@@ -1,47 +1,53 @@
 --
--- xmonad example config file.
---
--- A template showing all available configuration hooks,
--- and how to override the defaults in your own xmonad.hs conf file.
---
--- Normally, you'd only override those defaults you care about.
+-- LuisHGH config file.
 --
 
--- IMPORTS
 
+------------------------------------------------------------------------
+-- Imports
+
+-- Base
 import XMonad
-import Data.Monoid
 import System.Exit
-import XMonad.Util.SpawnOnce
-import XMonad.Util.Run
+import qualified XMonad.StackSet as W
+
+-- Data
+import Data.Monoid
+import qualified Data.Map        as M
+
+-- Hooks
 import XMonad.Hooks.ManageDocks
 
-import qualified XMonad.StackSet as W
-import qualified Data.Map        as M
+-- Utils
+import XMonad.Util.SpawnOnce
+import XMonad.Util.Run
+
+
+------------------------------------------------------------------------
+-- Settings
+
+myFont :: String
+myFont = "xft:JetBrains Mono:pixelsize=20:antialias=true:hinting=true"
 
 -- The preferred terminal program, which is used in a binding below and by
 -- certain contrib modules.
 --
 myTerminal      = "alacritty"
 
--- Whether focus follows the mouse pointer.
 myFocusFollowsMouse :: Bool
-myFocusFollowsMouse = True
+myFocusFollowsMouse = True  -- Whether focus follows the mouse pointer.
 
--- Whether clicking on a window to focus also passes the click to the window
 myClickJustFocuses :: Bool
-myClickJustFocuses = False
+myClickJustFocuses = False  -- Whether clicking on a window to focus also passes the click to the window
 
--- Width of the window border in pixels.
---
-myBorderWidth   = 2
+myBorderWidth = 2  -- Width of the window border in pixels.
 
 -- modMask lets you specify which modkey you want to use. The default
 -- is mod1Mask ("left alt").  You may also consider using mod3Mask
 -- ("right alt"), which does not conflict with emacs keybindings. The
 -- "windows key" is usually mod4Mask.
 --
-myModMask       = mod4Mask
+myModMask       = mod4Mask  -- Sets modkey to super/windows key
 
 -- The default number of workspaces (virtual screens) and their names.
 -- By default we use numeric strings, but any string may be used as a
@@ -56,8 +62,12 @@ myWorkspaces    = ["1","2","3","4","5","6","7","8","9"]
 
 -- Border colors for unfocused and focused windows, respectively.
 --
-myNormalBorderColor  = "#dddddd"
-myFocusedBorderColor = "#ff0000"
+myNormalBorderColor :: String
+myNormalBorderColor   = "#282c34"  -- Border color of normal windows
+
+myFocusedBorderColor :: String
+myFocusedBorderColor  = "#46d9ff"  -- Border color of focused windows
+
 
 ------------------------------------------------------------------------
 -- Key bindings. Add, modify or remove key bindings here.
