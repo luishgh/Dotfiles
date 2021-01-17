@@ -86,6 +86,15 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     -- change keyboard layout
     , ((controlMask .|. shiftMask, xK_space ), spawn "/home/luishgh/bin/keyboard_layout_switch.sh")
 
+    -- mute button
+    , ((0,                0x1008FF12), spawn "pactl set-sink-mute @DEFAULT_SINK@ toggle")
+
+    -- volumeup button
+    , ((0,                0x1008FF13), spawn "pactl set-sink-volume @DEFAULT_SINK@ +10%")
+
+    -- volumedown button 
+    , ((0,                0x1008FF11), spawn "pactl set-sink-volume @DEFAULT_SINK@ -10%")
+
     -- launch gmrun
     , ((modm .|. shiftMask, xK_p     ), spawn "gmrun")
 
