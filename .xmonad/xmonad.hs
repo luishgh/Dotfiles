@@ -17,6 +17,7 @@ import qualified Data.Map        as M
 
 -- Hooks
 import XMonad.Hooks.ManageDocks
+import XMonad.Hooks.DynamicLog (dynamicLogWithPP, wrap, xmobarPP, xmobarColor, shorten, PP(..))
 
 -- Utils
 import XMonad.Util.SpawnOnce
@@ -66,7 +67,7 @@ myNormalBorderColor :: String
 myNormalBorderColor   = "#282c34"  -- Border color of normal windows
 
 myFocusedBorderColor :: String
-myFocusedBorderColor  = "#46d9ff"  -- Border color of focused windows
+myFocusedBorderColor  = "#8e44ad"  -- Border color of focused windows
 
 
 ------------------------------------------------------------------------
@@ -264,7 +265,6 @@ myEventHook = mempty
 -- See the 'XMonad.Hooks.DynamicLog' extension for examples.
 --
 myLogHook = return ()
-
 ------------------------------------------------------------------------
 -- Startup hook
 
@@ -285,6 +285,14 @@ myStartupHook = do
 main = do
   xmproc <- spawnPipe "xmobar /home/luishgh/.config/xmobar/xmobarrc"
   xmonad $ docks defaults
+    {logHook = myLogHook <+> dynamicLogWithPP xmobarPP
+            { ppOutput  = \x -> hPutStrLn xmproc x                  -- Redirects output to xmobar pipe 
+            , ppCurrent = xmobarColor "#c678dd" "" . wrap "[" "]"   -- Current workspace in xmobar
+            , ppHidden  = xmobarColor "#666666" ""                  -- Hidden workspaces in xmobar 
+            , ppTitle   = xmobarColor "#b3afc2" ""                  -- Title of active window in xmobar
+            , ppSep     = "<fc=#666666> <fn=2>|</fn> </fc>"         -- Separators in xmobar
+            }
+    }
 
 -- A structure containing your configuration settings, overriding
 -- fields in the default config. Any you don't override, will
@@ -311,7 +319,7 @@ defaults = def {
         layoutHook         = myLayout,
         manageHook         = myManageHook,
         handleEventHook    = myEventHook,
-        logHook            = myLogHook,
+        logHook            = myLogHook ,
         startupHook        = myStartupHook
     }
 
