@@ -18,6 +18,7 @@ import qualified Data.Map        as M
 -- Hooks
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.DynamicLog (dynamicLogWithPP, wrap, xmobarPP, xmobarColor, shorten, PP(..))
+import XMonad.Hooks.EwmhDesktops
 
 -- Utils
 import XMonad.Util.SpawnOnce
@@ -33,7 +34,7 @@ myFont = "xft:JetBrains Mono:pixelsize=20:antialias=true:hinting=true"
 -- The preferred terminal program, which is used in a binding below and by
 -- certain contrib modules.
 --
-myTerminal      = "alacritty"
+myTerminal      = "kitty"
 
 myFocusFollowsMouse :: Bool
 myFocusFollowsMouse = True  -- Whether focus follows the mouse pointer.
@@ -95,6 +96,9 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 
     -- volumedown button 
     , ((0,                0x1008FF11), spawn "pactl set-sink-volume @DEFAULT_SINK@ -10%")
+
+    -- screenshot
+    , ((0,                xK_Print   ), spawn "flameshot gui -d 200")
 
     -- launch gmrun
     , ((modm .|. shiftMask, xK_p     ), spawn "gmrun")
@@ -256,7 +260,8 @@ myManageHook = composeAll
 -- return (All True) if the default handler is to be run afterwards. To
 -- combine event hooks use mappend or mconcat from Data.Monoid.
 --
-myEventHook = mempty
+-- myEventHook = mempty
+myEventHook = fullscreenEventHook -- Fullscreen mode support (F11)
 
 ------------------------------------------------------------------------
 -- Status bars and logging
@@ -285,7 +290,7 @@ myStartupHook = do
 main = do
   xmproc <- spawnPipe "xmobar /home/luishgh/.config/xmobar/xmobarrc"
   xmonad $ docks defaults
-    {logHook = myLogHook <+> dynamicLogWithPP xmobarPP
+    { logHook = myLogHook <+> dynamicLogWithPP xmobarPP             -- Dynamic data sent to Xmobar, needs to be here because of xmproc escope
             { ppOutput  = \x -> hPutStrLn xmproc x                  -- Redirects output to xmobar pipe 
             , ppCurrent = xmobarColor "#c678dd" "" . wrap "[" "]"   -- Current workspace in xmobar
             , ppHidden  = xmobarColor "#666666" ""                  -- Hidden workspaces in xmobar 
