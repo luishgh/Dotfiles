@@ -149,11 +149,23 @@ zinit light zsh-users/zsh-completions
 # Sources secrets and tokens
 source $HOME/.secrets.sh
 
+# Set nvim as editor
+export EDITOR="nvim"
+
 # Lutris
 export VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/intel_icd.x86_64.json
+
+# Export .local/bin to PATH
+export PATH=/home/luishgh/.local/bin:$PATH
 
 # Doom Emacs
 export PATH=/home/luishgh/.emacs.d/bin:$PATH
 
 # dotfiles repo
 alias dotrepo="git --git-dir=Documents/dotfiles --work-tree=/home/luishgh/"
+
+# td-cli config path
+export TD_CLI_HOME="/home/luishgh/.config/td-cli/"
+
+# Starship prompt
+eval "$(starship init zsh)"
