@@ -21,7 +21,7 @@ set noexpandtab
 " an indentation every four columns
 set tabstop=4
 
-" case insensitive search
+" case insensitive search (until you use a capital)
 set ignorecase
 set smartcase
 set infercase
@@ -49,10 +49,11 @@ set splitbelow
 set updatetime=100
 
 " leader key
-let mapleader = ','
+let mapleader = ' '
 
 " encoding
 scriptencoding utf-8
+set encoding=utf8
 
 " show matching brackets/parenthesis
 set showmatch
@@ -67,11 +68,14 @@ set hidden
 " Default colorscheme
 " color iceberg
 
-" True colors for gruvbox
+" True colors for colorschemes
 set termguicolors
 
+" Gui font for gvim and similars 
+"set guifont=DroidSansMono\ Nerd\ Font\ 11
+
 " syntax highlighting
-syntax on
+syntax enable
 set synmaxcol=512
 filetype plugin indent on
 
@@ -91,7 +95,7 @@ set noshowmode
 "set foldlevelstart=99
 
 " line wrapping
-set wrap
+set nowrap
 
 " show line numbers
 set number relativenumber
@@ -154,6 +158,13 @@ augroup END
 
 " Give more space for displaying messages.
 set cmdheight=2
+
+" Enables project specific configs:
+" The current directory is searched for two files. 
+" The first that exists is used, the others are ignored.
+"	-  The file ".nvimrc"
+"	-  The file ".exrc"
+set exrc
 
 " Don't pass messages to |ins-completion-menu|.
 set shortmess+=c

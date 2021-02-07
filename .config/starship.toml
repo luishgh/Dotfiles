@@ -1,0 +1,14 @@
+# Don't print a new line at the start of the prompt
+add_newline = false
+
+
+# Disable the package module, hiding it from the prompt completely
+[package]
+disabled = true
+
+[username]
+style_user = "yellow bold"
+style_root = "black bold"
+format = "[$user]($style) "
+disabled = false
+show_always = true

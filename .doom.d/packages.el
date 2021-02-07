@@ -48,3 +48,8 @@
 ;(unpin! pinned-package another-pinned-package)
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
 ;(unpin! t)
+
+
+;; PlatformIO
+(package! platformio-mode) ;; Main package for PlatformIO integration
+(package! arduino-mode)    ;; For .ino files support

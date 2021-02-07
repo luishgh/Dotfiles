@@ -19,6 +19,7 @@ import qualified Data.Map        as M
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.DynamicLog (dynamicLogWithPP, wrap, xmobarPP, xmobarColor, shorten, PP(..))
 import XMonad.Hooks.EwmhDesktops
+import XMonad.Hooks.SetWMName
 
 -- Utils
 import XMonad.Util.SpawnOnce
@@ -94,11 +95,11 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     -- volumeup button
     , ((0,                0x1008FF13), spawn "pactl set-sink-volume @DEFAULT_SINK@ +10%")
 
-    -- volumedown button 
+    -- volumedown button
     , ((0,                0x1008FF11), spawn "pactl set-sink-volume @DEFAULT_SINK@ -10%")
 
     -- screenshot
-    , ((0,                xK_Print   ), spawn "flameshot gui -d 200")
+    , ((0,                xK_Print   ), spawn "killall flameshot; flameshot gui -d 200")
 
     -- launch gmrun
     , ((modm .|. shiftMask, xK_p     ), spawn "gmrun")
@@ -261,7 +262,7 @@ myManageHook = composeAll
 -- combine event hooks use mappend or mconcat from Data.Monoid.
 --
 -- myEventHook = mempty
-myEventHook = fullscreenEventHook -- Fullscreen mode support (F11)
+myEventHook = mempty <+> fullscreenEventHook <+> ewmhDesktopsEventHook -- Fullscreen mode support (F11)
 
 ------------------------------------------------------------------------
 -- Status bars and logging
@@ -279,8 +280,9 @@ myLogHook = return ()
 --
 -- By default, do nothing.
 myStartupHook = do
-  spawnOnce "~/.fehbg &"  
-  spawnOnce "picom &"
+  spawnOnce "~/.fehbg &"    -- Sets background
+  spawnOnce "picom &"       -- Composition
+  setWMName "LG3D"          -- Sets WM name for Java GUI compatibility
 
 ------------------------------------------------------------------------
 -- Now run xmonad with all the defaults we set up.
@@ -289,11 +291,12 @@ myStartupHook = do
 --
 main = do
   xmproc <- spawnPipe "xmobar /home/luishgh/.config/xmobar/xmobarrc"
-  xmonad $ docks defaults
+--  xmonad $ ewmh defaults                                            -- Makes xmonad use the EWMH hints to tell panel applications about its workspaces and the windows therein
+  xmonad $ docks defaults                                           -- Provides tools to automatically manage dock type programs, such as xmobar
     { logHook = myLogHook <+> dynamicLogWithPP xmobarPP             -- Dynamic data sent to Xmobar, needs to be here because of xmproc escope
-            { ppOutput  = \x -> hPutStrLn xmproc x                  -- Redirects output to xmobar pipe 
+            { ppOutput  = hPutStrLn xmproc                          -- Redirects output to xmobar pipe
             , ppCurrent = xmobarColor "#c678dd" "" . wrap "[" "]"   -- Current workspace in xmobar
-            , ppHidden  = xmobarColor "#666666" ""                  -- Hidden workspaces in xmobar 
+            , ppHidden  = xmobarColor "#666666" ""                  -- Hidden workspaces in xmobar
             , ppTitle   = xmobarColor "#b3afc2" ""                  -- Title of active window in xmobar
             , ppSep     = "<fc=#666666> <fn=2>|</fn> </fc>"         -- Separators in xmobar
             }

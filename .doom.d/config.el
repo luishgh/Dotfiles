@@ -54,3 +54,16 @@
 ;;
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
+
+;; Use ESLint for checking typescript files
+(defun typescript-mode-setup ()
+  "Custom setup for Typescript mode"
+  (setq flycheck-checker 'javascript-eslint)
+  )
+(add-hook 'typescript-mode-hook 'typescript-mode-setup)
+
+;; Use platformio-mode for checking .ino files
+;;(defun arduino-mode-setup()
+;;  (setq flycheck-checker 'platformio-mode)
+;;  )
+;;(add-hook 'arduino-mode-hook 'arduino-mode-setup)

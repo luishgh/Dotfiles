@@ -18,9 +18,12 @@ map <C-c> :tabclose<cr>
 nnoremap <Leader>k gT
 nnoremap <Leader>j gt
 
-" spell-check (English US and Polish)
+" spell-check (English US and Portuguese)
 map <F6> :setlocal spell! spelllang=en_us<cr>
-map <F7> :setlocal spell! spelllang=pl<cr>
+map <F7> :setlocal spell! spelllang=pt_br<cr>
+
+" buffer managment
+nnoremap <Leader>bn :bnext<cr>
 
 " split Managment
 nnoremap <C-j> <C-w><C-j>
@@ -64,10 +67,9 @@ augroup BufferWrite
 augroup end
 
 " open terminal
-noremap <C-A-t> :split term://zsh<cr>:resize 10<cr>
+noremap <Leader>ot :split term://fish<cr>:resize 10<cr>
 
 " exit from terminal mode
-"tnoremap <Esc> <C-\><C-n>
 tnoremap <C-e> <C-\><C-n>
 
 " open netrw
@@ -223,3 +225,14 @@ endfunction
 " abbreviations
 iab @@ Cherrry9@disroot.org
 map <leader>t :r ~/.local/share/template<cr>
+
+fun! TrimWhitespace()
+    let l:save = winsaveview()
+    keeppatterns %s/\s\+$//e
+    call winrestview(l:save)
+endfun
+
+augroup LUIS_HGH
+	autocmd!
+    autocmd BufWritePre * :call TrimWhitespace()
+augroup END

@@ -585,7 +585,7 @@ background_opacity: 0.8
 #
 # If the same trigger is assigned to multiple actions, all of them are executed
 # in the order they were defined in.
-#key_bindings:
+key_bindings:
   #- { key: Paste,                                action: Paste          }
   #- { key: Copy,                                 action: Copy           }
   #- { key: L,         mods: Control,             action: ClearLogNotice }
@@ -598,6 +598,7 @@ background_opacity: 0.8
   # Vi Mode
   #- { key: Space,  mods: Shift|Control, mode: Vi, action: ScrollToBottom          }
   #- { key: Space,  mods: Shift|Control,           action: ToggleViMode            }
+  - { key: Space,  mods: Control,           action: ToggleViMode            }
   #- { key: Escape,                      mode: Vi, action: ClearSelection          }
   #- { key: I,                           mode: Vi, action: ScrollToBottom          }
   #- { key: I,                           mode: Vi, action: ToggleViMode            }
