@@ -35,7 +35,7 @@ nnoremap <C-h> <C-w><C-h>
 map <C-s> :noh<cr>
 
 " go to last change
-nnoremap <Leader>l :'.<cr>
+" nnoremap <Leader>l :'.<cr>
 
 " replace all is aliased to S.
 nnoremap S :%s//g<Left><Left>

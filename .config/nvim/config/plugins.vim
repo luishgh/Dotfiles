@@ -26,6 +26,7 @@ call plug#begin('~/.config/nvim/bundle')
 Plug 'neovim/nvim-lspconfig' 						" Neovim 0.5 built-in lsp client)
 Plug 'hrsh7th/nvim-compe' 							" Auto completion plugin for nvim lsp client
 Plug 'onsails/lspkind-nvim' 						" Adds vscode-like icons to neovim built-in lsp
+Plug 'sbdchd/neoformat'								" A (Neo)vim plugin for formatting code.
 
 " highlighting (stable)
 "Plug 'HerringtonDarkholme/yats.vim' " TS Syntax highlighting
@@ -230,42 +231,105 @@ let g:completion_matching_strategy_list = ['exact', 'substring', 'fuzzy']
 
 " Use K to show documentation in preview window
 nnoremap <silent> K <cmd>lua vim.lsp.buf.hover()<CR>
+nnoremap <leader>ld <cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>
 
 " Language server setups
-lua require'lspconfig'.tsserver.setup{ }
-lua require'lspconfig'.vimls.setup{ }
+lua <<EOF
+  local lspconfig = require"lspconfig"
+
+  lspconfig.tsserver.setup { }
+
+  lspconfig.vimls.setup{ }
+
+  lspconfig.intelephense.setup{ }
+
+  local system_name
+  if vim.fn.has("mac") == 1 then
+    system_name = "macOS"
+  elseif vim.fn.has("unix") == 1 then
+    system_name = "Linux"
+  elseif vim.fn.has('win32') == 1 then
+    system_name = "Windows"
+  else
+    print("Unsupported system for sumneko")
+  end
+
+  -- set the path to the sumneko installation
+  local sumneko_root_path = '/home/luishgh/lua-language-server'
+  local sumneko_binary = sumneko_root_path.."/bin/"..system_name.."/lua-language-server"
+
+  lspconfig.sumneko_lua.setup {
+    cmd = {sumneko_binary, "-E", sumneko_root_path .. "/main.lua"};
+    settings = {
+      Lua = {
+        runtime = {
+          -- Tell the language server which version of Lua you're using (most likely LuaJIT in the case of Neovim)
+          version = 'Lua 5.1.5',
+          -- Setup your lua path
+          path = vim.split(package.path, ';'),
+        },
+        diagnostics = {
+          globals = {
+		  	'vim', -- Get the language server to recognize the `vim` global
+
+			-- NodeMCU modules --
+			'file',
+			'gpio',
+			'http',
+			'net',
+			'node',
+			'sjson',
+			'softuart',
+			'tmr',
+			'uart',
+			'wifi'
+			---------------------
+
+		  },
+        },
+        workspace = {
+          -- Make the server aware of Neovim runtime files
+          library = {
+            [vim.fn.expand('$VIMRUNTIME/lua')] = true,
+            [vim.fn.expand('$VIMRUNTIME/lua/vim/lsp')] = true,
+          },
+        },
+      },
+    },
+  }
+EOF
 
 " VsCode-like icons
 lua require'lspkind'.init{ with_text = true  }
 
 " Auto completion (nvim-compe)
 lua <<EOF
-require'compe'.setup {
-  enabled = true;
-  autocomplete = true;
-  debug = false;
-  min_length = 1;
-  preselect = 'enable';
-  throttle_time = 80;
-  source_timeout = 200;
-  incomplete_delay = 400;
-  max_abbr_width = 100;
-  max_kind_width = 100;
-  max_menu_width = 100;
+  require'compe'.setup {
+    enabled = true;
+    autocomplete = true;
+    debug = false;
+    min_length = 1;
+    preselect = 'enable';
+    throttle_time = 80;
+    source_timeout = 200;
+    incomplete_delay = 400;
+    max_abbr_width = 100;
+    max_kind_width = 100;
+    max_menu_width = 100;
 
-  source = {
-    path = true;
-    buffer = true;
-    calc = true;
-    vsnip = true;
-    nvim_lsp = true;
-    nvim_lua = true;
-    spell = true;
-    tags = true;
-    snippets_nvim = true;
-    treesitter = true;
-  };
-}
+    source = {
+      path = true;
+      buffer = true;
+      calc = true;
+      vsnip = true;
+      nvim_lsp = true;
+      nvim_lua = true;
+      spell = true;
+      tags = true;
+      snippets_nvim = true;
+      treesitter = true;
+    };
+  }
 EOF
 
 "map <c-space> to manually trigger completion
@@ -281,19 +345,19 @@ inoremap <silent><expr> <C-e>     compe#close('<C-e>')
 " -------------------------------------
 " nvim-treesitter (Neovim 0.5 highlighting)
 lua <<EOF
-require'nvim-treesitter.configs'.setup {
-  highlight = {
-    enable = true,              -- false will disable the whole extension
-    -- disable = {},  			-- list of language that will be disabled
-  },
-  indent = {
-    enable = true,
-  },
-  playground = {
-	enable = true,
-	updatetime = 25
-  },
-}
+  require'nvim-treesitter.configs'.setup {
+    highlight = {
+      enable = true,              -- false will disable the whole extension
+      -- disable = {},  			-- list of language that will be disabled
+    },
+    indent = {
+      enable = true,
+    },
+    playground = {
+	  enable = true,
+	  updatetime = 25
+    },
+  }
 EOF
 
 " -------------------------------------
