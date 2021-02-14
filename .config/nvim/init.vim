@@ -14,3 +14,9 @@ for file in configs
     execute 'source' x
   endif
 endfor
+
+
+lua <<EOF
+require('lsp')				-- lua/nvim-treesitter.lua
+require('nvim-treesitter')	-- lua/nvim-treesitter.lua
+EOF

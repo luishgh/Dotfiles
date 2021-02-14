@@ -71,13 +71,14 @@ set hidden
 " True colors for colorschemes
 set termguicolors
 
-" Gui font for gvim and similars 
+" Gui font for gvim and similars
 "set guifont=DroidSansMono\ Nerd\ Font\ 11
 
 " syntax highlighting
 syntax enable
 set synmaxcol=512
 filetype plugin indent on
+let g:vimsyn_embed = 'l' " Lua syntax highlighting inside .vim files
 
 " autocompletion menu
 set pumheight=10
@@ -160,7 +161,7 @@ augroup END
 set cmdheight=2
 
 " Enables project specific configs:
-" The current directory is searched for two files. 
+" The current directory is searched for two files.
 " The first that exists is used, the others are ignored.
 "	-  The file ".nvimrc"
 "	-  The file ".exrc"
