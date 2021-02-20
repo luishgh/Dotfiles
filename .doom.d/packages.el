@@ -50,6 +50,6 @@
 ;(unpin! t)
 
 
-;; PlatformIO
-(package! platformio-mode) ;; Main package for PlatformIO integration
-(package! arduino-mode)    ;; For .ino files support
+;; PlatformIO packages
+(when (package! platformio-mode);; Main package for PlatformIO integration
+  (package! arduino-mode))      ;; For .ino files support
