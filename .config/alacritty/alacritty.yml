@@ -141,7 +141,7 @@ font:
     #style: Bold Italic
 
   # Point size
-  size: 14.0
+  size: 11.0
 
   # Offset is the extra space around each character. `offset.y` can be thought of
   # as modifying the line spacing, and `offset.x` as modifying the letter spacing.
@@ -597,8 +597,7 @@ key_bindings:
 
   # Vi Mode
   #- { key: Space,  mods: Shift|Control, mode: Vi, action: ScrollToBottom          }
-  #- { key: Space,  mods: Shift|Control,           action: ToggleViMode            }
-  - { key: Space,  mods: Control,           action: ToggleViMode            }
+  - { key: Space,  mods: Shift|Control,           action: ToggleViMode            }
   #- { key: Escape,                      mode: Vi, action: ClearSelection          }
   #- { key: I,                           mode: Vi, action: ScrollToBottom          }
   #- { key: I,                           mode: Vi, action: ToggleViMode            }

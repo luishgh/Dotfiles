@@ -1,7 +1,7 @@
-Config { font = "xft:JetBrains Mono:pixelsize=16:antialias=true:hinting=true"
-       , additionalFonts = [ "xft:Mononoki Nerd Font:pixelsize=16:antialias=true:hinting=true"
-                           , "xft:Mononoki Nerd Font:pixelsize=20:antialias=true:hinting=true"
-                           , "xft:HeavyData Nerd Font Mono:pixelsize=20:antialias=true:hinting=true"
+Config { font = "xft:JetBrains Mono:pixelsize=12:antialias=true:hinting=true"
+       , additionalFonts = [ "xft:Mononoki Nerd Font:pixelsize=12:antialias=true:hinting=true"
+                           , "xft:Mononoki Nerd Font:pixelsize=13:antialias=true:hinting=true"
+                           , "xft:HeavyData Nerd Font Mono:pixelsize=13:antialias=true:hinting=true"
                            ]
        , borderColor = "black"
        , border = TopB

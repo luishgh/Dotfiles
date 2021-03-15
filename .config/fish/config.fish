@@ -26,7 +26,13 @@ alias dotrepo="git --git-dir=Documents/dotfiles --work-tree=/home/luishgh/"
 # td-cli config path
 set -xg TD_CLI_HOME "/home/luishgh/.config/td-cli/"
 
-#
+# Go path
+set -xg PATH $HOME/go/bin $PATH
+
+# Neovim alias
+# alias vim="nvim"
 
 # Starship prompt
-starship init fish | source
+# starship init fish | source
+
+set -xg PATH $HOME/flutter/bin $PATH
