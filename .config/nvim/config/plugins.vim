@@ -22,75 +22,78 @@ endif
 call plug#begin('~/.config/nvim/bundle')
 
 " programming (stable)
-"Plug 'neoclide/coc.nvim', {'branch': 'release'} 	" Autocompletion (LSP client) (use if nvim-slp can't be used)
+" Plug 'neoclide/coc.nvim', {'branch': 'release'} 	" Autocompletion (LSP client) (use if nvim-lsp can't be used)
 
 " programming (Neovim 0.5)
-Plug 'neovim/nvim-lspconfig' 						" Neovim 0.5 built-in lsp client)
+Plug 'neovim/nvim-lspconfig' 						" Neovim 0.5 built-in lsp client configuration collection
 Plug 'hrsh7th/nvim-compe' 							" Auto completion plugin for nvim lsp client
 Plug 'onsails/lspkind-nvim' 						" Adds vscode-like icons to neovim built-in lsp
-Plug 'tjdevries/nlua.nvim' 							" Install sumneko lua.
+Plug 'nvim-lua/lsp_extensions.nvim' 				" Extensions to built-in LSP
+Plug 'kosayoda/nvim-lightbulb' 						" VSCode 💡 for neovim's built-in LSP
+" Plug 'tjdevries/nlua.nvim' 							" Install sumneko lua.
 
 " highlighting (stable)
-"Plug 'HerringtonDarkholme/yats.vim' 	" TS Syntax highlighting
-"Plug 'neovimhaskell/haskell-vim' 		" Haskell Syntax highlighting
-"Plug 'mxw/vim-jsx' 					" To highlight JSX
-"Plug 'pangloss/vim-javascript' 		" To highlight JS
-"Plug 'kevinoid/vim-jsonc' 				" Comment highlighting on config JSON files
-"Plug 'rust-lang/rust.vim'				" Rust file detection, syntax highlighting, formatting, Syntastic integration, and more
+" Plug 'HerringtonDarkholme/yats.vim' 	" TS Syntax highlighting
+" Plug 'neovimhaskell/haskell-vim' 		" Haskell Syntax highlighting
+" Plug 'mxw/vim-jsx' 						" To highlight JSX
+Plug 'pangloss/vim-javascript' 			" To highlight JS
+Plug 'kevinoid/vim-jsonc' 				" Comment highlighting on config JSON files
+Plug 'rust-lang/rust.vim'				" Rust file detection, syntax highlighting, formatting, Syntastic integration, and more
 Plug 'euclidianAce/BetterLua.vim'		" Better Lua syntax highlighting
+" Plug 'sheerun/vim-polyglot'
 
 " highlighting based on tree-sitter (Neovim 0.5 required)
-Plug 'nvim-treesitter/nvim-treesitter', {'do': 'TSUpdate'} 	" We recommend updating the parsers on update
-Plug 'nvim-treesitter/playground' 							" View treesitter information directly in Neovim
+" Plug 'nvim-treesitter/nvim-treesitter', {'do': 'TSUpdate'} 	" We recommend updating the parsers on update
+" Plug 'nvim-treesitter/playground' 							" View treesitter information directly in Neovim
 
-Plug 'SirVer/ultisnips'
-Plug 'honza/vim-snippets'
-Plug 'airblade/vim-gitgutter'
-Plug 'junegunn/gv.vim'
-Plug 'sheerun/vim-polyglot'
-Plug 'mattn/emmet-vim'
+" Snippets
+" Plug 'SirVer/ultisnips'
+" Plug 'honza/vim-snippets'
+" Plug 'mattn/emmet-vim'
 
 " stylize
-Plug 'lilydjwg/colorizer'
-"Plug 'preservim/nerdtree' " File explorer
-"Plug 'Xuyuanp/nerdtree-git-plugin' " Git plugin for NERDTree
-Plug 'ms-jpq/chadtree', {'branch': 'chad', 'do': 'python3 -m chadtree deps'} "File Manager for Neovim, Better than NERDTree.
-Plug 'isa/vim-matchit'
+Plug 'RRethy/vim-hexokinase', {'do': 'make hexokinase', 'on': 'HexokinaseToggle'} " The fastest (Neo)Vim plugin for asynchronously displaying the colours in the file
+Plug 'ms-jpq/chadtree', {'branch': 'chad', 'do': 'python3 -m chadtree deps', 'on': 'CHADopen' } "File Manager for Neovim, Better than NERDTree.
 Plug 'junegunn/goyo.vim', { 'on': 'Goyo' } " Zen mode
 Plug 'junegunn/limelight.vim', { 'on': 'Goyo' } " Complements zen mode
 Plug 'mbbill/undotree', { 'on': 'UndotreeToggle' }
 
 " colorschemes
 Plug 'gruvbox-community/gruvbox'
-Plug 'dracula/vim', { 'as': 'dracula' }
-Plug 'arcticicestudio/nord-vim'
+" Plug 'dracula/vim', { 'as': 'dracula' }
+" Plug 'arcticicestudio/nord-vim'
+
+" Tim Pope masterpieces
+Plug 'tpope/vim-surround' 	" Provides mappings to easily delete, change and add such surroundings in pairs
+Plug 'tpope/vim-commentary' " Shortcuts for commenting
+Plug 'tpope/vim-fugitive' 	"The premier Vim plugin for Git
 
 " features
 Plug 'mhinz/vim-startify' " Home screen
-Plug 'tpope/vim-surround' " Provides mappings to easily delete, change and add such surroundings in pairs
-Plug 'tpope/vim-commentary' " Shortcuts for commenting
 Plug 'matze/vim-move'
-Plug 'simeji/winresizer'
-Plug 'christoomey/vim-tmux-navigator'
-Plug 'vim-airline/vim-airline' " Statusline and tabline
-Plug 'vim-airline/vim-airline-themes' " Themes for vim-airline
-Plug 'tpope/vim-fugitive' "The premier Vim plugin for Git
-Plug 'sbdchd/neoformat'	" A (Neo)vim plugin for formatting code.
+Plug 'airblade/vim-gitgutter'
+Plug 'sbdchd/neoformat', { 'on': 'Neoformat'} " A (Neo)vim plugin for formatting code.
+" Plug 'junegunn/gv.vim' " A git commit browser
+" Plug 'simeji/winresizer'
+" Plug 'christoomey/vim-tmux-navigator'
+" Plug 'vim-airline/vim-airline' " Statusline and tabline
+" Plug 'vim-airline/vim-airline-themes' " Themes for vim-airline
 
 " Fuzzy finder (Neovim Nightly (0.5) is required for telescope.nvim to work.)
 Plug 'nvim-lua/popup.nvim'
 Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim'
+Plug 'kyazdani42/nvim-web-devicons' " A lua fork of vim-devicons, provides the same icons as well as colors for each icon.
+
 " Plug 'ctrlpvim/ctrlp.vim' " fuzzy find files (use if telescope can't be used)
 
 " Custom plugins
-Plug 'ryanoasis/vim-devicons' " Devicons plugin
-"Plug 'tiagofumo/vim-nerdtree-syntax-highlight' " Extra syntax highlighting for NERDTree
+" Plug 'ryanoasis/vim-devicons' " Devicons plugin
 
 call plug#end()
 
-" -------------------------------------
 
+" -------------------------------------
 
 " python paths, needed for virtualenvs
 let g:python3_host_prog = '/usr/bin/python3'
@@ -132,10 +135,10 @@ augroup omnifuncs
 	au!
 	autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
 	autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
-	autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
-	autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
+	" autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
+	" autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
 	autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
-	autocmd FileType php setlocal omnifunc=phpcomplete#CompletePHP
+	" autocmd FileType php setlocal omnifunc=phpcomplete#CompletePHP
 augroup end
 
 
@@ -161,8 +164,9 @@ nnoremap <F5> :UndotreeToggle<cr>
 
 " -------------------------------------
 " vim-airline
-let g:airline#extensions#tabline#enabled = 1
+" let g:airline#extensions#tabline#enabled = 1
 let g:airline_powerline_fonts = 1
+let g:airline_extensions = []
 
 " -------------------------------------
 
@@ -213,3 +217,63 @@ let g:WebDevIconsUnicodeDecorateFileNodesExtensionSymbols['sql'] = ''
 
 " -------------------------------------
 
+
+" vim.lsp
+augroup luaautocommands
+
+	" This prevents having the autocommands defined twice (e.g., after sourcing the vimrc file again).
+	au!
+
+	" Show diagnostic popup on cursor hold
+	autocmd CursorHold * lua vim.lsp.diagnostic.show_line_diagnostics()
+
+	" Enable type inlay hints
+	autocmd CursorMoved,InsertLeave,BufEnter,BufWinEnter,TabEnter,BufWritePost *
+	\ lua require'lsp_extensions'.inlay_hints{ prefix = '', highlight = "Comment", enabled = {"TypeHint", "ChainingHint", "ParameterHint"} }
+
+augroup end
+
+" -------------------------------------
+
+
+" -------------------------------------
+" nvim-lightbulb
+lua << EOF
+require'nvim-lightbulb'.update_lightbulb {
+    sign = {
+        enabled = true,
+        -- Priority of the gutter sign
+        priority = 10,
+    },
+    float = {
+        enabled = false,
+        -- Text to show in the popup float
+        text = "💡",
+        -- Available keys for window options:
+        -- - height     of floating window
+        -- - width      of floating window
+        -- - wrap_at    character to wrap at for computing height
+        -- - max_width  maximal width of floating window
+        -- - max_height maximal height of floating window
+        -- - pad_left   number of columns to pad contents at left
+        -- - pad_right  number of columns to pad contents at right
+        -- - pad_top    number of lines to pad contents at top
+        -- - pad_bottom number of lines to pad contents at bottom
+        -- - offset_x   x-axis offset of the floating window
+        -- - offset_y   y-axis offset of the floating window
+        -- - anchor     corner of float to place at the cursor (NW, NE, SW, SE)
+        -- - winblend   transparency of the window (0-100)
+        win_opts = {},
+    },
+    virtual_text = {
+        enabled = false,
+        -- Text to show at virtual text
+        text = "💡",
+    }
+}
+EOF
+
+" -------------------------------------
+
+" vim-hexokinase
+let g:Hexokinase_highlighters = ['virtual']

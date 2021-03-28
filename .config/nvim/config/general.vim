@@ -7,6 +7,7 @@ set scrolloff=5
 
 " enable auto indentation
 set autoindent
+set smartindent
 
 " coffee pasta
 set clipboard=unnamedplus
@@ -112,7 +113,7 @@ set listchars+=precedes:«
 set listchars+=nbsp:░
 
 " split style
-set fillchars=vert:▒
+" set fillchars=vert:▒
 
 " highlight current line
 augroup CursorLine

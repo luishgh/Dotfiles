@@ -1,5 +1,3 @@
-colorscheme dracula
-
 " Include bold attributes in highlighting >
 let g:dracula_bold = 1
 
@@ -17,3 +15,5 @@ let g:dracula_inverse = 1
 
 " Include background fill colors >
 let g:dracula_colorterm = 1
+
+colorscheme dracula
