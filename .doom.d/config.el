@@ -54,3 +54,5 @@
 ;;  (setq flycheck-checker 'platformio-mode)
 ;;  )
 ;;(add-hook 'arduino-mode-hook 'arduino-mode-setup)
+
+(setq flutter-sdk-path "/home/luishgh/flutter")

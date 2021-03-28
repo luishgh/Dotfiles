@@ -105,3 +105,7 @@ This was a failed attempt of trying to make platformio mode support .ino files. 
 ;;  )
 ;;(add-hook 'arduino-mode-hook 'arduino-mode-setup)
 #+end_src
+** Flutter Settings
+#+begin_src elisp
+(setq flutter-sdk-path "/home/luishgh/flutter")
+#+end_src
