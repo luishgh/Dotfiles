@@ -24,7 +24,7 @@ Some functionality uses this settings to identify you, e.g. GPG configuration, e
 #+end_src
 * Fonts
 Doom exposes five (optional) variables for controlling fonts in Doom. They all accept either a font-spec, font string ("Input Mono-12"), or xlfd font string. Here are the three important ones:
-+ ~doom-font~ - standart monoscace font.
++ ~doom-font~ - standart monospace font.
 + ~doom-variable-pitch-font~ - variable font which is used by some Emacs plugins (such as eww).
 + ~doom-big-font~ - used in ~doom-big-font-mode~, useful for presentations or streaming.
 #+begin_src elisp
