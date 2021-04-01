@@ -17,6 +17,6 @@ endfor
 
 
 lua <<EOF
-require('lsp')				-- lua/nvim-treesitter.lua
--- require('nvim-treesitter')	-- lua/nvim-treesitter.lua
+require('dotfiles.lsp')				-- lua/dotfiles/lsp.lua
+-- require('dotfiles.nvim-treesitter')	-- lua/dotfiles/nvim-treesitter.lua
 EOF

@@ -27,6 +27,9 @@ set ignorecase
 set smartcase
 set infercase
 
+" Give more space for displaying messages.
+set cmdheight=2
+
 " maintain undo history between sessions
 set undofile
 set nobackup
@@ -34,6 +37,13 @@ set noswapfile
 set undodir=~/.config/nvim/cache/undo
 "set backupdir=~/.config/nvim/cache/backups
 "set directory=~/.config/nvim/cache/swaps
+
+" Enables project specific configs:
+" The current directory is searched for two files.
+" The first that exists is used, the others are ignored.
+"	-  The file ".nvimrc"
+"	-  The file ".exrc"
+set exrc
 
 " plebs mode
 set mouse=a
@@ -63,11 +73,11 @@ set matchtime=3
 " disable startup message
 set shortmess+=I
 
+" Don't pass messages to |ins-completion-menu|.
+set shortmess+=c
+
 " hide buffers, not close them
 set hidden
-
-" Default colorscheme
-" color iceberg
 
 " True colors for colorschemes
 set termguicolors
@@ -155,21 +165,6 @@ augroup langindentation
 	autocmd Filetype yaml setlocal tabstop=2 shiftwidth=2 softtabstop=2
 augroup END
 
-
-" Custom configs
-
-" Give more space for displaying messages.
-set cmdheight=2
-
-" Enables project specific configs:
-" The current directory is searched for two files.
-" The first that exists is used, the others are ignored.
-"	-  The file ".nvimrc"
-"	-  The file ".exrc"
-set exrc
-
-" Don't pass messages to |ins-completion-menu|.
-set shortmess+=c
 
 " Always show the signcolumn, otherwise it would shift the text each time
 " diagnostics appear/become resolved.

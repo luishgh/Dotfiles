@@ -50,12 +50,15 @@ nnoremap <leader>x :!chmod +x % && ./%<cr>
 "noremap <leader>s :!clear && shellcheck %<cr>
 noremap <leader>s :sp \| terminal shellcheck %<cr>
 
-" deletes all trailing whitespace
-noremap <leader>c :%s/\s\+$//e<cr>
-
+fun! TrimWhitespace()
+    let l:save = winsaveview()
+    keeppatterns %s/\s\+$//e
+    call winrestview(l:save)
+endfun
 augroup BufferWrite
+	au!
 	" automatically deletes all trailing whitespace on save.
-	"autocmd BufWritePre * %s/\s\+$//e
+    autocmd BufWritePre * :call TrimWhitespace()
 	" when shortcut files are updated, renew bash and ranger configs with new material:
 	autocmd BufWritePost files,directories !shortcuts
 	" run xrdb whenever Xdefaults or Xresources are updated.
@@ -63,7 +66,7 @@ augroup BufferWrite
 	" update binds when sxhkdrc is updated.
 	autocmd BufWritePost *sxhkdrc !pkill -USR1 sxhkd
 	" reload vim when configuration is updated
-	autocmd BufWritePost init.vim,general.vim,commands.vim,ui.vim,term.vim,statusline.vim,plugin.vim,plugin-settings.vim source $MYVIMRC
+	" autocmd BufWritePost init.vim,general.vim,commands.vim,ui.vim,term.vim,statusline.vim,plugin.vim,plugin-settings.vim source $MYVIMRC
 augroup end
 
 " open terminal
@@ -90,7 +93,6 @@ let g:netrw_list_hide= '.*\.swp$,*/tmp/*,*.so,*.swp,*.zip,*.git,^\.\=/\=$'
 augroup finalcountdown
   au!
   autocmd WinEnter * if winnr('$') == 1 && getbufvar(winbufnr(winnr()), "&filetype") == "netrw" || &buftype == 'quickfix' |q|endif
-  autocmd BufEnter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) || &buftype == 'quickfix' |q|endif
 augroup END
 
 " netrw settings
@@ -99,27 +101,9 @@ let g:netrw_liststyle = 4
 let g:netrw_browse_split = 0
 let g:netrw_winsize = 20
 
-function! OpenToRight()
-  :normal v
-  let g:path=expand('%:p')
-  :q!
-  execute 'belowright vnew' g:path
-  :normal <C-l>
-endfunction
-
-function! OpenBelow()
-  :normal v
-  let g:path=expand('%:p')
-  :q!
-  execute 'belowright new' g:path
-  :normal <C-l>
-endfunction
-
 function! NetrwMappings()
     " Hack fix to make ctrl-l work properly
     noremap <buffer> <C-l> <C-w>l
-    noremap <buffer><c-v> :call OpenToRight()<cr>
-    noremap <buffer><C-x> :call OpenBelow()<cr>
 endfunction
 
 augroup netrw_mappings
@@ -139,43 +123,25 @@ augroup resCur
   autocmd BufWinEnter * call ResCur()
 augroup END
 
-" zoom
-function! Zoom() abort
-  if winnr('$') > 1
-    if exists('t:zoomed') && t:zoomed
-        execute t:zoom_winrestcmd
-        let t:zoomed = 0
-    else
-        let t:zoom_winrestcmd = winrestcmd()
-        resize
-        vertical resize
-        let t:zoomed = 1
-    endif
-  else
-    execute 'silent !tmux resize-pane -Z'
-  endif
-endfunction
-map <leader>z :call Zoom()<cr>
+" " toggle statusbar
+" let s:hidden_all = 0
+" function! ToggleHiddenAll()
+" 	if s:hidden_all  == 0
+" 		let s:hidden_all = 1
+" 		set laststatus=1
+" 		set noruler
+" 		set noshowcmd
+" 		set showmode
+" 	else
+" 		let s:hidden_all = 0
+" 		set laststatus=2
+" 		set noruler
+" 		set noshowcmd
+" 		set noshowmode
+" 	endif
+" endfunction
 
-" toggle statusbar
-let s:hidden_all = 0
-function! ToggleHiddenAll()
-	if s:hidden_all  == 0
-		let s:hidden_all = 1
-		set laststatus=1
-		set noruler
-		set noshowcmd
-		set showmode
-	else
-		let s:hidden_all = 0
-		set laststatus=2
-		set noruler
-		set noshowcmd
-		set noshowmode
-	endif
-endfunction
-
-nnoremap <S-T> :call ToggleHiddenAll()<cr>
+" nnoremap <S-T> :call ToggleHiddenAll()<cr>
 
 " auto pair
 let s:pair = 1
@@ -199,6 +165,7 @@ endfunction
 call ToggleAutoPair()
 nnoremap <Leader>p :call ToggleAutoPair()<cr>
 
+
 " identify the syntax highlighting group
 map <F10> :echo "hi<" . synIDattr(synID(line("."),col("."),1),"name") . '> trans<'
 \ . synIDattr(synID(line("."),col("."),0),"name") . "> lo<"
@@ -215,25 +182,6 @@ endif
 " Use D to show documentation in preview window
 "nnoremap <silent><C-d> :call <SID>show_documentation()<CR>
 
-function! s:show_documentation()
-  if (index(['vim','help'], &filetype) >= 0)
-    execute 'h '.expand('<cword>')
-  else
-    call CocAction('doHover')
-  endif
-endfunction
-
 " abbreviations
-iab @@ Cherrry9@disroot.org
-map <leader>t :r ~/.local/share/template<cr>
-
-fun! TrimWhitespace()
-    let l:save = winsaveview()
-    keeppatterns %s/\s\+$//e
-    call winrestview(l:save)
-endfun
-
-augroup LUIS_HGH
-	autocmd!
-    autocmd BufWritePre * :call TrimWhitespace()
-augroup END
+" iab @@ luishenriquegh2701@gmail.com
+" map <leader>t :r ~/.local/share/template<cr>
