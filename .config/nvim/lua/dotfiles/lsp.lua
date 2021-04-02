@@ -24,7 +24,7 @@ end
 
 local on_attach = function(client)
     -- diagnostics
-    noremap("n", "<leader>ld", "<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>")
+    noremap("n", "<leader>fd", "<cmd>lua require('telescope.builtin').lsp_document_diagnostics")
     noremap("n", "<silent> g[", "<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>")
     noremap("n", "<silent> g]", "<cmd>lua vim.lsp.diagnostic.goto_next()<CR>")
 
@@ -40,7 +40,7 @@ local on_attach = function(client)
         vim.cmd "nnoremap <silent>K <cmd>lua vim.lsp.buf.hover()<CR>" -- map K to show documentation in preview window
     end
     if client.resolved_capabilities.goto_definition then
-        vim.cmd "nnoremap <silent>gd <cmd>lua vim.lsp.buf.definition()<CR>" -- map gd to goto definition
+        vim.cmd "nnoremap <silent>gd <cmd>lua require('telescope.builtin').lsp_definitions()<CR>" -- map gd to goto definition
     end
     if client.resolved_capabilities.implementation then
         vim.cmd "nnoremap <silent>gD <cmd>lua vim.lsp.buf.implementation()<CR>" -- Use gD to see all implementations
