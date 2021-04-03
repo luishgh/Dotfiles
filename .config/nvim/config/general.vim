@@ -10,17 +10,15 @@ set autoindent
 set smartindent
 
 " coffee pasta
-set clipboard=unnamedplus
+" set clipboard = "unnamed"
 
-" use indents of 4 spaces
-set shiftwidth=4
-set shiftround
-
-" tabs are tabs
-set noexpandtab
+" tabs are not tabs
+set expandtab
 
 " an indentation every four columns
-set tabstop=4
+set tabstop=4 softtabstop=4
+set shiftwidth=4
+set shiftround
 
 " case insensitive search (until you use a capital)
 set ignorecase
@@ -96,9 +94,9 @@ set pumheight=10
 
 " Statusline
 set laststatus=2
-set noruler
+" set noruler
 set showcmd
-set noshowmode
+" set noshowmode
 
 " no folding
 "set nofoldenable
@@ -114,13 +112,13 @@ set number relativenumber
 set numberwidth=1
 
 " show invisibles
-set list
-set listchars=
-set listchars+=tab:·\
-set listchars+=trail:·
-set listchars+=extends:»
-set listchars+=precedes:«
-set listchars+=nbsp:░
+" set list
+" set listchars=
+" set listchars+=tab:·\
+" set listchars+=trail:·
+" set listchars+=extends:»
+" set listchars+=precedes:«
+" set listchars+=nbsp:░
 
 " split style
 " set fillchars=vert:▒
@@ -128,7 +126,6 @@ set listchars+=nbsp:░
 " highlight current line
 augroup CursorLine
 	au!
-	"au VimEnter,WinEnter,BufWinEnter * setlocal cursorcolumn
 	au VimEnter,WinEnter,BufWinEnter * setlocal cursorline
 	au WinLeave * setlocal nocursorline
 augroup END
@@ -136,9 +133,10 @@ augroup END
 " fuzzy find
 set path+=**
 " lazy file name tab completion
-set wildmode=longest,list,full
+set wildmode=longest,full
 set wildmenu
 set wildignorecase
+set wildoptions=pum
 " ignore files vim doesnt use
 set wildignore+=.git,.hg,.svn
 set wildignore+=*.aux,*.out,*.toc
@@ -151,18 +149,10 @@ set wildignore+=*.doc,*.pdf,*.cbr,*.cbz
 set wildignore+=*.zip,*.tar.gz,*.tar.bz2,*.rar,*.tar.xz,*.kgb
 set wildignore+=*.swp,.lock,.DS_Store,._*
 
-" language-specific
+" language-specific (put here languages that don't use 4 spaces)
 augroup langindentation
-	autocmd Filetype c setlocal tabstop=2 shiftwidth=2 softtabstop=2
-	autocmd Filetype cpp setlocal tabstop=2 shiftwidth=2 softtabstop=2
-	autocmd Filetype css setlocal tabstop=2 shiftwidth=2 softtabstop=2
 	autocmd Filetype javascript setlocal tabstop=2 shiftwidth=2 softtabstop=2
 	autocmd Filetype typescript setlocal tabstop=2 shiftwidth=2 softtabstop=2
-	autocmd Filetype html setlocal tabstop=2 shiftwidth=2 softtabstop=2
-	autocmd Filetype json setlocal tabstop=2 shiftwidth=2 softtabstop=2
-	autocmd Filetype scss setlocal tabstop=2 shiftwidth=2 softtabstop=2
-	autocmd Filetype php setlocal tabstop=2 shiftwidth=2 softtabstop=2
-	autocmd Filetype yaml setlocal tabstop=2 shiftwidth=2 softtabstop=2
 augroup END
 
 
