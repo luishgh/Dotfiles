@@ -30,12 +30,12 @@ import XMonad.Util.Run
 -- Settings
 
 myFont :: String
-myFont = "xft:JetBrains Mono:pixelsize=20:antialias=true:hinting=true"
+myFont = "xft:FiraCode Nerd Font Mono:pixelsize=20:antialias=true:hinting=true"
 
 -- The preferred terminal program, which is used in a binding below and by
 -- certain contrib modules.
 --
-myTerminal      = "kitty"
+myTerminal      = "alacritty"
 
 myFocusFollowsMouse :: Bool
 myFocusFollowsMouse = True  -- Whether focus follows the mouse pointer.
