@@ -81,7 +81,8 @@ set hidden
 set termguicolors
 
 " Gui font for gvim and similars
-"set guifont=DroidSansMono\ Nerd\ Font\ 11
+" set guifont=JetBrains\ Mono:h18
+set guifont=JetBrainsMono\ Nerd\ Font\ Mono:h18
 
 " syntax highlighting
 syntax enable
@@ -96,7 +97,7 @@ set pumheight=10
 set laststatus=2
 " set noruler
 set showcmd
-" set noshowmode
+set noshowmode
 
 " no folding
 "set nofoldenable
@@ -110,6 +111,16 @@ set nowrap
 " show line numbers
 set number relativenumber
 set numberwidth=1
+
+augroup NeovimTerminal
+    au!
+    " Disables number lines on terminal buffers
+	autocmd TermOpen * :setl nonumber norelativenumber
+
+    autocmd TermEnter * setlocal scrolloff=0
+    autocmd TermEnter * setlocal scrollback=1000
+    autocmd TermLeave * setlocal scrolloff=5
+augroup END
 
 " show invisibles
 " set list
@@ -151,8 +162,10 @@ set wildignore+=*.swp,.lock,.DS_Store,._*
 
 " language-specific (put here languages that don't use 4 spaces)
 augroup langindentation
+    au!
 	autocmd Filetype javascript setlocal tabstop=2 shiftwidth=2 softtabstop=2
 	autocmd Filetype typescript setlocal tabstop=2 shiftwidth=2 softtabstop=2
+	autocmd Filetype html setlocal tabstop=2 shiftwidth=2 softtabstop=2
 augroup END
 
 

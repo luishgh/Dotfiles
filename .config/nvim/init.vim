@@ -17,6 +17,5 @@ endfor
 
 
 lua <<EOF
-require('dotfiles.lsp')				-- lua/dotfiles/lsp.lua
--- require('dotfiles.nvim-treesitter')	-- lua/dotfiles/nvim-treesitter.lua
+require('dotfiles') -- requires lua/dotfiles/init.lua, which requires all the files in this folder
 EOF

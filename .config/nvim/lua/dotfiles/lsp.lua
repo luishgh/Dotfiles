@@ -23,17 +23,17 @@ end
 -- ------------------- Language server setups ----------------------------------------------
 
 local on_attach = function(client)
-    -- diagnostics
-    noremap("n", "<leader>fd", "<cmd>lua require('telescope.builtin').lsp_document_diagnostics")
-    noremap("n", "<silent> g[", "<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>")
-    noremap("n", "<silent> g]", "<cmd>lua vim.lsp.diagnostic.goto_next()<CR>")
+    -- diagnostics mappings
+    vim.cmd "nnoremap <leader>fd <cmd>lua require('telescope.builtin').lsp_document_diagnostics()<CR>"
+    vim.cmd "nnoremap <leader>fD <cmd>lua require('telescope.builtin').lsp_workspace_diagnostics()<CR>"
+    -- noremap("n", "<silent> g[", "<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>")
+    -- noremap("n", "<silent> g]", "<cmd>lua vim.lsp.diagnostic.goto_next()<CR>")
 
     -- autocommands
-    vim.cmd [[augroup LuaAutoCommands]]
-    vim.cmd [[au!]] -- This prevents having the autocommands defined twice (e.g., after sourcing the vimrc file again).
-    vim.cmd [[autocmd CursorHold * lua vim.lsp.diagnostic.show_line_diagnostics()]] -- Show diagnostic popup on cursor hold
-    -- Enable type inlay hints
-    vim.cmd [[autocmd CursorMoved,InsertLeave,BufEnter,BufWinEnter,TabEnter,BufWritePost * lua require'lsp_extensions'.inlay_hints{ prefix = '', highlight = "Comment", enabled = {"TypeHint", "ChainingHint", "ParameterHint"} }]]
+    vim.cmd [[augroup LspAutoCommands]]
+    vim.cmd [[au!]] -- This prevents having the autocommands defined twice
+    vim.cmd [[autocmd CursorHold * lua vim.lsp.diagnostic.show_line_diagnostics{ show_header = false }]] -- Show diagnostic popup on cursor hold
+    vim.cmd [[autocmd BufWrite,BufEnter,InsertLeave * lua vim.lsp.diagnostic.set_loclist({open_loclist = false})]] -- Populate the loclist with buffer diagnostics
     vim.cmd [[augroup END]]
 
     if client.resolved_capabilities.hover then
@@ -54,15 +54,17 @@ local on_attach = function(client)
         vim.cmd 'inoremap <silent><expr> <C-e> compe#close("<C-e>")' -- map <C-e> to close completion
     end
     if client.resolved_capabilities.rename then
-        noremap("n", "<leader>rn", "<cmd>lua vim.lsp.buf.rename()<CR>") -- map <leader>rn to rename all references to the symbol under the cursor
+        -- noremap("n", "<leader>rn", "<cmd>lua vim.lsp.buf.rename()<CR>")
+        vim.cmd "nnoremap <silent>rn <cmd>lua vim.lsp.buf.rename()<CR>" -- map rn to rename all references to the symbol under the cursor
     end
     if client.resolved_capabilities.code_action then
+        -- nvim-lightbulb autocommands
         vim.cmd [[augroup CodeAction]]
         vim.cmd [[autocmd! * <buffer>]]
         vim.cmd [[autocmd CursorHold * lua require'nvim-lightbulb'.update_lightbulb()]]
         vim.cmd [[augroup END]]
 
-        noremap("n", "<leader>ca", "<cmd>lua require('telescope.builtin').lsp_code_actions()<CR>")
+        noremap("n", "<leader>ca", "<cmd>lua require('telescope.builtin').lsp_code_actions()<CR>") -- map <leader>ca to get LSP code actions on telescope
     end
     -- if client.resolved_capabilities.document_formatting then
     --    vim.cmd [[augroup Format]]
@@ -80,24 +82,22 @@ lspconfig.intelephense.setup {on_attach = on_attach}
 
 lspconfig.pyls.setup {on_attach = on_attach}
 
+-- snippet support
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities.textDocument.completion.completionItem.snippetSupport = true
 
 lspconfig.rust_analyzer.setup {
-    capabilities = capabilities,
-    on_attach = on_attach
-}
+    capabilities = capabilities, -- Enable LSP Snippets
+    on_attach = function(client)
+        -- Enable type inlay hints
+        vim.cmd [[augroup RustAnalyzerAutoCommands]]
+        vim.cmd [[au!]]
+        vim.cmd [[autocmd CursorMoved,InsertLeave,BufEnter,BufWinEnter,TabEnter,BufWritePost *.rs lua require'lsp_extensions'.inlay_hints{ prefix = ' » ', highlight = "NonText", aligned = false, enabled = {"TypeHint", "ChainingHint", "ParameterHint"} }]]
+        vim.cmd [[augroup END]]
 
--- Enable diagnostics
-vim.lsp.handlers["textDocument/publishDiagnostics"] =
-    vim.lsp.with(
-    vim.lsp.diagnostic.on_publish_diagnostics,
-    {
-        virtual_text = true,
-        signs = true,
-        update_in_insert = true
-    }
-)
+        on_attach(client)
+    end
+}
 
 -- TsServer + Efm (for ESLint)
 local eslint = {
@@ -111,7 +111,7 @@ local eslint = {
 
 lspconfig.tsserver.setup {
     on_attach = function(client)
-        client.resolved_capabilities.document_formatting = false
+        client.resolved_capabilities.document_formatting = false -- prevents TsServer and Efm formatting to collide
         on_attach(client)
     end
 }
@@ -164,27 +164,65 @@ lspconfig.efm.setup {
     }
 }
 
---require('nlua.lsp.nvim').setup(lspconfig, {
---	-- Include globals you want to tell the LSP are real :)
---	globals = {
---    -- NodeMCU modules --
---          'file',
---          'gpio',
---          'http',
---          'net',
---          'node',
---          'sjson',
---          'softuart',
---          'tmr',
---          'uart',
---          'wifi'
---    ---------------------
---  }
---})
+require('nlua.lsp.nvim').setup(lspconfig, {
+    on_attach = on_attach,
 
--- ------------------- Additional features ----------------------------------------------
+	-- Include globals you want to tell the LSP are real :)
+	globals = {
+    -- NodeMCU modules --
+          'file',
+          'gpio',
+          'http',
+          'net',
+          'node',
+          'sjson',
+          'softuart',
+          'tmr',
+          'uart',
+          'wifi'
+    ---------------------
+  }
+})
 
--- VsCode-like icons
+-- ------------------- Diagnostics ----------------------------------------------
+
+-- Enable diagnostics
+vim.lsp.handlers["textDocument/publishDiagnostics"] =
+    vim.lsp.with(
+    vim.lsp.diagnostic.on_publish_diagnostics,
+    {
+        virtual_text = {
+            prefix = ""
+        },
+        signs = true,
+        update_in_insert = true
+    }
+)
+
+-- Send diagnostics to quickfix list
+do
+    local method = "textDocument/publishDiagnostics"
+    local default_handler = vim.lsp.handlers[method]
+    vim.lsp.handlers[method] = function(err, method, result, client_id, bufnr, config)
+        default_handler(err, method, result, client_id, bufnr, config)
+        local diagnostics = vim.lsp.diagnostic.get_all()
+        local qflist = {}
+        for bufnr, diagnostic in pairs(diagnostics) do
+            for _, d in ipairs(diagnostic) do
+                d.bufnr = bufnr
+                d.lnum = d.range.start.line + 1
+                d.col = d.range.start.character + 1
+                d.text = d.message
+                table.insert(qflist, d)
+            end
+        end
+        vim.lsp.util.set_qflist(qflist)
+    end
+end
+
+-- ------------------- Completion ----------------------------------------------
+
+-- VsCode-like icons in completion menu
 require "lspkind".init {with_text = true}
 
 -- Auto completion (nvim-compe)
@@ -205,15 +243,17 @@ require "compe".setup {
         buffer = true,
         -- calc = true,
         vsnip = true,
-        ultisnips = true,
+        -- ultisnips = true,
         nvim_lsp = true,
         nvim_lua = true,
         -- spell = true,
-        tags = true
+        tags = true,
         -- snippets_nvim = true,
-        -- treesitter = true
+        treesitter = true
     }
 }
+
+-- ------------------- Additional features ----------------------------------------------
 
 -- Code Actions (nvim-lightbulb)
 require "nvim-lightbulb".update_lightbulb {

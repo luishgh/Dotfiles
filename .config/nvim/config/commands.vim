@@ -3,33 +3,34 @@
 " ┗━┛┛━┛┛ ┇┛ ┇┛ ┇┇┗┛┇━┛━━┛
 
 " Switch to normal mode
-inoremap jk <esc>
+" inoremap jk <esc>
 
 " when line overflows, it will go
 " one _visual_ line and not actual
-nnoremap j gj
-nnoremap k gk
-vnoremap j gj
-vnoremap k gk
+" nnoremap j gj
+" nnoremap k gk
+" vnoremap j gj
+" vnoremap k gk
 
-" tab managment
-map <C-o> :tabnew<cr>
-map <C-c> :tabclose<cr>
-nnoremap <Leader>k gT
-nnoremap <Leader>j gt
+" tab managment in case you're one of the psychos that use tabs
+" map <C-o> :tabnew<cr>
+" map <C-c> :tabclose<cr>
+" nnoremap <Leader>k gT
+" nnoremap <Leader>j gt
 
-" spell-check (English US and Portuguese)
+" spell-check (English US and Brazilian Portuguese)
 map <F6> :setlocal spell! spelllang=en_us<cr>
 map <F7> :setlocal spell! spelllang=pt_br<cr>
 
 " buffer managment
 nnoremap <Leader>bn :bnext<cr>
+nnoremap <Leader>bp :bprev<cr>
 
 " split Managment
-nnoremap <C-j> <C-w><C-j>
-nnoremap <C-k> <C-w><C-k>
-nnoremap <C-l> <C-w><C-l>
-nnoremap <C-h> <C-w><C-h>
+nnoremap <C-Down> <C-w><C-j>
+nnoremap <C-Up> <C-w><C-k>
+nnoremap <C-Right> <C-w><C-l>
+nnoremap <C-Left> <C-w><C-h>
 
 " disable hlsearch
 map <C-s> :noh<cr>
@@ -89,7 +90,7 @@ let g:netrw_list_hide= '.*\.swp$,*/tmp/*,*.so,*.swp,*.zip,*.git,^\.\=/\=$'
 " 	" autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | CHADopen | endif
 " augroup end
 
-" close netrw/nerdtree if it's the only buffer open
+" close netrw if it's the only buffer open
 augroup finalcountdown
   au!
   autocmd WinEnter * if winnr('$') == 1 && getbufvar(winbufnr(winnr()), "&filetype") == "netrw" || &buftype == 'quickfix' |q|endif
@@ -185,3 +186,35 @@ endif
 " abbreviations
 " iab @@ luishenriquegh2701@gmail.com
 " map <leader>t :r ~/.local/share/template<cr>
+
+" Quickfix and location (window-local) lists
+let g:luishgh_qf_l = 0
+let g:luishgh_qf_g = 0
+
+function! ToggleLists(global)
+    if a:global
+        if g:luishgh_qf_g == 1
+            let g:luishgh_qf_g = 0
+            cclose
+        else
+            let g:luishgh_qf_g = 1
+            copen
+        end
+    else
+        if g:luishgh_qf_l == 1
+            let g:luishgh_qf_l = 0
+             lclose
+        else
+            let g:luishgh_qf_l = 1
+             lopen
+        end
+    end
+endfun
+
+nnoremap <C-q> <cmd>call ToggleLists(1)<CR>
+nnoremap <C-j> <cmd>cnext<CR>zz
+nnoremap <C-k> <cmd>cprev<CR>zz
+
+nnoremap <leader>q <cmd>call ToggleLists(0)<CR>
+nnoremap <leader>j <cmd>lnext<CR>zz
+nnoremap <leader>k <cmd>lprev<CR>zz

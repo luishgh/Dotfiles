@@ -25,41 +25,42 @@ call plug#begin('~/.config/nvim/bundle')
 " Plug 'neoclide/coc.nvim', {'branch': 'release'} 	" Autocompletion (LSP client) (use if nvim-lsp can't be used)
 
 " programming (Neovim 0.5)
-Plug 'neovim/nvim-lspconfig' 						" Neovim 0.5 built-in lsp client configuration collection
-Plug 'hrsh7th/nvim-compe' 							" Auto completion plugin for nvim lsp client
-Plug 'onsails/lspkind-nvim' 						" Adds vscode-like icons to neovim built-in lsp
-Plug 'nvim-lua/lsp_extensions.nvim' 				" Extensions to built-in LSP
-Plug 'kosayoda/nvim-lightbulb' 						" VSCode 💡 for neovim's built-in LSP
-" Plug 'tjdevries/nlua.nvim' 							" Install sumneko lua.
+Plug 'neovim/nvim-lspconfig' 		" Neovim 0.5 built-in lsp client configuration collection
+Plug 'hrsh7th/nvim-compe' 			" Auto completion plugin for nvim lsp client
+Plug 'onsails/lspkind-nvim' 		" Adds vscode-like icons to neovim built-in lsp
+Plug 'nvim-lua/lsp_extensions.nvim' " Extensions to built-in LSP
+Plug 'kosayoda/nvim-lightbulb' 		" VSCode 💡 for neovim's built-in LSP
+Plug 'tjdevries/nlua.nvim' 			" Install sumneko lua.
+" Plug 'nvim-lua/lsp-status.nvim'
+
+" language plugins
+Plug 'rust-lang/rust.vim'				" Rust file detection, syntax highlighting, formatting, Syntastic integration, and more
 
 " highlighting (stable)
 " Plug 'HerringtonDarkholme/yats.vim' 	" TS Syntax highlighting
 " Plug 'neovimhaskell/haskell-vim' 		" Haskell Syntax highlighting
 " Plug 'mxw/vim-jsx' 						" To highlight JSX
-Plug 'pangloss/vim-javascript' 			" To highlight JS
-Plug 'kevinoid/vim-jsonc' 				" Comment highlighting on config JSON files
-Plug 'rust-lang/rust.vim'				" Rust file detection, syntax highlighting, formatting, Syntastic integration, and more
-Plug 'euclidianAce/BetterLua.vim'		" Better Lua syntax highlighting
-" Plug 'sheerun/vim-polyglot'
+" Plug 'pangloss/vim-javascript' 			" To highlight JS
+" Plug 'kevinoid/vim-jsonc' 				" Comment highlighting on config JSON files
+" Plug 'euclidianAce/BetterLua.vim'		" Better Lua syntax highlighting
 
 " highlighting based on tree-sitter (Neovim 0.5 required)
-" Plug 'nvim-treesitter/nvim-treesitter', {'do': 'TSUpdate'} 	" We recommend updating the parsers on update
+Plug 'nvim-treesitter/nvim-treesitter', {'do': 'TSUpdate'} 	" We recommend updating the parsers on update
 " Plug 'nvim-treesitter/playground' 							" View treesitter information directly in Neovim
 
 " Snippets
-Plug 'hrsh7th/vim-vsnip'
-" Plug 'hrsh7th/vim-vsnip-integ'
+Plug 'hrsh7th/vim-vsnip'            " VSCode(LSP)'s snippet feature in vim.
+Plug 'rafamadriz/friendly-snippets' " Snippets collection for a set of different programming languages for faster development.
 
 " stylize
 Plug 'RRethy/vim-hexokinase', {'do': 'make hexokinase', 'on': 'HexokinaseToggle'} " The fastest (Neo)Vim plugin for asynchronously displaying the colours in the file
-Plug 'ms-jpq/chadtree', {'branch': 'chad', 'do': 'python3 -m chadtree deps', 'on': 'CHADopen' } "File Manager for Neovim, Better than NERDTree.
-Plug 'junegunn/goyo.vim', { 'on': 'Goyo' } " Zen mode
-Plug 'junegunn/limelight.vim', { 'on': 'Goyo' } " Complements zen mode
-Plug 'mbbill/undotree', { 'on': 'UndotreeToggle' } " Visualizes undo history and makes it easier to browse and switch between different undo branches.
+Plug 'mhinz/vim-startify' " Home screen
+Plug 'glepnir/galaxyline.nvim' , {'branch': 'main'}
+Plug 'kyazdani42/nvim-web-devicons' " A lua fork of vim-devicons, provides the same icons as well as colors for each icon.
 
 " colorschemes
-Plug 'gruvbox-community/gruvbox'
-" Plug 'dracula/vim', { 'as': 'dracula' }
+Plug 'gruvbox-community/gruvbox' " A bright theme with pastel 'retro groove' colors and light/dark mode switching
+Plug 'dracula/vim', { 'as': 'dracula' }
 " Plug 'arcticicestudio/nord-vim'
 
 " Tim Pope masterpieces
@@ -68,10 +69,13 @@ Plug 'tpope/vim-commentary' " Shortcuts for commenting
 Plug 'tpope/vim-fugitive' 	" The premier Vim plugin for Git
 
 " features
-Plug 'mhinz/vim-startify' " Home screen
 Plug 'matze/vim-move' " Moves lines and selections in a more visual manner
 Plug 'airblade/vim-gitgutter' " Shows a git diff in the sign column.
 Plug 'sbdchd/neoformat', { 'on': 'Neoformat'} " A (Neo)vim plugin for formatting code.
+Plug 'ms-jpq/chadtree', {'branch': 'chad', 'do': 'python3 -m chadtree deps', 'on': 'CHADopen' } "File Manager for Neovim, Better than NERDTree.
+Plug 'junegunn/goyo.vim', { 'on': 'Goyo' } " Zen mode
+Plug 'junegunn/limelight.vim', { 'on': 'Goyo' } " Complements zen mode
+Plug 'mbbill/undotree', { 'on': 'UndotreeToggle' } " Visualizes undo history and makes it easier to browse and switch between different undo branches.
 " Plug 'junegunn/gv.vim' " A git commit browser
 " Plug 'simeji/winresizer'
 " Plug 'christoomey/vim-tmux-navigator'
@@ -81,7 +85,6 @@ Plug 'nvim-lua/popup.nvim' " [WIP] An implementation of the Popup API from vim i
 Plug 'nvim-lua/plenary.nvim' " All the lua functions I don't want to write twice.
 Plug 'nvim-telescope/telescope.nvim' " A highly extendable fuzzy finder over lists
 Plug 'nvim-telescope/telescope-fzy-native.nvim' " FZY style sorter for telescope.nvim that is compiled
-Plug 'kyazdani42/nvim-web-devicons' " A lua fork of vim-devicons, provides the same icons as well as colors for each icon.
 
 " Plug 'ctrlpvim/ctrlp.vim' " fuzzy find files (use if telescope can't be used)
 
@@ -164,5 +167,14 @@ colorscheme gruvbox
 " -------------------------------------
 " vim-hexokinase
 let g:Hexokinase_highlighters = ['virtual']
+
+" -------------------------------------
+
+
+" -------------------------------------
+" Mappings for snippets for filetypes without LSP servers
+inoremap <silent><expr> <C-Space> compe#complete()
+inoremap <silent><expr> <CR> compe#confirm("<CR>")
+inoremap <silent><expr> <C-e> compe#close("<C-e>")
 
 " -------------------------------------
