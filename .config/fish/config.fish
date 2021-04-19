@@ -21,7 +21,7 @@ set -xg PATH $HOME/.yarn/bin $PATH
 set -xg PATH $HOME/.emacs.d/bin $PATH
 
 # dotfiles repo
-alias dotrepo="git --git-dir=Documents/dotfiles --work-tree=/home/luishgh/"
+alias dotrepo="git --git-dir=/home/luishgh/Documents/dotfiles --work-tree=/home/luishgh/"
 
 # td-cli config path
 set -xg TD_CLI_HOME "/home/luishgh/.config/td-cli/"
