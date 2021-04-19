@@ -53,3 +53,9 @@
 ;; PlatformIO packages
 (when (package! platformio-mode);; Main package for PlatformIO integration
   (package! arduino-mode))      ;; For .ino files support
+
+;; Elfeed packages
+(package! elfeed-goodies) ;; Various bits and pieces to enhance the Elfeed user experience
+
+;; Org packages
+(package! org-fragtog) ;; Automatically toggle Org mode LaTeX fragment previews as the cursor enters and exits them

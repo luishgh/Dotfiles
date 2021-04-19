@@ -2,6 +2,21 @@
 #+AUTHOR: Luis Henrique Gomes Higino
 #+STARTUP: showeverything
 
+* Table Of Contents :toc:
+- [[#about-this-config][About This Config]]
+  - [[#some-additional-functionsmacros-that-could-help-you-configure-doom][Some additional functions/macros that could help you configure Doom:]]
+- [[#identification][Identification]]
+- [[#fonts][Fonts]]
+- [[#doom-theme][Doom Theme]]
+- [[#org-mode][Org Mode]]
+  - [[#org-roam][Org-roam]]
+- [[#line-settings][Line Settings]]
+- [[#elfeed][Elfeed]]
+- [[#programming-settings][Programming settings]]
+  - [[#use-eslint-for-checking-typescript-files][Use ESLint for checking typescript files]]
+  - [[#use-platformio-mode-for-checking-ino-files-doesnt-work][Use platformio-mode for checking .ino files (doesn't work)]]
+  - [[#flutter-settings][Flutter Settings]]
+
 * About This Config
 This is my personal Doom Emacs literate config. Note: it was heavily inspired by [[https://gitlab.com/dwt1/dotfiles/-/blob/master/.doom.d/config.org][Derek Taylor's]]. You can take some elisp from this file and paste it into =$DOOMDIR/config.el= if you're using a normal config. In case you're wondering how can you use a literate config, just uncomment the ~literate~ section in the bottom of your =$DOOMDIR/init.el= and create a =$DOOMDIR/config.org= file. For more details about the ~literate~ module, check its documentation inside your Doom Emacs instalation. Remember, you do not need to run ~doom sync~ after modifying neither =config.el= or =config.org=!
 #+begin_src elisp
@@ -28,9 +43,9 @@ Doom exposes five (optional) variables for controlling fonts in Doom. They all a
 + ~doom-variable-pitch-font~ - variable font which is used by some Emacs plugins (such as eww).
 + ~doom-big-font~ - used in ~doom-big-font-mode~, useful for presentations or streaming.
 #+begin_src elisp
-(setq doom-font (font-spec :family "JetBrains Mono" :size 15)
+(setq doom-font (font-spec :family "FiraCode Nerd Font Mono" :size 15)
       doom-variable-pitch-font (font-spec :family "Ubuntu" :size 15)
-      doom-big-font (font-spec :family "JetBrains Mono" :size 24))
+      doom-big-font (font-spec :family "FiraCode Nerd Font Mono" :size 24))
 #+end_src
 You can also enable bold and italic:
 #+begin_src elisp
@@ -82,10 +97,68 @@ I was tired of having to run org-babel-tangle after saving my literate dotfiles.
   "Tangle current buffer asynchronously."
   (dt/org-babel-tangle-async (buffer-file-name)))
 #+end_src
+~org-fragtog~ configuration for fragment previews, such as LaTeX formulas or Markdown files, to be automatically toggled as the cursor enters and exists them
+#+begin_src elisp
+(add-hook 'org-mode-hook 'org-fragtog-mode)
+#+end_src
+** Org-roam
+A tool for network thought. It reproduces some of [[https://roamresearch.com/][Roam Research’s]] features within the all-powerful Org-mode. I am currently using it to study for [[https://www.gov.br/inep/pt-br/areas-de-atuacao/avaliacao-e-exames-educacionais/enem][Enem]], basically the national exam in Brazil for getting into college.
+#+begin_src elisp
+(setq org-roam-directory "~/Documents/org/org-roam")
+#+end_src
+Custom mappings for Org-roam
+#+begin_src elisp
+(after! org-roam
+  (map! :leader
+        :prefix "n"
+        :desc "org-roam" "l" #'org-roam
+        :desc "org-roam-insert" "i" #'org-roam-insert
+        :desc "org-roam-switch-to-buffer" "b" #'org-roam-switch-to-buffer
+        :desc "org-roam-find-file" "f" #'org-roam-find-file
+        :desc "org-roam-show-graph" "g" #'org-roam-graph-show
+        :desc "org-roam-insert" "i" #'org-roam-insert
+        :desc "org-roam-capture" "c" #'org-roam-capture))
+#+end_src
+Autocompletion for linking (I *think* Doom already sets this to be enabled, testing for the time being)
+#+begin_src elisp
+;; use this if you want completion with company
+;; (push 'company-capf  company-backends)
+
+;; use this for as-you-type link completions
+;; (setq org-roam-completion-everywhere t)
+#+end_src
+Using ~deft~ ro navigate my ~org-roam~ files
+#+begin_src elisp
+(use-package deft
+  :after org
+  :custom
+  (deft-recursive t)
+  (deft-use-filter-string-for-filename t)
+  (deft-default-extension "org")
+  (deft-directory "~/Documents/org/org-roam/"))
+#+end_src
 * Line Settings
 This determines the style of line numbers in effect. If set to `nil', line numbers are disabled. For relative line numbers, set this to `relative'.
 #+begin_src elisp
 (setq display-line-numbers-type 'relative)
+#+end_src
+* Elfeed
+An RSS newsfeed reader for Emacs.
+#+begin_src elisp
+(require 'elfeed-goodies)
+(elfeed-goodies/setup)
+(setq elfeed-goodies/entry-pane-size 0.5)
+(evil-define-key 'normal elfeed-show-mode-map
+  (kbd "J") 'elfeed-goodies/split-show-next
+  (kbd "K") 'elfeed-goodies/split-show-prev)
+(setq elfeed-feeds (quote
+                    (("https://www.reddit.com/r/neovim.rss" reddit vim)
+                     ("http://neovim.io/news.xml" news neovim)
+                     ("https://www.reddit.com/r/Gentoo.rss" reddit gentoo)
+                     ("https://www.reddit.com/r/DoomEmacs.rss" reddit emacs)
+                     ("https://www.reddit.com/r/vim.rss" reddit vim)
+                     ("https://www.reddit.com/r/emacs.rss" reddit emacs)
+                     ("https://www.gentoo.org/feeds/news.xml" news gentoo))))
 #+end_src
 * Programming settings
 These are more personal configs related to my programming workflows.
