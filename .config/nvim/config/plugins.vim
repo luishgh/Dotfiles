@@ -30,7 +30,8 @@ Plug 'hrsh7th/nvim-compe' 			" Auto completion plugin for nvim lsp client
 Plug 'onsails/lspkind-nvim' 		" Adds vscode-like icons to neovim built-in lsp
 Plug 'nvim-lua/lsp_extensions.nvim' " Extensions to built-in LSP
 Plug 'kosayoda/nvim-lightbulb' 		" VSCode 💡 for neovim's built-in LSP
-Plug 'tjdevries/nlua.nvim' 			" Install sumneko lua.
+" Plug 'tjdevries/nlua.nvim' 			" Lua Development for Neovim (download_sumneko.lua script broken at the moment)
+Plug 'luishgh/nlua.nvim'            " My fork of tjdevries/nlua.nvim with working download_sumneko script
 " Plug 'nvim-lua/lsp-status.nvim'
 
 " language plugins
@@ -69,6 +70,7 @@ Plug 'tpope/vim-commentary' " Shortcuts for commenting
 Plug 'tpope/vim-fugitive' 	" The premier Vim plugin for Git
 
 " features
+Plug 'tweekmonster/startuptime.vim' " Startup benchmark
 Plug 'matze/vim-move' " Moves lines and selections in a more visual manner
 Plug 'airblade/vim-gitgutter' " Shows a git diff in the sign column.
 Plug 'sbdchd/neoformat', { 'on': 'Neoformat'} " A (Neo)vim plugin for formatting code.
