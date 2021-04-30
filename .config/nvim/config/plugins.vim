@@ -78,6 +78,7 @@ Plug 'ms-jpq/chadtree', {'branch': 'chad', 'do': 'python3 -m chadtree deps', 'on
 Plug 'junegunn/goyo.vim', { 'on': 'Goyo' } " Zen mode
 Plug 'junegunn/limelight.vim', { 'on': 'Goyo' } " Complements zen mode
 Plug 'mbbill/undotree', { 'on': 'UndotreeToggle' } " Visualizes undo history and makes it easier to browse and switch between different undo branches.
+Plug 'gentoo/gentoo-syntax', { 'do': 'make PREFIX=~/.config/nvim/ install' } " Gentoo and portage related syntax highlighting, filetype and indent settings
 " Plug 'junegunn/gv.vim' " A git commit browser
 " Plug 'simeji/winresizer'
 " Plug 'christoomey/vim-tmux-navigator'
