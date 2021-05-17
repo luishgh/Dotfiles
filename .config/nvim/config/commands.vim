@@ -71,7 +71,7 @@ augroup BufferWrite
 augroup end
 
 " open terminal
-noremap <Leader>ot :split term://fish<cr>:resize 10<cr>
+noremap <Leader>ot :split term://bash<cr>:resize 10<cr>
 
 " exit from terminal mode
 tnoremap <C-e> <C-\><C-n>

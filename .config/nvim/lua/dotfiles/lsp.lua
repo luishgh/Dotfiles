@@ -43,7 +43,7 @@ local on_attach = function(client)
         vim.cmd "nnoremap <silent>gd <cmd>lua require('telescope.builtin').lsp_definitions()<CR>" -- map gd to goto definition or list them in telescope if more than one exists
     end
     if client.resolved_capabilities.find_references then
-        vim.cmd "nnoremap <silent>gr <cmd>lua require('telescope.builtin').lsp_references" -- map gr to list all the references to the symbol under the cursor in telescope
+        vim.cmd "nnoremap <silent>gr <cmd>lua require('telescope.builtin').lsp_references()<CR>" -- map gr to list all the references to the symbol under the cursor in telescope
     end
     if client.resolved_capabilities.implementation then
         vim.cmd "nnoremap <silent>gD <cmd>lua vim.lsp.buf.implementation()<CR>" -- Use gD to see all implementations
