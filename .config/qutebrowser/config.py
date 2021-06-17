@@ -37,6 +37,11 @@ config.set("tabs.padding", {"top": 1, "bottom": 2, "left": 5, "right": 5})
 config.set("tabs.indicator.width", 0)
 config.set("tabs.favicons.scale", 1.2)
 
+# Open every tab as a new window
+c.tabs.tabs_are_windows = True
+c.tabs.show = "multiple"
+c.tabs.last_close = "close"
+
 # Disable case sensitivity for searching
 config.set("search.ignore_case", "always")
 
