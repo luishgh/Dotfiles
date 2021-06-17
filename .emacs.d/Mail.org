@@ -1,0 +1,118 @@
+#+TITLE: Managing Mail inside Emacs 
+#+AUTHOR: Luis Henrique
+#+PROPERTY: header-args:emacs-lisp :tangle ./lisp/lhgh-mail.el :mkdirp yes
+
+* About This Config
+I manage my emails inside Emacs through the Mu4e email client. For syncing the mail folder, I use the =mbsync= program from the =isync= package and the =mu= utility for the indexing.
+
+** Tip for gmail users
+If you wonder how you can expose Gmail categories - like =Updates= or =Promotions= - to IMAP, check [[https://dylanconlin.svbtle.com/exposing-gmails-categories-to-imap][this blog post]]. Labels are exposed by default, so don't worry about them.
+
+* Mu4e configuratio
+
+#+begin_src emacs-lisp
+  (use-package mu4e
+    :straight nil ;; mu4e is installed through the package manager
+    :defer 20 ; Wait until 20 seconds after startup
+    :config
+
+    ;; Requiring org helpers
+    (require 'mu4e-org)
+
+    ;; use mu4e for e-mail in emacs
+    (setq mail-user-agent 'mu4e-user-agent)
+
+    ;; This is set to 't' to avoid mail syncing issues when using mbsync
+    (setq mu4e-change-filenames-when-moving t)
+
+    ;; Refresh mail interval in seconds
+    (setq mu4e-update-interval (* 2 60 60))
+
+    (setq mu4e-get-mail-command "mbsync -a")
+    (setq mu4e-maildir "~/Mail")
+
+    ;; something about ourselves
+    (setq
+     user-mail-address "luishenriquegh2701@gmail.com"
+     user-full-name "Luis Henrique Gomes Higino"
+     mu4e-compose-signature
+       (concat
+         "Luis H. Higino - "
+         "Representante do 3 Ano de Informática do CEFET-MG Campus V"))
+
+    ;; folders
+    (setq mu4e-drafts-folder "/[Gmail]/Drafts")
+    (setq mu4e-sent-folder   "/[Gmail]/Sent Mail")
+    (setq mu4e-refile-folder "/[Gmail]/All Mail")
+    (setq mu4e-trash-folder  "/[Gmail]/Trash")
+
+    ;; shortcuts
+    (setq mu4e-maildir-shortcuts
+      '((:maildir "/primary"           :key ?i)
+        (:maildir "/academic"          :key ?a)
+        (:maildir "/[Gmail]/Sent Mail" :key ?s)
+        (:maildir "/[Gmail]/Trash"     :key ?t)
+        (:maildir "/[Gmail]/Drafts"    :key ?d)
+        (:maildir "/[Gmail]/All Mail"  :key ?A)))
+
+    ;; custom actions
+    (defun lhgh/capture-mail-read-later (msg)
+      (interactive)
+      (call-interactively 'org-store-link)
+      (org-capture nil "mr"))
+
+    ;; adding the custom actions to mu4e actions
+    (add-to-list 'mu4e-headers-actions
+      '("read later" . lhgh/capture-mail-read-later) t)
+    (add-to-list 'mu4e-view-actions
+      '("read later" . lhgh/capture-mail-read-later) t)
+
+    ;; setting mu4e to complete with completing-read
+    (setq mu4e-completing-read-function 'completing-read)
+
+    ;; SMTP Settings
+    (setq smtpmail-smtp-server "smtp.gmail.com"
+          smtpmail-smtp-service 465
+          smtpmail-stream-type  'ssl)
+
+    ;; Function to use for sending mail
+    (setq message-send-mail-function 'smtpmail-send-it)
+
+    ;; Make sure plain text mails flow correclty for recipients
+    (setq mu4e-compose-format-flowed t)
+
+    ;; Run mu4e in the background to sync mail periodically 
+    (mu4e t))
+#+end_src
+
+* Mbsync configuration
+
+#+begin_src conf :tangle ~/.mbsyncrc :mkdirp yes
+  IMAPAccount gmail
+  Host imap.gmail.com
+  SSLType IMAPS
+  AuthMechs LOGIN
+  User luishenriquegh2701@gmail.com
+  PassCmd "pass email/mbsync-gmail"
+  CertificateFile /etc/ssl/certs/ca-certificates.crt
+  
+  IMAPStore gmail-remote
+  Account gmail
+  
+  MaildirStore gmail-local
+  Subfolders Verbatim
+  Path ~/Mail/
+  Inbox ~/Mail/Inbox
+  
+  Channel gmail
+  Master :gmail-remote:
+  Slave :gmail-local:
+  Patterns * ![Gmail]* "[Gmail]/Sent Mail" "[Gmail]/Starred" "[Gmail]/All Mail" "[Gmail]/Trash"
+  Create Both
+  SyncState *
+#+end_src
+
+* Provide the lhgh-mail package
+#+begin_src emacs-lisp
+  (provide 'lhgh-mail)
+#+end_src
