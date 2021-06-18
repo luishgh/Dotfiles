@@ -18,7 +18,7 @@ fi
 # Put your fun stuff here.
 
 # Dotfiles repo
-alias dotrepo="/usr/bin/git --git-dir=$HOME/Documents/dotfiles --work-tree=$HOME"
+alias dotrepo="git --git-dir=$HOME/Documents/dotfiles --work-tree=$HOME"
 
 # Doom Emacs
 # export PATH=$HOME/.emacs.d/bin:$PATH
