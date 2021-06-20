@@ -1,14 +1,14 @@
 ;; The default is 800 kilobytes.  Measured in bytes.
 (setq gc-cons-threshold (* 50 1000 1000))
 
-(defun efs/display-startup-time ()
+(defun lhgh/display-startup-time ()
   (message "Emacs loaded in %s with %d garbage collections."
            (format "%.2f seconds"
                    (float-time
                     (time-subtract after-init-time before-init-time)))
            gcs-done))
 
-(add-hook 'emacs-startup-hook #'efs/display-startup-time)
+(add-hook 'emacs-startup-hook #'lhgh/display-startup-time)
 
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
@@ -30,8 +30,13 @@
 ;; Load the helper package for commands like `straight-x-clean-unused-repos'
 (require 'straight-x)
 
+(setq lhgh/is-guix-system (and (require 'f)
+			       (string-equal (f-read "/etc/issue")
+					     "\nThis is the GNU system.  Welcome.\n")))
+
 (straight-use-package 'use-package) ;; Use straight.el for use-package expressions
-(setq straight-use-package-by-default t) ;; Install a package if it isn't installed already
+;; (setq straight-use-package-by-default (not lhgh/is-guix-system)) ;; Install a package if it isn't installed already on non-Guix systems
+(setq straight-use-package-by-default t) ;; guix transition WIP
 ;; (setq use-package-verbose t) ;; Uncomment to bench mark use-package
 
 ;; Change the user-emacs-directory to keep unwanted things out of ~/.emacs.d
@@ -56,6 +61,10 @@
 (when lhgh/exwm-enabled
   (require 'lhgh-desktop))
 
+(use-package undo-tree
+  :init
+  (global-undo-tree-mode 1))
+
 (use-package evil
   :init ;; tweak evil's configuration before loading it (as suggested in the package's documentation)
   (setq evil-want-integration t)
@@ -76,9 +85,11 @@
   :config
   (evil-collection-init))
 
-(use-package evil-commentary
+(use-package evil-nerd-commenter
   :after evil
-  :config (evil-commentary-mode 1))
+  :config (evilnc-default-hotkeys t) ;; use default key bindings (M-;) in Emacs state
+  :bind (:map evil-normal-state-map
+         ("gc" . evilnc-comment-or-uncomment-lines)))
 
 (use-package general
   :after evil
@@ -94,7 +105,7 @@
     "tv" '(visual-line-mode :which-hey "visual lines")))
 
 (use-package hydra
-  :defer 1) ;; I don't use hydra at the moment but paln to do it when I find a case where it is useful
+  :defer 1) ;; load only when a defhydra is called
 
 (use-package which-key
   :init (which-key-mode)
@@ -154,12 +165,14 @@
   (corfu-global-mode 1))
 
 (use-package orderless
+  :straight t
   :init
   (setq completion-styles '(orderless)
         completion-category-defaults nil
         completion-category-overrides '((file (styles . (partial-completion))))))
 
 (use-package embark
+  :straight t
   :bind (("C-S-a" . embark-act)
          :map minibuffer-local-map
          ("C-d" . embark-act))
@@ -198,7 +211,7 @@
   :font "JetBrains Mono 11"
   :weight 'medium)
 (set-face-attribute 'variable-pitch nil
-  :font "Ubuntu 15"
+  :font "Iosevka Aile 15"
   :weight 'medium)
 
 (column-number-mode) ;; Shows column number in mode-line
@@ -221,7 +234,8 @@
   :if (display-graphic-p)
   :commands all-the-icons-install-fonts
   :init
-  (unless (find-font (font-spec :name "all-the-icons"))
+  (unless (or lhgh/is-guix-system
+              (find-font (font-spec :name "all-the-icons")))
     (all-the-icons-install-fonts t)))
 
 (use-package doom-themes
@@ -229,7 +243,7 @@
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  (load-theme 'doom-palenight t)
+  (load-theme 'doom-palenight t) ; sets the proper theme
 
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
@@ -246,6 +260,19 @@
   ;; Whethe to display the buffer encoding.
   (setq doom-modeline-buffer-encoding nil))
 
+(use-package dashboard
+  :defer lhgh/exwm-enabled ;; defer if in EXWM because it doesn't make sense in that context
+  :init
+  (setq dashboard-set-heading-icons t)
+  (setq dashboard-set-file-icons t)
+  (setq dashboard-banner-logo-title "May I save your soul?")
+  (setq dashboard-startup-banner 'logo)
+  (setq dashboard-items '((recents . 10)
+                          (agenda . 5)
+                          (projects . 5)))
+  :config
+  (dashboard-setup-startup-hook))
+
 (lhgh/leader-maps
   "o" '(:ignore t :which-key "org"))
 
@@ -254,7 +281,7 @@
   (setq evil-auto-indent nil))
 
 (use-package org
-  :straight (:type built-in) ;; using the latest version doesn't work at the moment, will resolve it later (related to the built in version being loaded before this one)
+  ;; :straight (:type built-in) ;; using the latest version doesn't work at the moment, will resolve it later (related to the built in version being loaded before this one)
   :hook (org-mode . lhgh/org-mode-setup)
   :commands (org-capture org-agenda) ;; Org is deferred, these commands are autoloaded so they can be used before opening an Org file
   :general
@@ -339,7 +366,9 @@
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((emacs-lisp . t)
-     (python . t))))
+     (python . t)
+     (scheme . t)
+     (latex . t))))
 
 (with-eval-after-load 'org
   (require 'org-tempo)
@@ -348,7 +377,23 @@
   ;; Custom templates for specific languages
   (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
   (add-to-list 'org-structure-template-alist '("py" . "src python"))
+  (add-to-list 'org-structure-template-alist '("sc" . "src scheme"))
   (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp")))
+
+(with-eval-after-load 'ox-latex
+    (add-to-list 'org-latex-classes
+                 '("homework"
+                   "\\documentclass[11pt]{article}
+[DEFAULT-PACKAGES]
+\\usepackage[]{babel}
+\\pagenumbering{gobble}
+\\usepackage[margin=0.5in]{geometry}
+\\usepackage{enumitem}"
+                   ("\\section{%s}" . "\\section*{%s}")
+                   ("\\subsection{%s}" . "\\subsection*{%s}")
+                   ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+                   ("\\paragraph{%s}" . "\\paragraph*{%s}")
+                   ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))))
 
 ;; This ends the use-package org block
 )
@@ -363,6 +408,7 @@
   (org-superstar-remove-leading-stars t))
 
 (use-package grip-mode
+  :straight t
   :defer t
   :general
   (lhgh/leader-maps '(markdown-mode-map gfm-mode-map org-mode-map)
@@ -425,12 +471,16 @@
     "g"  '(:ignore t :which-key "git")
     "gg" 'magit-status))
 
+(use-package magit-todos ;; shows TODOs (or similars) in files inside the repo 
+  :defer t)
+
 (use-package forge
   :init
   (setq auth-sources '("~/.authinfo"))
   :after magit)
 
 (use-package lsp-mode
+  :straight t
   :commands (lsp lsp-deferred)
   :init
   (setq lsp-keymap-prefix "C-c l")
@@ -440,6 +490,7 @@
   (lsp-enable-which-key-integration t))
 
 (use-package lsp-ui
+  :straight t
   :hook (lsp-mode . lsp-ui-mode)
   :custom
   (lsp-eldoc-enable-hover nil)
@@ -453,6 +504,7 @@
 (push "~/.local/bin" exec-path)
 
 (use-package dap-mode
+  :straight t
   :after lsp-mode
   :custom
   (lsp-emable-dap-auto-configure nil)
@@ -509,6 +561,7 @@
   (require 'dap-python))
 
 (use-package lsp-pyright
+  :straight t
   :hook (python-mode . (lambda ()
                           (require 'lsp-pyright)
                           (lsp-deferred))))
@@ -517,12 +570,14 @@
   :mode "\\.dart\\'")
 
 (use-package lsp-dart
+  :straight t
   :hook (dart-mode . lsp-deferred)
   :custom
   (lsp-dart-flutter-sdk-dir "~/.local/share/flutter")
   (lsp-dart-sdk-dir "~/.local/share/flutter/bin/cache/dart-sdk"))
 
 (use-package flutter
+  :straight t
   :after dart-mode
   :general
   (lhgh/leader-maps dart-mode-map
@@ -533,6 +588,7 @@
   :init (setq makrdown-command "marked"))
 
 (use-package markdown-toc
+  :straight t
   :after markdown-mode
   :general
   (lhgh/leader-maps '(markdown-mode-map gfm-mode-map)
@@ -575,6 +631,7 @@
         eshell-aliases-file (expand-file-name "~/.emacs.d/eshell/alias")))
 
 (use-package eshell-git-prompt
+  :straight t
   :after eshell)
 
 (use-package eshell-syntax-highlighting
@@ -677,8 +734,8 @@
                '(file)))))
 
 (use-package telega
-  :straight (telega :host github
-                    :branch "master")
+  ;; :straight (telega :host github
+  ;;                   :branch "master")
   :commands telega
   :custom
   (telega-completing-read-function 'completing-read)
@@ -722,6 +779,7 @@
    :nick "luishgh" :password (password-store-get "irc/irc.libera.chat")))
 
 (use-package langtool
+  :straight t
   :commands langtool-check
   :config
   (setq langtool-language-tool-server-jar "~/.local/bin/LanguageTool-5.3/languagetool-server.jar"))

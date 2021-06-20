@@ -2,6 +2,7 @@
 #+AUTHOR: Luis Henrique
 #+DESCRIPTION: My personal vanilla Emacs config.
 #+PROPERTY: header-args:emacs-lisp :tangle ./init.el :mkdirp yes
+#+PROPERTY: header-args:scheme :noweb-ref packages :noweb-sep ""
 
 * Table of Contents
 :PROPERTIES:
@@ -16,6 +17,7 @@
 - [[#package-management][Package Management]]
   - [[#general-package-setup-packageel][General package setup (package.el)]]
   - [[#straightel][straight.el]]
+  - [[#guix][guix]]
   - [[#use-package-setup][use-package setup]]
     - [[#packageel-setup][package.el setup]]
     - [[#straightel-setup][straight.el setup]]
@@ -27,7 +29,7 @@
     - [[#evil][Evil]]
     - [[#enhancing-evil][Enhancing evil]]
       - [[#evil-collection][evil-collection]]
-      - [[#evil-commentary][evil-commentary]]
+      - [[#evil-nerd-commenter][evil-nerd-commenter]]
   - [[#generalel][general.el]]
   - [[#hydra][Hydra]]
   - [[#which-key][which-key]]
@@ -63,6 +65,7 @@
   - [[#habit-tracking][Habit Tracking]]
   - [[#babel][Babel]]
   - [[#structure-templates][Structure Templates]]
+  - [[#latex-workflow][LaTeX workflow]]
   - [[#end-use-package][End use-package]]
   - [[#update-toc-on-save][Update TOC on Save]]
   - [[#packages][Packages]]
@@ -144,14 +147,14 @@ This is my GNU Emacs config. I had been using [[https://github.com/hlissner/doom
   ;; The default is 800 kilobytes.  Measured in bytes.
   (setq gc-cons-threshold (* 50 1000 1000))
 
-  (defun efs/display-startup-time ()
+  (defun lhgh/display-startup-time ()
     (message "Emacs loaded in %s with %d garbage collections."
              (format "%.2f seconds"
                      (float-time
                       (time-subtract after-init-time before-init-time)))
              gcs-done))
 
-  (add-hook 'emacs-startup-hook #'efs/display-startup-time)
+  (add-hook 'emacs-startup-hook #'lhgh/display-startup-time)
 #+end_src
 
 * Global Mappings
@@ -180,9 +183,9 @@ Initializing package sources. (Not using this right now, trying straight.el)
 Initializing package system
 
 #+begin_src emacs-lisp :tangle no
-(package-initialize)
-(unless package-archive-contents
-  (package-refresh-contents))
+  (package-initialize)
+  (unless package-archive-contents
+    (package-refresh-contents))
 #+end_src
 
 ** straight.el
@@ -208,6 +211,15 @@ Initializing package system
 (require 'straight-x)
 #+end_src
 
+** guix
+I started using [[https://guix.gnu.org/][GNU Guix]] recently along with my Gentoo system and managing the Emacs packages with the =guix= package manager there. This variable helps defining use-package to use straight by default only on non-Guix OSs.
+
+#+begin_src emacs-lisp
+  (setq lhgh/is-guix-system (and (require 'f)
+				 (string-equal (f-read "/etc/issue")
+					       "\nThis is the GNU system.  Welcome.\n")))
+#+end_src
+
 ** =use-package= setup
 I personally use [[https://github.com/jwiegley/use-package][use-package]] because I like how it helps fragmenting my configuration in sensible way.
 
@@ -215,7 +227,7 @@ I personally use [[https://github.com/jwiegley/use-package][use-package]] becaus
 
 #+begin_src emacs-lisp :tangle no
   (require 'use-package)
-  (setq use-package-always-ensure t) ;; Install a package if it isn't installed already
+  (setq use-package-always-ensure (not lhgh/is-guix-system)) ;; Install a package if it isn't installed already on non-Guix systems
   ;; (setq use-package-verbose t) ;; Uncomment to bench mark use-package
 #+end_src
 
@@ -223,7 +235,8 @@ I personally use [[https://github.com/jwiegley/use-package][use-package]] becaus
 
 #+begin_src emacs-lisp
   (straight-use-package 'use-package) ;; Use straight.el for use-package expressions
-  (setq straight-use-package-by-default t) ;; Install a package if it isn't installed already
+  ;; (setq straight-use-package-by-default (not lhgh/is-guix-system)) ;; Install a package if it isn't installed already on non-Guix systems
+  (setq straight-use-package-by-default t) ;; guix transition WIP
   ;; (setq use-package-verbose t) ;; Uncomment to bench mark use-package
 #+end_src
 
@@ -263,6 +276,15 @@ Load up the desktop environment if the =--use-exwm= argument was passed to Emacs
     (require 'lhgh-desktop))
 #+end_src
 
+*Guix Packages*
+Despite the code being in Desktop.org, include the emacs packages for the desktop environment in this file so that they can be included in the Emacs profile.
+
+#+begin_src scheme
+  "emacs-exwm"
+  "emacs-desktop-environment"
+  "emacs-app-launcher"
+#+end_src
+
 * Key Bindings
 
 ** Dark Side (Evil)
@@ -272,6 +294,10 @@ This is the main section of configuration that makes Emacs usable for me. Before
 [[https://github.com/emacs-evil/evil][Evil]] is an extensible vi(m) layer for Emacs. It emulates its main features and provides facilites for writing extensions.
 
 #+begin_src emacs-lisp
+  (use-package undo-tree
+    :init
+    (global-undo-tree-mode 1))
+
   (use-package evil
     :init ;; tweak evil's configuration before loading it (as suggested in the package's documentation)
     (setq evil-want-integration t)
@@ -288,6 +314,13 @@ This is the main section of configuration that makes Emacs usable for me. Before
     (evil-global-set-key 'motion "k" 'evil-previous-visual-line))
 #+end_src
 
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-evil"
+  "emacs-undo-tree"
+#+end_src
+
 *** Enhancing evil
 
 **** evil-collection
@@ -300,13 +333,22 @@ This is the main section of configuration that makes Emacs usable for me. Before
     (evil-collection-init))
 #+end_src
 
-**** evil-commentary
-[[https://github.com/linktohack/evil-commentary][evil-commentary]] is a port from tpope's vim-commentary.
+**** evil-nerd-commenter
+[[https://github.com/redguardtoo/evil-nerd-commenter][evil-nerd-commenter]] is like [[http://www.vim.org/scripts/script.php?script_id=1218][Nerd Commenter]] in Vim.
 
 #+begin_src emacs-lisp
-  (use-package evil-commentary
+  (use-package evil-nerd-commenter
     :after evil
-    :config (evil-commentary-mode 1))
+    :config (evilnc-default-hotkeys t) ;; use default key bindings (M-;) in Emacs state
+    :bind (:map evil-normal-state-map
+           ("gc" . evilnc-comment-or-uncomment-lines)))
+#+end_src
+
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-evil-collection"
+  "emacs-evil-nerd-commenter"
 #+end_src
 
 ** general.el
@@ -327,12 +369,24 @@ This is the main section of configuration that makes Emacs usable for me. Before
       "tv" '(visual-line-mode :which-hey "visual lines")))
 #+end_src
 
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-general"
+#+end_src
+
 ** Hydra
 [[https://github.com/abo-abo/hydra][Hydra]] is a package that can be used to tie related commands into a single prefix and execute them in succesion after calling such prefix.
 
 #+begin_src emacs-lisp
   (use-package hydra
-    :defer 1) ;; I don't use hydra at the moment but paln to do it when I find a case where it is useful
+    :defer 1) ;; load only when a defhydra is called
+#+end_src
+
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-hydra"
 #+end_src
 
 ** which-key
@@ -344,6 +398,12 @@ This is the main section of configuration that makes Emacs usable for me. Before
   :diminish which-key-mode
   :config
   (setq which-key-idle-delay 0.3))
+#+end_src
+
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-which-key"
 #+end_src
 
 * Completion
@@ -426,6 +486,12 @@ A more minimal alternative to =Ivy=.  It uses the default completion system, whi
     (vertico-mode))
 #+end_src
 
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-vertico"
+#+end_src
+
 ** Consult
 Consult provides a lot of useful completion commands similar to Ivy’s Counsel. It is compatible with any completion system based on the standard Emacs completing-read API, like =Vertico= or =Selectrum.=
 
@@ -441,6 +507,12 @@ Consult provides a lot of useful completion commands similar to Ivy’s Counsel.
     (completion-in-region-function #'consult-completion-in-region))
 #+end_src
 
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-consult"
+#+end_src
+
 ** Marginalia
 Marginalia provides helpful annotations for various types of minibuffer completions. You can think of it as a replacement of =ivy-rich=.
 
@@ -449,6 +521,12 @@ Marginalia provides helpful annotations for various types of minibuffer completi
     :after vertico
     :init
     (marginalia-mode))
+#+end_src
+
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-marginalia"
 #+end_src
 
 ** Corfu
@@ -469,10 +547,17 @@ Corfu can be considered the minimalistic =completion-in-region= counterpart of =
     (corfu-global-mode 1))
 #+end_src
 
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-corfu"
+#+end_src
+
 ** Orderless
 
 #+begin_src emacs-lisp
   (use-package orderless
+    :straight t
     :init
     (setq completion-styles '(orderless)
           completion-category-defaults nil
@@ -484,6 +569,7 @@ Context action for completion minibuffers.
 
 #+begin_src emacs-lisp
   (use-package embark
+    :straight t
     :bind (("C-S-a" . embark-act)
            :map minibuffer-local-map
            ("C-d" . embark-act))
@@ -506,6 +592,12 @@ Context action for completion minibuffers.
     ([remap describe-function] . helpful-callable)
     ([remap describe-variable] . helpful-variable)
     ([remap describe-key] . helpful-key))
+#+end_src
+
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-helpful"
 #+end_src
 
 ** Bindings
@@ -542,7 +634,7 @@ Do I really need to explain the following options? Just look at that default too
     :font "JetBrains Mono 11"
     :weight 'medium)
   (set-face-attribute 'variable-pitch nil
-    :font "Ubuntu 15"
+    :font "Iosevka Aile 15"
     :weight 'medium)
 #+end_src
 
@@ -580,12 +672,19 @@ Word wrapping is disabled by default. I like it to be on in certain modes, like 
 [[https://github.com/domtronn/all-the-icons.el][all-the-icons]] is a utility package to collect various Icon Fonts and propertize them within Emacs.
 
 #+begin_src emacs-lisp
-  (use-package all-the-icons
-    :if (display-graphic-p)
-    :commands all-the-icons-install-fonts
-    :init
-    (unless (find-font (font-spec :name "all-the-icons"))
-      (all-the-icons-install-fonts t)))
+    (use-package all-the-icons
+      :if (display-graphic-p)
+      :commands all-the-icons-install-fonts
+      :init
+      (unless (or lhgh/is-guix-system
+                  (find-font (font-spec :name "all-the-icons")))
+        (all-the-icons-install-fonts t)))
+#+end_src
+
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-all-the-icons"
 #+end_src
 
 ** Colorscheme (theme)
@@ -597,7 +696,7 @@ I use [[https://github.com/hlissner/emacs-doom-themes#doom-emacs][doom-themes]] 
     ;; Global settings (defaults)
     (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
           doom-themes-enable-italic t) ; if nil, italics is universally disabled
-    (load-theme 'doom-palenight t)
+    (load-theme 'doom-palenight t) ; sets the proper theme
 
     ;; Enable flashing mode-line on errors
     (doom-themes-visual-bell-config)
@@ -607,6 +706,12 @@ I use [[https://github.com/hlissner/emacs-doom-themes#doom-emacs][doom-themes]] 
 
     ;; Corrects (and improves) org-mode's native fontification.
     (doom-themes-org-config))
+#+end_src
+
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-doom-themes"
 #+end_src
 
 ** Mode-line (statusline in vimish)
@@ -620,11 +725,18 @@ I use [[https://github.com/seagle0128/doom-modeline][doom-modeline]] because it 
     (setq doom-modeline-buffer-encoding nil))
 #+end_src
 
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-doom-modeline"
+#+end_src
+
 ** Startup Screen
 I use [[https://github.com/emacs-dashboard/emacs-dashboard][Emacs Dashboard]] as my startup screen.
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp
   (use-package dashboard
+    :defer lhgh/exwm-enabled ;; defer if in EXWM because it doesn't make sense in that context
     :init
     (setq dashboard-set-heading-icons t)
     (setq dashboard-set-file-icons t)
@@ -635,6 +747,12 @@ I use [[https://github.com/emacs-dashboard/emacs-dashboard][Emacs Dashboard]] as
                             (projects . 5)))
     :config
     (dashboard-setup-startup-hook))
+#+end_src
+
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-dashboard"
 #+end_src
 
 * Org Mode
@@ -655,7 +773,7 @@ I use [[https://github.com/emacs-dashboard/emacs-dashboard][Emacs Dashboard]] as
     (setq evil-auto-indent nil))
 
   (use-package org
-    :straight (:type built-in) ;; using the latest version doesn't work at the moment, will resolve it later (related to the built in version being loaded before this one)
+    ;; :straight (:type built-in) ;; using the latest version doesn't work at the moment, will resolve it later (related to the built in version being loaded before this one)
     :hook (org-mode . lhgh/org-mode-setup)
     :commands (org-capture org-agenda) ;; Org is deferred, these commands are autoloaded so they can be used before opening an Org file
     :general
@@ -667,6 +785,12 @@ I use [[https://github.com/emacs-dashboard/emacs-dashboard][Emacs Dashboard]] as
           org-hide-emphasis-markers t)
 
   ;; NOTE: Subsequent sections are still part of this use-package block!
+#+end_src
+
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-org"
 #+end_src
 
 ** Tags
@@ -761,7 +885,9 @@ This block tells which languages org-babel should load. Check [[https://orgmode.
     (org-babel-do-load-languages
      'org-babel-load-languages
      '((emacs-lisp . t)
-       (python . t))))
+       (python . t)
+       (scheme . t)
+       (latex . t))))
 #+end_src
 
 ** Structure Templates
@@ -775,13 +901,15 @@ Insert empty structural blocks, such as =#+begin_src= … =#+end_src=, by pressi
     ;; Custom templates for specific languages
     (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
     (add-to-list 'org-structure-template-alist '("py" . "src python"))
+    (add-to-list 'org-structure-template-alist '("sc" . "src scheme"))
     (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp")))
 #+end_src
 
-** COMMENT LaTeX workflow
+** LaTeX workflow
 For academic documents, I'm starting to use Org mode for the general content and LaTeX for formatting.
 
 #+begin_src emacs-lisp
+  (with-eval-after-load 'ox-latex
     (add-to-list 'org-latex-classes
                  '("homework"
                    "\\documentclass[11pt]{article}
@@ -794,7 +922,7 @@ For academic documents, I'm starting to use Org mode for the general content and
                    ("\\subsection{%s}" . "\\subsection*{%s}")
                    ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
                    ("\\paragraph{%s}" . "\\paragraph*{%s}")
-                   ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+                   ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))))
 #+end_src
 
 ** End =use-package=
@@ -812,6 +940,12 @@ ToC (Table of Contents) sections are nice in documentation and literate configs.
     :hook (org-mode . org-make-toc-mode))
 #+end_src
 
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-org-make-toc"
+#+end_src
+
 ** Packages
 
 *** org-superstar
@@ -825,11 +959,18 @@ ToC (Table of Contents) sections are nice in documentation and literate configs.
     (org-superstar-remove-leading-stars t))
 #+end_src
 
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-org-superstar"
+#+end_src
+
 *** grip-mode
 [[https://github.com/seagle0128/grip-mode][grip-mode]] provides instant Github-flavored Markdown/Org preview using [[https://github.com/joeyespo/grip][Grip]] (GitHub Readme Instant Preview).
 
 #+begin_src emacs-lisp
 (use-package grip-mode
+  :straight t
   :defer t
   :general
   (lhgh/leader-maps '(markdown-mode-map gfm-mode-map org-mode-map)
@@ -850,6 +991,12 @@ ToC (Table of Contents) sections are nice in documentation and literate configs.
                                     :with-author nil
                                     :with-toc nil))
     (add-hook 'message-send-hook 'org-mime-confirm-when-no-multipart))
+#+end_src
+
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-org-mime"
 #+end_src
 
 *** org-appear
@@ -912,6 +1059,12 @@ This snippet adds a hook to =org-mode= buffers so that any Org file in the =.ema
     (setq projectile-switch-project-action #'projectile-dired))
 #+end_src
 
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-projectile"
+#+end_src
+
 *** counsel-projectile
 [[https://github.com/ericdanan/counsel-projectile][counsel-projectile]] provides further ivy integration into projectile.
 
@@ -933,6 +1086,16 @@ This snippet adds a hook to =org-mode= buffers so that any Org file in the =.ema
     (lhgh/leader-maps
       "g"  '(:ignore t :which-key "git")
       "gg" 'magit-status))
+
+  (use-package magit-todos ;; shows TODOs (or similars) in files inside the repo 
+    :defer t)
+#+end_src
+
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-magit"
+  "emacs-magit-todos"
 #+end_src
 
 *** Forge
@@ -946,11 +1109,18 @@ NOTE: Remember to configure GitHub and/or GitLab tokens before using this packag
     :after magit)
 #+end_src
 
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-forge"
+#+end_src
+
 ** Language Server Protocol
 LSP is IMO one of the most important contributions Microsoft has ever done to the dev community and surely the best aspect of the creation of Visual Studio Code. It makes possible to have IDE level features in almost any text editor, from VSCode itself to (Neo)vim and Emacs.
 
 #+begin_src emacs-lisp
   (use-package lsp-mode
+    :straight t
     :commands (lsp lsp-deferred)
     :init
     (setq lsp-keymap-prefix "C-c l")
@@ -960,6 +1130,7 @@ LSP is IMO one of the most important contributions Microsoft has ever done to th
     (lsp-enable-which-key-integration t))
 
   (use-package lsp-ui
+    :straight t
     :hook (lsp-mode . lsp-ui-mode)
     :custom
     (lsp-eldoc-enable-hover nil)
@@ -984,6 +1155,7 @@ The second best contribution from VSCode, debugger integration for any editor.
 
 #+begin_src emacs-lisp
   (use-package dap-mode
+    :straight t
     :after lsp-mode
     :custom
     (lsp-emable-dap-auto-configure nil)
@@ -1032,6 +1204,12 @@ The second best contribution from VSCode, debugger integration for any editor.
   (dap-node-setup)) ;; Automatically installs Node debug adapter if needed
 #+end_src
 
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-typescript-mode"
+#+end_src
+
 *** Python
 
 #+begin_src emacs-lisp
@@ -1054,6 +1232,7 @@ The second best contribution from VSCode, debugger integration for any editor.
     (require 'dap-python))
 
   (use-package lsp-pyright
+    :straight t
     :hook (python-mode . (lambda ()
                             (require 'lsp-pyright)
                             (lsp-deferred))))
@@ -1068,16 +1247,24 @@ Used primarily for Flutter.
     :mode "\\.dart\\'")
 
   (use-package lsp-dart
+    :straight t
     :hook (dart-mode . lsp-deferred)
     :custom
     (lsp-dart-flutter-sdk-dir "~/.local/share/flutter")
     (lsp-dart-sdk-dir "~/.local/share/flutter/bin/cache/dart-sdk"))
 
   (use-package flutter
+    :straight t
     :after dart-mode
     :general
     (lhgh/leader-maps dart-mode-map
       "mr" '(flutter-run-or-hot-reload :which-key "hot reload")))
+#+end_src
+
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-dart-mode"
 #+end_src
 
 *** Markdown
@@ -1091,11 +1278,18 @@ Used primarily for Flutter.
     :init (setq makrdown-command "marked"))
 #+end_src
 
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-markdown-mode"
+#+end_src
+
 **** markdown-toc
 [[https://github.com/ardumont/markdown-toc][markdown-toc]] generates TOCs in markdown files.
 
 #+begin_src emacs-lisp
   (use-package markdown-toc
+    :straight t
     :after markdown-mode
     :general
     (lhgh/leader-maps '(markdown-mode-map gfm-mode-map)
@@ -1111,12 +1305,24 @@ Used primarily for Flutter.
     :hook (lsp-mode . flycheck-mode))
 #+end_src
 
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-flycheck"
+#+end_src
+
 *** Raibow Delimeters
 [[https://github.com/Fanael/rainbow-delimiters][raibow-delimeters]] helps spotting matching delimiters, orienting yourself in the code and telling which statements are at a given depth.
 
 #+begin_src emacs-lisp
   (use-package rainbow-delimiters
     :hook (prog-mode . rainbow-delimiters-mode))
+#+end_src
+
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-rainbow-delimeters"
 #+end_src
 
 * Applications
@@ -1139,6 +1345,12 @@ A native code alternative to =term= and =ansi-term=.
       "at" '(vterm :which-key "vterm"))
     :config
     (setq vterm-max-scrollback 10000))
+#+end_src
+
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-vterm"
 #+end_src
 
 ** Eshell
@@ -1164,6 +1376,7 @@ A native code alternative to =term= and =ansi-term=.
           eshell-aliases-file (expand-file-name "~/.emacs.d/eshell/alias")))
 
   (use-package eshell-git-prompt
+    :straight t
     :after eshell)
 
   (use-package eshell-syntax-highlighting
@@ -1184,6 +1397,12 @@ A native code alternative to =term= and =ansi-term=.
         (add-to-list 'eshell-visual-commands program)))
 
     (eshell-git-prompt-use-theme 'powerline))
+#+end_src
+ 
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-eshell-syntax-highlighting"
 #+end_src
 
 ** File Browsing
@@ -1326,6 +1545,14 @@ Just a cheatsheet with the commands I use most frequently. Disclaimer: this docu
       "p" 'dired-ranger-paste))
 #+end_src
 
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-all-the-icons-dired"
+  "emacs-dired-single"
+  "emacs-dired-hacks"
+#+end_src
+
 *** Opening Files Externally
 
 #+begin_src emacs-lisp
@@ -1347,12 +1574,18 @@ Just a cheatsheet with the commands I use most frequently. Disclaimer: this docu
                  '(file)))))
 #+end_src
 
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-openwith"
+#+end_src
+
 ** Telegram
 
 #+begin_src emacs-lisp
   (use-package telega
-    :straight (telega :host github
-                      :branch "master")
+    ;; :straight (telega :host github
+    ;;                   :branch "master")
     :commands telega
     :custom
     (telega-completing-read-function 'completing-read)
@@ -1361,12 +1594,24 @@ Just a cheatsheet with the commands I use most frequently. Disclaimer: this docu
     (telega-appindicator-mode 1))
 #+end_src
 
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-telega"
+#+end_src
+
 ** Elpher
 A relatively full-featured gopher and gemini client for GNU Emacs.
 
 #+begin_src emacs-lisp
   (use-package elpher
     :commands elpher)
+#+end_src
+
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-elpher"
 #+end_src
 
 ** ERC
@@ -1410,6 +1655,7 @@ ERC is a builtin IRC client for Emacs.
 
 #+begin_src emacs-lisp
   (use-package langtool
+    :straight t
     :commands langtool-check
     :config
     (setq langtool-language-tool-server-jar "~/.local/bin/LanguageTool-5.3/languagetool-server.jar"))
@@ -1442,6 +1688,15 @@ The [[https://github.com/zx2c4/password-store/tree/master/contrib/emacs][passwor
       "app" '(password-store-copy :which-key "copy password")
       "api" '(password-store-insert :which-key "insert password")
       "apg" '(password-store-generate :which-key "generate password")))
+#+end_src
+
+*Guix Packages*
+
+#+begin_src scheme
+  ;; "emacs-pinentry"
+  "pinentry-emacs"
+  "emacs-password-store"
+  "emacs-auth-source-pass"
 #+end_src
 
 * Utility Functions

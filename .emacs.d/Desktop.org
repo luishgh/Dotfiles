@@ -63,6 +63,7 @@
              (exwm-layout-toggle-mode-line))))
 
   (use-package exwm
+    :if lhgh/exwm-enabled
     :config
     ;; Set the default number of workspaces
     (setq exwm-workspace-number 2)
