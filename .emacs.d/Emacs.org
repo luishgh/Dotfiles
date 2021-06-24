@@ -92,6 +92,8 @@
     - [[#markdown][Markdown]]
       - [[#markdown-mode][markdown-mode]]
       - [[#markdown-toc][markdown-toc]]
+    - [[#html][HTML]]
+      - [[#tailwind-css][Tailwind CSS]]
   - [[#productivity][Productivity]]
     - [[#syntax-checking-with-flycheck][Syntax checking with Flycheck]]
     - [[#raibow-delimeters][Raibow Delimeters]]
@@ -215,6 +217,7 @@ Initializing package system
 I started using [[https://guix.gnu.org/][GNU Guix]] recently along with my Gentoo system and managing the Emacs packages with the =guix= package manager there. This variable helps defining use-package to use straight by default only on non-Guix OSs.
 
 #+begin_src emacs-lisp
+  (straight-use-package 'f)
   (setq lhgh/is-guix-system (and (require 'f)
 				 (string-equal (f-read "/etc/issue")
 					       "\nThis is the GNU system.  Welcome.\n")))
@@ -1052,6 +1055,7 @@ This snippet adds a hook to =org-mode= buffers so that any Org file in the =.ema
       "pp" '(projectile-switch-project :which-key "switch-project")
       "pf" '(projectile-find-file :which-key "find-file")
       "pF" '(projectile-find-file-other-window :which-key "find-file-other-window")
+      "pq" '(projectile-kill-buffers :which-key "quit project")
       "pt" '(projectile-test-project :which-key "test-project"))
     :init
     (when (file-directory-p "~/Projects/Code")
@@ -1294,6 +1298,33 @@ Used primarily for Flutter.
     :general
     (lhgh/leader-maps '(markdown-mode-map gfm-mode-map)
       "rt" '(markdown-toc-generate-or-refresh-toc :which-key "generate or refresh markdown toc")))
+#+end_src
+
+*** HTML
+
+#+begin_src emacs-lisp
+  (use-package web-mode
+    :mode "(\\.\\(html?\\|ejs\\|tsx\\|jsx\\)\\'"
+    :hook (web-mode . lsp-deferred)
+    :config
+    (setq-default web-mode-code-indent-offset 2)
+    (setq-default web-mode-markup-indent-offset 2)
+    (setq-default web-mode-attribute-indent-offset 2))
+#+end_src
+
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-web-mode"
+#+end_src
+
+**** Tailwind CSS
+Check out Tailwind [[https://tailwindcss.com/][here]].
+#+begin_src emacs-lisp
+  (use-package lsp-tailwindcss
+    :straight '(:type git
+                :host github
+                :repo "merrickluo/lsp-tailwindcss"))
 #+end_src
 
 ** Productivity

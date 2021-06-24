@@ -30,6 +30,7 @@
 ;; Load the helper package for commands like `straight-x-clean-unused-repos'
 (require 'straight-x)
 
+(straight-use-package 'f)
 (setq lhgh/is-guix-system (and (require 'f)
 			       (string-equal (f-read "/etc/issue")
 					     "\nThis is the GNU system.  Welcome.\n")))
@@ -458,6 +459,7 @@
     "pp" '(projectile-switch-project :which-key "switch-project")
     "pf" '(projectile-find-file :which-key "find-file")
     "pF" '(projectile-find-file-other-window :which-key "find-file-other-window")
+    "pq" '(projectile-kill-buffers :which-key "quit project")
     "pt" '(projectile-test-project :which-key "test-project"))
   :init
   (when (file-directory-p "~/Projects/Code")
@@ -593,6 +595,19 @@
   :general
   (lhgh/leader-maps '(markdown-mode-map gfm-mode-map)
     "rt" '(markdown-toc-generate-or-refresh-toc :which-key "generate or refresh markdown toc")))
+
+(use-package web-mode
+  :mode "(\\.\\(html?\\|ejs\\|tsx\\|jsx\\)\\'"
+  :hook (web-mode . lsp-deferred)
+  :config
+  (setq-default web-mode-code-indent-offset 2)
+  (setq-default web-mode-markup-indent-offset 2)
+  (setq-default web-mode-attribute-indent-offset 2))
+
+(use-package lsp-tailwindcss
+  :straight '(:type git
+              :host github
+              :repo "merrickluo/lsp-tailwindcss"))
 
 (use-package flycheck
   :hook (lsp-mode . flycheck-mode))
