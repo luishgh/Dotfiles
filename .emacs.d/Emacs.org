@@ -112,9 +112,11 @@
         - [[#other-common-operations][Other common operations]]
       - [[#configuration][Configuration]]
     - [[#opening-files-externally][Opening Files Externally]]
-  - [[#telegram][Telegram]]
+  - [[#chat][Chat]]
+    - [[#telegram][Telegram]]
+    - [[#erc][ERC]]
+    - [[#discord][Discord]]
   - [[#elpher][Elpher]]
-  - [[#erc][ERC]]
   - [[#languagetool][LanguageTool]]
   - [[#mail-management][Mail management]]
 - [[#credential-management][Credential Management]]
@@ -1599,6 +1601,10 @@ Just a cheatsheet with the commands I use most frequently. Disclaimer: this docu
                  "mpv"
                  '(file))
            (list (openwith-make-extension-regexp
+                  '("pdf"))
+                 "zathura"
+                 '(file))
+           (list (openwith-make-extension-regexp
                   '("xbm" "pbm" "pgm" "ppm" "pnm"
                     "png" "gif" "bmp" "tif" "jpeg")) ;; Removed jpg because Telega uses it
                  "vimiv"
@@ -1611,7 +1617,8 @@ Just a cheatsheet with the commands I use most frequently. Disclaimer: this docu
   "emacs-openwith"
 #+end_src
 
-** Telegram
+** Chat
+*** Telegram
 
 #+begin_src emacs-lisp
   (use-package telega
@@ -1631,21 +1638,7 @@ Just a cheatsheet with the commands I use most frequently. Disclaimer: this docu
   "emacs-telega"
 #+end_src
 
-** Elpher
-A relatively full-featured gopher and gemini client for GNU Emacs.
-
-#+begin_src emacs-lisp
-  (use-package elpher
-    :commands elpher)
-#+end_src
-
-*Guix Packages*
-
-#+begin_src scheme
-  "emacs-elpher"
-#+end_src
-
-** ERC
+*** ERC
 ERC is a builtin IRC client for Emacs.
 
 #+begin_src emacs-lisp
@@ -1658,7 +1651,7 @@ ERC is a builtin IRC client for Emacs.
             erc-user-full-name "Luis Henrique"
             erc-kill-buffer-on-part t
             erc-auto-query 'bury
-            erc-autojoin-channels-alist '(("libera.chat" "#systemcrafters" "#libera")))
+            erc-autojoin-channels-alist '(("libera.chat" "#systemcrafters")))
 
       ;; visual config
       (setq erc-fill-column 120
@@ -1669,7 +1662,7 @@ ERC is a builtin IRC client for Emacs.
       (setq erc-pals '("diegovsky"))
 
       ;; tracking config
-      (setq erc-track-exclude '("#emacs")
+      (setq erc-track-exclude '("#emacs" "#guix")
             erc-track-exclude-types '("JOIN" "NICK" "PART" "QUIT" "MODE" "AWAY")
             erc-track-exclude-server-buffer t
             erc-track-shorten-start 8
@@ -1680,6 +1673,32 @@ ERC is a builtin IRC client for Emacs.
     (erc-tls
      :server "irc.libera.chat" :port 7000
      :nick "luishgh" :password (password-store-get "irc/irc.libera.chat")))
+#+end_src
+
+*** Discord
+=elcord= makes it possible to notify Discord when Emacs is “playing” using the Game Activity feature.
+
+#+begin_src emacs-lisp
+  (use-package elcord
+    :straight t
+    :custom
+    (elcord-display-buffer-details nil)
+    :config
+    (elcord-mode))
+#+end_src
+
+** Elpher
+A relatively full-featured gopher and gemini client for GNU Emacs.
+
+#+begin_src emacs-lisp
+  (use-package elpher
+    :commands elpher)
+#+end_src
+
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-elpher"
 #+end_src
 
 ** LanguageTool

@@ -743,6 +743,10 @@
                "mpv"
                '(file))
          (list (openwith-make-extension-regexp
+                '("pdf"))
+               "zathura"
+               '(file))
+         (list (openwith-make-extension-regexp
                 '("xbm" "pbm" "pgm" "ppm" "pnm"
                   "png" "gif" "bmp" "tif" "jpeg")) ;; Removed jpg because Telega uses it
                "vimiv"
@@ -758,9 +762,6 @@
   (define-key global-map (kbd "C-c t") telega-prefix-map)
   (telega-appindicator-mode 1))
 
-(use-package elpher
-  :commands elpher)
-
 (use-package erc
     :commands erc
     :config
@@ -770,7 +771,7 @@
           erc-user-full-name "Luis Henrique"
           erc-kill-buffer-on-part t
           erc-auto-query 'bury
-          erc-autojoin-channels-alist '(("libera.chat" "#systemcrafters" "#libera")))
+          erc-autojoin-channels-alist '(("libera.chat" "#systemcrafters")))
 
     ;; visual config
     (setq erc-fill-column 120
@@ -781,7 +782,7 @@
     (setq erc-pals '("diegovsky"))
 
     ;; tracking config
-    (setq erc-track-exclude '("#emacs")
+    (setq erc-track-exclude '("#emacs" "#guix")
           erc-track-exclude-types '("JOIN" "NICK" "PART" "QUIT" "MODE" "AWAY")
           erc-track-exclude-server-buffer t
           erc-track-shorten-start 8
@@ -792,6 +793,16 @@
   (erc-tls
    :server "irc.libera.chat" :port 7000
    :nick "luishgh" :password (password-store-get "irc/irc.libera.chat")))
+
+(use-package elcord
+  :straight t
+  :custom
+  (elcord-display-buffer-details nil)
+  :config
+  (elcord-mode))
+
+(use-package elpher
+  :commands elpher)
 
 (use-package langtool
   :straight t
