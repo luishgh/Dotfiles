@@ -733,6 +733,7 @@
 
 (use-package openwith
   :after dired
+  :hook (dired-mode . openwith-mode)
   :config
   (setq openwith-associations
         (list

@@ -1591,6 +1591,7 @@ Just a cheatsheet with the commands I use most frequently. Disclaimer: this docu
 #+begin_src emacs-lisp
   (use-package openwith
     :after dired
+    :hook (dired-mode . openwith-mode)
     :config
     (setq openwith-associations
           (list
