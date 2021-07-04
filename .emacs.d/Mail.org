@@ -116,3 +116,11 @@ If you wonder how you can expose Gmail categories - like =Updates= or =Promotion
 #+begin_src emacs-lisp
   (provide 'lhgh-mail)
 #+end_src
+
+* Dependencies
+
+#+begin_src scheme :tangle .config/guix/manifests/mail.scm :mkdirp yes
+  (specifications->manifest
+   '("mu"
+     "isync"))
+#+end_src

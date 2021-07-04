@@ -202,6 +202,7 @@ Minimalist alternative to =counsel-linux-app=. Uses the builtin completion, so i
 
 #+begin_src emacs-lisp
   (use-package app-launcher
+    :straight t
     :after exwm
     :straight '(app-launcher :host github :repo "SebastienWae/app-launcher")
     :commands app-launcher-run-app

@@ -271,8 +271,8 @@
   (setq dashboard-items '((recents . 10)
                           (agenda . 5)
                           (projects . 5)))
-  :config
-  (dashboard-setup-startup-hook))
+  (unless lhgh/exwm-enabled
+    (dashboard-setup-startup-hook)))
 
 (lhgh/leader-maps
   "o" '(:ignore t :which-key "org"))
@@ -711,6 +711,7 @@
     (dired-rainbow-define-chmod executable-unix "#38c172" "-.*x.*"))
 
   (use-package dired-single
+    :straight t
     :defer t)
 
   (use-package dired-ranger
