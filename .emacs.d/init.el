@@ -659,6 +659,8 @@
 (use-package eshell
   :hook (eshell-first-time-mode . lhgh/configure-eshell)
   :config
+  (lhgh/leader-maps
+    "ae" '(eshell :which-key "eshell"))
 
   (with-eval-after-load 'em-term
     (setq eshell-destroy-buffer-when-process-dies t)

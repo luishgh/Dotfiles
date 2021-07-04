@@ -153,7 +153,7 @@
 ** Keybindings
 
 #+begin_src emacs-lisp
-  ;; TODO: setup audio to use pulsemixer and screenshot to use clipboard
+  ;; TODO: setup audio to use pulsemixer
   (use-package desktop-environment
     :after exwm
     :config 
@@ -166,9 +166,9 @@
     (desktop-environment-brightness-normal-increment "10%+")
     (desktop-environment-brightness-normal-decrement "10%-")
     (desktop-environment-screenshot-command "flameshot gui -d 200"))
-
+  
   (exwm-input-set-key (kbd "<S-s-return>") 'vterm)
-
+  
   (with-eval-after-load 'hydra
     (defhydra hydra-exwm-resize (:timeout 4)
       "Resize Window (Shift is bigger steps)"
@@ -180,8 +180,21 @@
       ("H" (lambda () (interactive) (exwm-layout-shrink-window-horizontally 30)) "< 30")
       ("l" (lambda () (interactive) (exwm-layout-enlarge-window-horizontally 10)) "> 10")
       ("L" (lambda () (interactive) (exwm-layout-enlarge-window-horizontally 30)) "> 30"))
-
+  
     (exwm-input-set-key (kbd "s-R") 'hydra-exwm-resize/body))
+  
+  (defun lhgh/set-keyboard-layout (layout)
+    "Set X keyboard layout to given layout"
+    (start-process-shell-command "setting-keyboard-layout" nil (concat "setxkbmap " layout " && xmodmap ~/.emacs.d/exwm/Xmodmap")))
+  
+  (defun lhgh/toggle-keyboard-layout ()
+    "Toggle keyboard layout between us and pt-br (abnt2)"
+    (interactive)
+    (pcase (string-trim (shell-command-to-string "setxkbmap -query | awk '/layout/ {print $2}'"))
+      ("us" (lhgh/set-keyboard-layout "br"))
+      ("br" (lhgh/set-keyboard-layout "us"))))
+  
+  (exwm-input-set-key (kbd "s-SPC") 'lhgh/toggle-keyboard-layout)
 #+end_src
 
 ** Launching Apps
@@ -202,7 +215,7 @@ Minimalist alternative to =counsel-linux-app=. Uses the builtin completion, so i
 This file is used the display manager (GDM, LightDM, etc) to display EXWM as a desktop environment option when you log in.
 
 #+begin_src shell :tangle no
-sudo ln -f ~/.emacs/exwm/EXWM.desktop /usr/share/xsessions/EXWM.desktop
+  sudo ln -f ~/.emacs/exwm/EXWM.desktop /usr/share/xsessions/EXWM.desktop
 #+end_src
 
 #+begin_src shell :tangle ./exwm/EXWM.desktop :mkdirp yes
@@ -228,6 +241,13 @@ This launcher script is invoked by =EXWM.desktop= to start Emacs and load our de
 
   # Fire it up
   exec dbus-launch --exit-with-session emacs -mm --debug-init --use-exwm
+#+end_src
+
+*Obs*
+As a fallback (for guix), symlink the =start-exwm.sh= file to =~/.xsession=.
+
+#+begin_src shell :tangle no
+  sudo ln -f ~/.emacs/exwm/start-exwm.sh ~/.xsession
 #+end_src
 
 ** Keyboard Configuration

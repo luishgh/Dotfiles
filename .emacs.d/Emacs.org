@@ -1392,43 +1392,45 @@ A native code alternative to =term= and =ansi-term=.
   (defun lhgh/configure-eshell ()
     (require 'evil-collection-eshell)
     (evil-collection-eshell-setup)
-
+  
     ;; Save command history when commands are entered
     (add-hook 'eshell-pre-command-hook 'eshell-save-some-history)
-
+  
     ;; Truncate buffer for performance
     (add-to-list 'eshell-output-filter-functions 'eshell-truncate-buffer)
-
+  
     (evil-define-key '(normal emacs insert visual) eshell-mode-map (kbd "C-r") 'consult-history)
     (evil-define-key '(normal emacs insert visual) eshell-mode-map (kbd "<home>") 'eshell-bol)
-
+  
     (setq eshell-history-size 10000
           eshell-buffer-maximum-lines 10000
           eshell-hist-ignore-dups t
           eshell-scroll-to-bottom-on-input t
           eshell-aliases-file (expand-file-name "~/.emacs.d/eshell/alias")))
-
+  
   (use-package eshell-git-prompt
     :straight t
     :after eshell)
-
+  
   (use-package eshell-syntax-highlighting
     :after esh-mode
     :config
     ;; Enable in all Eshell buffers.
     (eshell-syntax-highlighting-global-mode +1))
-
-
+  
+  
   (use-package eshell
     :hook (eshell-first-time-mode . lhgh/configure-eshell)
     :config
-
+    (lhgh/leader-maps
+      "ae" '(eshell :which-key "eshell"))
+  
     (with-eval-after-load 'em-term
       (setq eshell-destroy-buffer-when-process-dies t)
       (dolist (program '( "nmtui"
                           "nvim"))
         (add-to-list 'eshell-visual-commands program)))
-
+  
     (eshell-git-prompt-use-theme 'powerline))
 #+end_src
  
