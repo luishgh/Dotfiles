@@ -1,6 +1,6 @@
 #+TITLE: Managing Mail inside Emacs 
 #+AUTHOR: Luis Henrique
-#+PROPERTY: header-args:emacs-lisp :tangle ./lisp/lhgh-mail.el :mkdirp yes
+#+PROPERTY: header-args:emacs-lisp :tangle .emacs.d/lisp/lhgh-mail.el :mkdirp yes
 
 * About This Config
 I manage my emails inside Emacs through the Mu4e email client. For syncing the mail folder, I use the =mbsync= program from the =isync= package and the =mu= utility for the indexing.
@@ -87,7 +87,7 @@ If you wonder how you can expose Gmail categories - like =Updates= or =Promotion
 
 * Mbsync configuration
 
-#+begin_src conf :tangle ~/.mbsyncrc :mkdirp yes
+#+begin_src conf :tangle .mbsyncrc :mkdirp yes
   IMAPAccount gmail
   Host imap.gmail.com
   SSLType IMAPS
