@@ -202,9 +202,8 @@ Minimalist alternative to =counsel-linux-app=. Uses the builtin completion, so i
 
 #+begin_src emacs-lisp
   (use-package app-launcher
-    :straight t
-    :after exwm
     :straight '(app-launcher :host github :repo "SebastienWae/app-launcher")
+    :after exwm
     :commands app-launcher-run-app
     :init
     (exwm-input-set-key (kbd "s-p") 'app-launcher-run-app))
@@ -234,12 +233,17 @@ This file is used the display manager (GDM, LightDM, etc) to display EXWM as a d
 This launcher script is invoked by =EXWM.desktop= to start Emacs and load our desktop environment configuration.  We also start up some other helpful applications to configure the desktop experience.
 
 #+begin_src shell :tangle .emacs.d/exwm/start-exwm.sh :shebang #!/bin/sh
+  # Source .profile for common environment vars
+  . ~/.profile
+  
+  xhost +SI:localuser:$USER
+  
   # Run the screen compositor
   compton &
-
+  
   # Enable screen locking on suspend
   # xss-lock -- slock &
-
+  
   # Fire it up
   exec dbus-launch --exit-with-session emacs -mm --debug-init --use-exwm
 #+end_src
@@ -369,9 +373,9 @@ This is the Polybar configuration. TODO: tangle to other directory and symlink i
 
   module-margin = 1
 
-  font-0 = "Fira Code:size=10:weight=bold;2"
+  font-0 = "JetBrains Mono:size=10:weight=bold;2"
   font-1 = "Material Icons:size=14;5"
-  font-2 = "FiraCode Nerd Font Mono:size=17;5"
+  font-2 = "JetBrainsMono Nerd Font Mono:size=17;5"
 
   modules-left = exwm-workspace
   modules-right = cpu temperature battery updates date
@@ -478,8 +482,17 @@ This is the Polybar configuration. TODO: tangle to other directory and symlink i
 ** GnuPG
 This gpg-agent configuration permits using Emacs' minibuffer for gpg passphrases.
 
-#+begin_src conf :tangle emacs-pinentry/.gnupg/gpg-agent.conf
-  pinentry-program /usr/bin/pinentry-emacs
+Obs: here I use the power of [[https://orgmode.org/manual/Noweb-Reference-Syntax.html#Noweb-Reference-Syntax][Noweb references]] to set the pinentry-emacs path based on the current distro.
+
+#+NAME: pinentry-path
+#+begin_src emacs-lisp
+  (if lhgh/is-guix-system
+      "/home/luishgh/.guix-extra-profiles/emacs/emacs/bin/pinentry-emacs"
+    "/usr/bin/pinentry-emacs")
+#+end_src
+
+#+begin_src conf :tangle ~/.gnupg/gpg-agent.conf :noweb yes
+  pinentry-program <<pinentry-path()>>
   allow-emacs-pinentry
   allow-loopback-pinentry
 #+end_src

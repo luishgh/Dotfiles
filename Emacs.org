@@ -248,8 +248,7 @@ I personally use [[https://github.com/jwiegley/use-package][use-package]] becaus
 
 #+begin_src emacs-lisp
   (straight-use-package 'use-package) ;; Use straight.el for use-package expressions
-  ;; (setq straight-use-package-by-default (not lhgh/is-guix-system)) ;; Install a package if it isn't installed already on non-Guix systems
-  (setq straight-use-package-by-default t) ;; guix transition WIP
+  (setq straight-use-package-by-default (not lhgh/is-guix-system)) ;; Install a package if it isn't installed already on non-Guix systems
   ;; (setq use-package-verbose t) ;; Uncomment to bench mark use-package
 #+end_src
 
@@ -269,6 +268,11 @@ I personally use [[https://github.com/jwiegley/use-package][use-package]] becaus
             (expand-file-name "custom.el" server-socket-dir)
           (expand-file-name (format "emacs-custom-%s.el" (user-uid)) temporary-file-directory)))
   (load custom-file t)
+#+end_src
+
+*Guix Package*
+#+begin_src scheme
+  "emacs-no-littering"
 #+end_src
 
 * Update Load Path
@@ -1259,14 +1263,16 @@ Used primarily for Flutter.
 #+begin_src emacs-lisp
   (use-package dart-mode
     :mode "\\.dart\\'")
-
+  
   (use-package lsp-dart
     :straight t
     :hook (dart-mode . lsp-deferred)
     :custom
-    (lsp-dart-flutter-sdk-dir "~/.local/share/flutter")
-    (lsp-dart-sdk-dir "~/.local/share/flutter/bin/cache/dart-sdk"))
-
+    (lsp-dart-flutter-sdk-dir (if lhgh/is-guix-system
+                                  (string-trim (shell-command-to-string "find /nix/store -regex \".*flutter\-.*\-unwrapped$\""))
+                                "~/.local/share/flutter"))
+    (lsp-dart-sdk-dir (concat lsp-dart-flutter-sdk-dir "/bin/cache/dart-sdk")))
+  
   (use-package flutter
     :straight t
     :after dart-mode
