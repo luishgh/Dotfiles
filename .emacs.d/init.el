@@ -36,8 +36,7 @@
 					     "\nThis is the GNU system.  Welcome.\n")))
 
 (straight-use-package 'use-package) ;; Use straight.el for use-package expressions
-;; (setq straight-use-package-by-default (not lhgh/is-guix-system)) ;; Install a package if it isn't installed already on non-Guix systems
-(setq straight-use-package-by-default t) ;; guix transition WIP
+(setq straight-use-package-by-default (not lhgh/is-guix-system)) ;; Install a package if it isn't installed already on non-Guix systems
 ;; (setq use-package-verbose t) ;; Uncomment to bench mark use-package
 
 ;; Change the user-emacs-directory to keep unwanted things out of ~/.emacs.d
@@ -575,8 +574,10 @@
   :straight t
   :hook (dart-mode . lsp-deferred)
   :custom
-  (lsp-dart-flutter-sdk-dir "~/.local/share/flutter")
-  (lsp-dart-sdk-dir "~/.local/share/flutter/bin/cache/dart-sdk"))
+  (lsp-dart-flutter-sdk-dir (if lhgh/is-guix-system
+                                (string-trim (shell-command-to-string "find /nix/store -regex \".*flutter\-.*\-unwrapped$\""))
+                              "~/.local/share/flutter"))
+  (lsp-dart-sdk-dir (concat lsp-dart-flutter-sdk-dir "/bin/cache/dart-sdk")))
 
 (use-package flutter
   :straight t
