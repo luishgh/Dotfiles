@@ -152,8 +152,10 @@
   (marginalia-mode))
 
 (use-package corfu
-  :straight '(corfu :host github
-                    :repo "minad/corfu")
+  :straight (if lhgh/is-guix-system
+                nil
+              '(corfu :host github
+                      :repo "minad/corfu"))
   :demand t
   :bind (:map corfu-map
          ("M-j" . corfu-next)
@@ -281,7 +283,6 @@
   (setq evil-auto-indent nil))
 
 (use-package org
-  ;; :straight (:type built-in) ;; using the latest version doesn't work at the moment, will resolve it later (related to the built in version being loaded before this one)
   :hook (org-mode . lhgh/org-mode-setup)
   :commands (org-capture org-agenda) ;; Org is deferred, these commands are autoloaded so they can be used before opening an Org file
   :general
