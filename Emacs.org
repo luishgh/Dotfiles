@@ -1,7 +1,7 @@
 #+TITLE: My own GNU Emacs Config
 #+AUTHOR: Luis Henrique
 #+DESCRIPTION: My personal vanilla Emacs config.
-#+PROPERTY: header-args:emacs-lisp :tangle ./init.el :mkdirp yes
+#+PROPERTY: header-args:emacs-lisp :tangle .emacs.d/init.el :mkdirp yes
 #+PROPERTY: header-args:scheme :noweb-ref packages :noweb-sep ""
 
 * Table of Contents
@@ -1790,7 +1790,7 @@ Dial the GC threshold back down so that garbage collection happens more frequent
 * Emacs Profile
 *.config/guix/manifests/emacs.scm*
 
-#+begin_src scheme :tangle ~/.config/guix/manifests/emacs.scm :noweb yes :noweb-ref nil :mkdirp yes
+#+begin_src scheme :tangle .config/guix/manifests/emacs.scm :noweb yes :noweb-ref nil :mkdirp yes
   (specifications->manifest
    '("emacs"
      ;;"emacs-native-comp"

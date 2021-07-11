@@ -1,6 +1,6 @@
 #+TITLE: Emacs Desktop Environment
 #+AUTHOR: Luis Henrique
-#+PROPERTY: header-args:emacs-lisp :tangle ./lisp/lhgh-desktop.el :mkdirp yes
+#+PROPERTY: header-args:emacs-lisp :tangle .emacs.d/lisp/lhgh-desktop.el :mkdirp yes
 
 * Window Management
 
@@ -218,7 +218,7 @@ This file is used the display manager (GDM, LightDM, etc) to display EXWM as a d
   sudo ln -f ~/.emacs/exwm/EXWM.desktop /usr/share/xsessions/EXWM.desktop
 #+end_src
 
-#+begin_src shell :tangle ./exwm/EXWM.desktop :mkdirp yes
+#+begin_src shell :tangle .emacs.d/exwm/EXWM.desktop :mkdirp yes
   [Desktop Entry]
   Name=EXWM
   Comment=Emacs Window Manager
@@ -232,7 +232,7 @@ This file is used the display manager (GDM, LightDM, etc) to display EXWM as a d
 ** Launcher Script
 This launcher script is invoked by =EXWM.desktop= to start Emacs and load our desktop environment configuration.  We also start up some other helpful applications to configure the desktop experience.
 
-#+begin_src shell :tangle ./exwm/start-exwm.sh :shebang #!/bin/sh
+#+begin_src shell :tangle .emacs.d/exwm/start-exwm.sh :shebang #!/bin/sh
   # Source .profile for common environment vars
   . ~/.profile
   
@@ -258,7 +258,7 @@ As a fallback (for guix), symlink the =start-exwm.sh= file to =~/.xsession=.
 ** Keyboard Configuration
 The =Xmodmap= file will be used with the =xmodmap= program to remap CapsLock to Ctrl inside of our desktop environment:
 
-#+begin_src sh :tangle ./exwm/Xmodmap
+#+begin_src sh :tangle .emacs.d/exwm/Xmodmap
   clear lock
   clear control
   keycode 66 = Control_L
@@ -329,7 +329,7 @@ This elisp snippet sets the necessary hook for updating the workspace icon in Po
 
 This is the Polybar configuration. TODO: tangle to other directory and symlink instead.
 
-#+begin_src conf :tangle ~/.config/polybar/config :mkdirp yes
+#+begin_src conf :tangle .config/polybar/config :mkdirp yes
   ; Docs: https://github.com/polybar/polybar
   ;==========================================================
 
@@ -491,7 +491,7 @@ Obs: here I use the power of [[https://orgmode.org/manual/Noweb-Reference-Syntax
     "/usr/bin/pinentry-emacs")
 #+end_src
 
-#+begin_src conf :tangle ~/.gnupg/gpg-agent.conf :noweb yes
+#+begin_src conf :tangle .gnupg/gpg-agent.conf :noweb yes
   pinentry-program <<pinentry-path()>>
   allow-emacs-pinentry
   allow-loopback-pinentry
