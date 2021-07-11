@@ -551,10 +551,6 @@ Corfu can be considered the minimalistic =completion-in-region= counterpart of =
 
 #+begin_src emacs-lisp
   (use-package corfu
-    :straight (if lhgh/is-guix-system
-                  nil
-                '(corfu :host github
-                        :repo "minad/corfu"))
     :demand t
     :bind (:map corfu-map
            ("M-j" . corfu-next)

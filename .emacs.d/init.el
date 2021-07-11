@@ -152,14 +152,15 @@
   (marginalia-mode))
 
 (use-package corfu
-  :straight (if lhgh/is-guix-system
-                nil
-              '(corfu :host github
-                      :repo "minad/corfu"))
+  ;; :straight (if lhgh/is-guix-system
+  ;;               nil
+  ;;             '(corfu :host github
+  ;;                     :repo "minad/corfu"))
+  :straight nil
   :demand t
   :bind (:map corfu-map
-         ("M-j" . corfu-next)
-         ("M-k" . corfu-previous))
+	 ("M-j" . corfu-next)
+	 ("M-k" . corfu-previous))
   :custom
   (corfu-cycle t)
   :config

@@ -473,7 +473,7 @@ This is the Polybar configuration. TODO: tangle to other directory and symlink i
 
   [module/updates]
   type = custom/script
-  exec = ~/bin/update-notifier.sh
+  exec = ~/.bin/update-notifier.sh
   interval = 3600
   format-underline = ${colors.underline-1}
   format-padding = 1
@@ -491,7 +491,7 @@ Obs: here I use the power of [[https://orgmode.org/manual/Noweb-Reference-Syntax
     "/usr/bin/pinentry-emacs")
 #+end_src
 
-#+begin_src conf :tangle .gnupg/gpg-agent.conf :noweb yes
+#+begin_src conf :tangle .gnupg/gpg-agent.conf :noweb yes :mkdirp yes
   pinentry-program <<pinentry-path()>>
   allow-emacs-pinentry
   allow-loopback-pinentry
