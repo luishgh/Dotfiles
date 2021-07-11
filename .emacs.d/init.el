@@ -152,15 +152,10 @@
   (marginalia-mode))
 
 (use-package corfu
-  ;; :straight (if lhgh/is-guix-system
-  ;;               nil
-  ;;             '(corfu :host github
-  ;;                     :repo "minad/corfu"))
-  :straight nil
   :demand t
   :bind (:map corfu-map
-	 ("M-j" . corfu-next)
-	 ("M-k" . corfu-previous))
+         ("M-j" . corfu-next)
+         ("M-k" . corfu-previous))
   :custom
   (corfu-cycle t)
   :config
@@ -438,7 +433,7 @@
 ;; Automatically tangle our Emacs.org config file when we save it
 (defun lhgh/org-babel-tangle-config ()
   (when (string-equal (file-name-directory (buffer-file-name))
-                      (expand-file-name "~/.emacs.d/"))
+                      (expand-file-name "~/.dotfiles/"))
     ;; Dynamic scoping to the rescue
     (let ((org-confirm-babel-evaluate nil))
       (org-babel-tangle))))
