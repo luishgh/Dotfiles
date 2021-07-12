@@ -613,6 +613,15 @@
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
 
+(use-package tree-sitter
+  :straight t
+  :init
+  (global-tree-sitter-mode)
+  (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode))
+(use-package tree-sitter-langs
+  :after tree-sitter
+  :straight t)
+
 (lhgh/leader-maps
   "a" '(:ignore t :which-key "applications"))
 
@@ -811,6 +820,12 @@
   :commands langtool-check
   :config
   (setq langtool-language-tool-server-jar "~/.local/bin/LanguageTool-5.3/languagetool-server.jar"))
+
+(when lhgh/is-guix-system
+  ;; Load mu4e from mail profile
+  (let ((default-directory (expand-file-name "~/.guix-extra-profiles/mail/mail/share/emacs")))
+    (message default-directory)
+    (normal-top-level-add-subdirs-to-load-path)))
 
 (require 'lhgh-mail)
 

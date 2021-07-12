@@ -97,6 +97,7 @@
   - [[#productivity][Productivity]]
     - [[#syntax-checking-with-flycheck][Syntax checking with Flycheck]]
     - [[#raibow-delimeters][Raibow Delimeters]]
+  - [[#tree-sitter][Tree-Sitter]]
 - [[#applications][Applications]]
   - [[#binding-prefix][Binding Prefix]]
   - [[#vterm][Vterm]]
@@ -1369,6 +1370,19 @@ Check out Tailwind [[https://tailwindcss.com/][here]].
   "emacs-rainbow-delimiters"
 #+end_src
 
+** Tree-Sitter
+
+#+begin_src emacs-lisp
+  (use-package tree-sitter
+    :straight t
+    :init
+    (global-tree-sitter-mode)
+    (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode))
+  (use-package tree-sitter-langs
+    :after tree-sitter
+    :straight t)
+#+end_src
+
 * Applications
 
 ** Binding Prefix
@@ -1730,7 +1744,13 @@ A relatively full-featured gopher and gemini client for GNU Emacs.
 Load up the configuration present in [[file:Mail.org][Mail.org]]
 
 #+begin_src emacs-lisp
-  (require 'lhgh-mail) 
+  (when lhgh/is-guix-system
+    ;; Load mu4e from mail profile
+    (let ((default-directory (expand-file-name "~/.guix-extra-profiles/mail/mail/share/emacs")))
+      (message default-directory)
+      (normal-top-level-add-subdirs-to-load-path)))
+
+  (require 'lhgh-mail)
 #+end_src
 
 * Credential Management
