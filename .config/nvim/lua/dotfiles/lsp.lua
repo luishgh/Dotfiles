@@ -80,7 +80,7 @@ lspconfig.vimls.setup {on_attach = on_attach}
 
 lspconfig.intelephense.setup {on_attach = on_attach}
 
-lspconfig.pyls.setup {on_attach = on_attach}
+lspconfig.pyright.setup {on_attach = on_attach}
 
 -- snippet support
 local capabilities = vim.lsp.protocol.make_client_capabilities()
