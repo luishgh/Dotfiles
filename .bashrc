@@ -17,9 +17,6 @@ fi
 
 # Put your fun stuff here.
 
-# Dotfiles repo
-alias dotrepo="git --git-dir=$HOME/Documents/dotfiles --work-tree=$HOME"
-
 # Doom Emacs
 # export PATH=$HOME/.emacs.d/bin:$PATH
 
@@ -35,4 +32,12 @@ export PATH=$HOME/.yarn/bin:$PATH
 export PATH=$HOME/.cargo/bin:$PATH
 
 # Prompt
-export PS1="\[$(tput bold)\]\[$(tput setaf 1)\][\[$(tput setaf 3)\]\u\[$(tput setaf 2)\]@\[$(tput setaf 4)\]\h \[$(tput setaf 5)\]\W\[$(tput setaf 1)\]]\[$(tput setaf 7)\]\\$ \[$(tput sgr0)\]"
+if [ -n "$GUIX_ENVIRONMENT" ]
+then
+    # Guix env prompt
+    export PS1="\u@\h \w [guix-env]\$ "
+else
+    # Normal prompt
+    export PS1="\[$(tput bold)\]\[$(tput setaf 1)\][\[$(tput setaf 3)\]\u\[$(tput setaf 2)\]@\[$(tput setaf 4)\]\h \[$(tput setaf 5)\]\W\[$(tput setaf 1)\]]\[$(tput setaf 7)\]\\$ \[$(tput sgr0)\]"
+fi
+
