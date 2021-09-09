@@ -47,6 +47,7 @@ Unlike most distros, Guix pulls package definitions from Git repositories, so ad
                (srfi srfi-1)) ; for extended delete procedure
   (use-service-modules desktop networking
                        ssh xorg
+                       sound
                        virtualization nix)
   (use-package-modules package-management)
   
@@ -89,6 +90,11 @@ Unlike most distros, Guix pulls package definitions from Git repositories, so ad
                                         (udev-configuration (inherit config)
                                                             (rules (cons %backlight-udev-rule
                                                                          (udev-configuration-rules config)))))
+                     (pulseaudio-service-type config =>
+                                              (pulseaudio-configuration (inherit config)
+                                                                        (client-conf '((autospawn . no )))
+                                                                        (daemon-conf '((flat-volumes . no)
+                                                                                       (exit-idle-time . -1)))))
                      (delete gdm-service-type)))
   
 #+end_src
