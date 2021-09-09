@@ -82,6 +82,8 @@
 
 (use-package evil-collection
   :after evil
+  :init
+  (setq evil-collection-company-use-tng nil)
   :config
   (evil-collection-init))
 
@@ -254,9 +256,9 @@
 
 (use-package doom-modeline
   :init (doom-modeline-mode 1)
-  :config
-  ;; Whethe to display the buffer encoding.
-  (setq doom-modeline-buffer-encoding nil))
+  :custom
+  (doom-modeline-buffer-file-name-style 'truncate-with-project)
+  (doom-modeline-buffer-encoding nil))
 
 (use-package dashboard
   :defer lhgh/exwm-enabled ;; defer if in EXWM because it doesn't make sense in that context
@@ -270,6 +272,18 @@
                           (projects . 5)))
   (unless lhgh/exwm-enabled
     (dashboard-setup-startup-hook)))
+
+(use-package perspective
+  :demand t
+  :bind (("C-M-k" . persp-switch)
+         ("C-M-n" . persp-next)
+         ("C-x k" . persp-kill-buffer*))
+  :custom
+  (persp-initial-frame-name "Main")
+  :config
+  ;; Running `persp-mode' multiple times resets the perspective list...
+  (unless (equal persp-mode t)
+    (persp-mode)))
 
 (lhgh/leader-maps
   "o" '(:ignore t :which-key "org"))
@@ -470,7 +484,7 @@
     "gg" 'magit-status))
 
 (use-package magit-todos ;; shows TODOs (or similars) in files inside the repo 
-  :defer t)
+  :after magit)
 
 (use-package forge
   :init
@@ -484,6 +498,8 @@
   (setq lsp-keymap-prefix "C-c l")
   :bind (:map lsp-mode-map
          ("TAB" . completion-at-point))
+  :custom
+  (lsp-completion-provider :none)
   :config
   (lsp-enable-which-key-integration t))
 
@@ -521,14 +537,46 @@
     "due" '(dap-ui-expressions :which-key "expresions")
     "dh" '(dap-hydra :which-key "dap-hydra")
     "db" '(:ignore t :which-key "breakpoints")
-    "dbt" '(dab-breakpoint-toggle :which-key "toggle")
+    "dbt" '(dap-breakpoint-toggle :which-key "toggle")
     "dbl" '(dap-breakpoint-log-message :which-key "log-message")
     "dbc" '(dap-breakpoint-condition :which-key "condition")
     "ds" '(dap-switch-stack-frame :which-key "stack-frame") 
     "dq" '(dap-disconnect :which-key "disconnect")
     "de" '(dap-debug-edit-template :which-key "edit-template")))
 
+(use-package yasnippet
+  :hook ((progn-mode . yas-minor-mode)
+         (org-mode . yas-minor-mode))
+  :config
+  (add-to-list 'yas-snippet-dirs "~/.emacs.d/snippets")
+  (yas-reload-all))
+
 (add-hook 'emacs-lisp-mode-hook #'flycheck-mode)
+
+(use-package nix-mode
+  :mode "\\.nix\\'")
+
+(use-package haskell-mode
+  :hook ((haskell-mode . interactive-haskell-mode)
+         (haskell-mode . haskell-indent-mode)
+         (haskell-mode . haskell-doc-mode)
+         (haskell-mode . flycheck-mode))
+ :config
+ (flycheck-add-next-checker 'haskell-ghc '(info . haskell-hlint)))
+
+(use-package hindent
+  :after haskell-mode
+  :hook (haskell-mode . hindent-mode))
+
+(use-package dante
+  ;; :straight t
+  :disabled t
+  :after haskell-mode
+  :commands 'dante-mode
+  :hook ((haskell-mode . flycheck-mode)
+         (haskell-mode . dante-mode))
+  :config
+  (flycheck-add-next-checker 'haskell-dante '(info . haskell-hlint)))
 
 (use-package typescript-mode
   :mode "\\.ts\\'"
@@ -549,20 +597,30 @@
     "mrr" '(run-python :which-key "run repl")
     "mre" '(python-shell-send-region :which-key "send region to repl")
     "mrE" '(python-shell-send-buffer :which-key "send buffer to repl")
-    "mrf" '(python-shell-send-file :which-key "send function to repl")
-    "mrF" '(python-shell-send-defun :which-key "send file to repl"))
+    "mrf" '(python-shell-send-defun :which-key "send function to repl")
+    "mrF" '(python-shell-send-file :which-key "send file to repl"))
   :custom
   (python-shell-interpreter "python3")
   (dap-python-executable "python3")
   (dap-python-debugger 'debugpy)
-  :config
-  (require 'dap-python))
+  )
 
 (use-package lsp-pyright
   :straight t
   :hook (python-mode . (lambda ()
                           (require 'lsp-pyright)
-                          (lsp-deferred))))
+                          (lsp-deferred)
+                          (require 'dap-python))))
+
+(use-package pipenv
+  :straight t
+  :hook (python-mode . pipenv-mode))
+
+(use-package python-docstring
+  :hook (python-mode . python-docstring-mode)
+  :straight '(:type git
+              :host github
+              :repo "glyph/python-docstring-mode"))
 
 (use-package dart-mode
   :mode "\\.dart\\'")
@@ -612,6 +670,9 @@
 
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
+
+(use-package hl-todo
+  :defer t)
 
 (use-package tree-sitter
   :straight t
@@ -807,10 +868,9 @@
 
 (use-package elcord
   :straight t
+  :defer t
   :custom
-  (elcord-display-buffer-details nil)
-  :config
-  (elcord-mode))
+  (elcord-display-buffer-details nil))
 
 (use-package elpher
   :commands elpher)

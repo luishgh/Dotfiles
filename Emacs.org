@@ -47,15 +47,16 @@
   - [[#embark][Embark]]
   - [[#helpful][Helpful]]
   - [[#bindings][Bindings]]
-- [[#general-ui-settings][General UI Settings]]
+- [[#general-configuration][General Configuration]]
   - [[#removing-some-default-ui-elements][Removing some default ui elements]]
   - [[#fonts][Fonts]]
   - [[#column-and-line-numbers][Column and Line Numbers]]
   - [[#visual-lines][Visual lines]]
   - [[#icons][Icons]]
   - [[#colorscheme-theme][Colorscheme (theme)]]
-  - [[#mode-line-statusline-in-vimish][Mode-line (statusline in vimish)]]
+  - [[#modeline-statusline-in-vimish][Modeline (statusline in vimish)]]
   - [[#startup-screen][Startup Screen]]
+  - [[#workspaces][Workspaces]]
 - [[#org-mode][Org Mode]]
   - [[#binding-prefix][Binding Prefix]]
   - [[#org-configuration][Org Configuration]]
@@ -84,8 +85,11 @@
   - [[#language-server-protocol][Language Server Protocol]]
     - [[#add-localbin-to-exec-path-for-lsp-servers][Add .local/bin to exec path for lsp servers]]
   - [[#debug-adapter-protocol][Debug Adapter Protocol]]
+  - [[#snippets][Snippets]]
   - [[#languages][Languages]]
     - [[#emacs-lisp][Emacs Lisp]]
+    - [[#nix][Nix]]
+    - [[#haskell][Haskell]]
     - [[#typescript][TypeScript]]
     - [[#python][Python]]
     - [[#dart][Dart]]
@@ -96,7 +100,8 @@
       - [[#tailwind-css][Tailwind CSS]]
   - [[#productivity][Productivity]]
     - [[#syntax-checking-with-flycheck][Syntax checking with Flycheck]]
-    - [[#raibow-delimeters][Raibow Delimeters]]
+    - [[#raibow-delimiters][Raibow Delimiters]]
+    - [[#highlight-todos][Highlight TODOs]]
   - [[#tree-sitter][Tree-Sitter]]
 - [[#applications][Applications]]
   - [[#binding-prefix][Binding Prefix]]
@@ -347,6 +352,8 @@ This is the main section of configuration that makes Emacs usable for me. Before
 #+begin_src emacs-lisp
   (use-package evil-collection
     :after evil
+    :init
+    (setq evil-collection-company-use-tng nil)
     :config
     (evil-collection-init))
 #+end_src
@@ -625,7 +632,7 @@ Context action for completion minibuffers.
     "bb" '(consult-buffer :which-key "switch buffer"))
 #+end_src
 
-* General UI Settings
+* General Configuration
 
 ** Removing some default ui elements
 Do I really need to explain the following options? Just look at that default toolbar, *eww*.
@@ -730,15 +737,15 @@ I use [[https://github.com/hlissner/emacs-doom-themes#doom-emacs][doom-themes]] 
   "emacs-doom-themes"
 #+end_src
 
-** Mode-line (statusline in vimish)
+** Modeline (statusline in vimish)
 I use [[https://github.com/seagle0128/doom-modeline][doom-modeline]] because it is minimal and has many useful features. Also because it just looks good ¯\_(ツ)_/¯.
 
 #+begin_src emacs-lisp
   (use-package doom-modeline
     :init (doom-modeline-mode 1)
-    :config
-    ;; Whethe to display the buffer encoding.
-    (setq doom-modeline-buffer-encoding nil))
+    :custom
+    (doom-modeline-buffer-file-name-style 'truncate-with-project)
+    (doom-modeline-buffer-encoding nil))
 #+end_src
 
 *Guix Packages*
@@ -769,6 +776,28 @@ I use [[https://github.com/emacs-dashboard/emacs-dashboard][Emacs Dashboard]] as
 
 #+begin_src scheme
   "emacs-dashboard"
+#+end_src
+
+** Workspaces
+
+#+begin_src emacs-lisp
+  (use-package perspective
+    :demand t
+    :bind (("C-M-k" . persp-switch)
+           ("C-M-n" . persp-next)
+           ("C-x k" . persp-kill-buffer*))
+    :custom
+    (persp-initial-frame-name "Main")
+    :config
+    ;; Running `persp-mode' multiple times resets the perspective list...
+    (unless (equal persp-mode t)
+      (persp-mode)))
+#+end_src
+
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-perspective"
 #+end_src
 
 * Org Mode
@@ -1104,7 +1133,7 @@ This snippet adds a hook to =org-mode= buffers so that any Org file in the =.dot
       "gg" 'magit-status))
 
   (use-package magit-todos ;; shows TODOs (or similars) in files inside the repo 
-    :defer t)
+    :after magit)
 #+end_src
 
 *Guix Packages*
@@ -1142,9 +1171,11 @@ LSP is IMO one of the most important contributions Microsoft has ever done to th
     (setq lsp-keymap-prefix "C-c l")
     :bind (:map lsp-mode-map
            ("TAB" . completion-at-point))
+    :custom
+    (lsp-completion-provider :none)
     :config
     (lsp-enable-which-key-integration t))
-
+  
   (use-package lsp-ui
     :straight t
     :hook (lsp-mode . lsp-ui-mode)
@@ -1190,12 +1221,31 @@ The second best contribution from VSCode, debugger integration for any editor.
       "due" '(dap-ui-expressions :which-key "expresions")
       "dh" '(dap-hydra :which-key "dap-hydra")
       "db" '(:ignore t :which-key "breakpoints")
-      "dbt" '(dab-breakpoint-toggle :which-key "toggle")
+      "dbt" '(dap-breakpoint-toggle :which-key "toggle")
       "dbl" '(dap-breakpoint-log-message :which-key "log-message")
       "dbc" '(dap-breakpoint-condition :which-key "condition")
       "ds" '(dap-switch-stack-frame :which-key "stack-frame") 
       "dq" '(dap-disconnect :which-key "disconnect")
       "de" '(dap-debug-edit-template :which-key "edit-template")))
+#+end_src
+
+** Snippets
+For snippets, I use yasnippets.
+
+#+begin_src emacs-lisp
+  (use-package yasnippet
+    :hook ((progn-mode . yas-minor-mode)
+           (org-mode . yas-minor-mode))
+    :config
+    (add-to-list 'yas-snippet-dirs "~/.emacs.d/snippets") 
+    (yas-reload-all))
+#+end_src
+
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-yasnippet"
+  "emacs-yasnippet-snippets"
 #+end_src
 
 ** Languages
@@ -1204,6 +1254,55 @@ The second best contribution from VSCode, debugger integration for any editor.
 
 #+begin_src emacs-lisp
   (add-hook 'emacs-lisp-mode-hook #'flycheck-mode)
+#+end_src
+
+*** Nix
+
+#+begin_src emacs-lisp
+  (use-package nix-mode
+    :mode "\\.nix\\'")
+#+end_src
+
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-nix-mode"
+#+end_src
+
+*** Haskell
+
+#+begin_src emacs-lisp
+  (use-package haskell-mode
+    :hook ((haskell-mode . interactive-haskell-mode)
+           (haskell-mode . haskell-indent-mode)
+           (haskell-mode . haskell-doc-mode)
+           (haskell-mode . flycheck-mode))
+   :config
+   (flycheck-add-next-checker 'haskell-ghc '(info . haskell-hlint)))
+  
+  (use-package hindent
+    :after haskell-mode
+    :hook (haskell-mode . hindent-mode))
+  
+  (use-package dante
+    ;; :straight t
+    :disabled t
+    :after haskell-mode
+    :commands 'dante-mode
+    :hook ((haskell-mode . flycheck-mode)
+           (haskell-mode . dante-mode))
+    :config
+    (flycheck-add-next-checker 'haskell-dante '(info . haskell-hlint)))
+#+end_src
+
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-haskell-mode"
+  "emacs-dante" ;; outdated version
+  "ghc" ;; for haskell-interactive-mode
+  "ghc-hindent"
+  "hlint"
 #+end_src
 
 *** TypeScript
@@ -1238,21 +1337,30 @@ The second best contribution from VSCode, debugger integration for any editor.
       "mrr" '(run-python :which-key "run repl")
       "mre" '(python-shell-send-region :which-key "send region to repl")
       "mrE" '(python-shell-send-buffer :which-key "send buffer to repl")
-      "mrf" '(python-shell-send-file :which-key "send function to repl")
-      "mrF" '(python-shell-send-defun :which-key "send file to repl"))
+      "mrf" '(python-shell-send-defun :which-key "send function to repl")
+      "mrF" '(python-shell-send-file :which-key "send file to repl"))
     :custom
     (python-shell-interpreter "python3")
     (dap-python-executable "python3")
     (dap-python-debugger 'debugpy)
-    :config
-    (require 'dap-python))
-
+    )
+  
   (use-package lsp-pyright
     :straight t
     :hook (python-mode . (lambda ()
                             (require 'lsp-pyright)
-                            (lsp-deferred))))
-
+                            (lsp-deferred)
+                            (require 'dap-python))))
+  
+  (use-package pipenv
+    :straight t
+    :hook (python-mode . pipenv-mode))
+  
+  (use-package python-docstring
+    :hook (python-mode . python-docstring-mode)
+    :straight '(:type git
+                :host github
+                :repo "glyph/python-docstring-mode"))
 #+end_src
 
 *** Dart
@@ -1356,7 +1464,7 @@ Check out Tailwind [[https://tailwindcss.com/][here]].
   "emacs-flycheck"
 #+end_src
 
-*** Raibow Delimeters
+*** Raibow Delimiters
 [[https://github.com/Fanael/rainbow-delimiters][raibow-delimeters]] helps spotting matching delimiters, orienting yourself in the code and telling which statements are at a given depth.
 
 #+begin_src emacs-lisp
@@ -1368,6 +1476,19 @@ Check out Tailwind [[https://tailwindcss.com/][here]].
 
 #+begin_src scheme
   "emacs-rainbow-delimiters"
+#+end_src
+
+*** Highlight TODOs
+
+#+begin_src emacs-lisp
+  (use-package hl-todo
+    :defer t)
+#+end_src
+
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-hl-todo"
 #+end_src
 
 ** Tree-Sitter
@@ -1710,10 +1831,9 @@ ERC is a builtin IRC client for Emacs.
 #+begin_src emacs-lisp
   (use-package elcord
     :straight t
+    :defer t
     :custom
-    (elcord-display-buffer-details nil)
-    :config
-    (elcord-mode))
+    (elcord-display-buffer-details nil))
 #+end_src
 
 ** Elpher
