@@ -19,15 +19,55 @@
       "feh" nil  "feh --bg-scale ~/Documents/Wallpapers/lord-of-the-rings-wallpapers.jpg"))
   
   (defun lhgh/exwm-init-hook ()
-    ;; Make workspace 1 be the one where we land at startup
-    (exwm-workspace-switch-create 1)
-  
-    ;; Open eshell by default
-    (eshell)
+    (with-eval-after-load 'perspective
+      ;; Set transparency (TODO: fix this)
+      (set-frame-parameter (selected-frame) 'alpha '(90 . 90))
+      (add-to-list 'default-frame-alist '(alpha . (90 . 90)))
 
-    ;; Load eshell aliases
-    (eshell-read-aliases-list)
-  
+
+      ;; Set up perspective names on initial workspaces
+      (exwm-workspace-switch-create 0)
+      (persp-switch "VMs")
+      (persp-kill "Main")
+      (exwm-workspace-switch-create 1)
+      (persp-switch "Browsers")
+      (persp-kill "Main")
+      (exwm-workspace-switch-create 2)
+      (persp-switch "Chat")
+
+      ;; Launch Telega in workspace 2 if we've logged in before
+      (when (file-exists-p "~/.telega/db.sqlite")
+        (telega nil))
+
+      (persp-kill "Main")
+      (exwm-workspace-switch-create 3)
+      (persp-switch "Code")
+      (persp-kill "Main")
+      (exwm-workspace-switch-create 4)
+      (persp-switch "Config")
+      (persp-kill "Main")
+      (exwm-workspace-switch-create 5)
+      (persp-switch "Mail")
+      (persp-kill "Main")
+      (exwm-workspace-switch-create 6)
+      (persp-switch "School")
+      (persp-kill "Main")
+      (exwm-workspace-switch-create 7)
+      (persp-switch "Media")
+      (persp-kill "Main")
+      (exwm-workspace-switch-create 8)
+      (persp-switch "Game")
+      (persp-kill "Main")
+
+      ;; Make workspace 1 be the one where we land at startup
+      (exwm-workspace-switch-create 1)
+
+      ;; Open eshell by default
+      (eshell)
+
+      ;; Load eshell aliases
+      (eshell-read-aliases-list))
+
     ;; Show battery status in the mode line
     ;; (display-battery-mode 1)
   
@@ -36,11 +76,7 @@
     ;; (setq display-time-format "%a %b %d %H:%M") ;; look for the format-time-string function for the syntax of this variable
     ;; (display-time-mode 1)
     ;; ;; Also take a look at display-time-format and format-time-string
-  
-    ;; Set transparency (TODO: fix this)
-    (set-frame-parameter (selected-frame) 'alpha '(90 . 90))
-    (add-to-list 'default-frame-alist '(alpha . (90 . 90)))
-  
+
     ;; Start the Polybar panel
     (lhgh/start-panel "polybar")
   
@@ -68,8 +104,8 @@
     :if lhgh/exwm-enabled
     :config
     ;; Set the default number of workspaces
-    (setq exwm-workspace-number 2)
-  
+    (setq exwm-workspace-number 1)
+
     ;; remap Caps Lock to Ctrl
     (start-process-shell-command "xmodmap" nil "xmodmap ~/.emacs.d/exwm/Xmodmap")
   
@@ -156,7 +192,7 @@
   ;; TODO: setup audio to use pulsemixer
   (use-package desktop-environment
     :after exwm
-    :config 
+    :config
     (setq desktop-environment-update-exwm-global-keys :prefix)
     (define-key desktop-environment-mode-map (kbd "s-l") nil) ;; disables the s-l keybinding that comes by default
     (desktop-environment-mode)
@@ -239,8 +275,11 @@ This launcher script is invoked by =EXWM.desktop= to start Emacs and load our de
   xhost +SI:localuser:$USER
   
   # Run the screen compositor
-  compton &
-  
+  picom &
+
+  # Run user services
+  shepherd &
+
   # Enable screen locking on suspend
   # xss-lock -- slock &
   
@@ -305,7 +344,7 @@ This part of the configuration should work with any panel. Curently using Polyba
     (interactive "sName of the panel: ")
     (lhgh/kill-panel) ;; kill any present panel
     (pcase panel-name
-      ("polybar" 
+      ("polybar"
         (setq lhgh/panel-process (start-process-shell-command "polybar" nil "polybar panel")))))
 #+end_src
 
