@@ -13,7 +13,7 @@ Unlike most distros, Guix pulls package definitions from Git repositories, so ad
 
 #+begin_src scheme :tangle .config/guix/channels.scm
   ;; NOTE: This file is generated from System.org.  Please see commentary there.
-  
+
   (list (channel
           (name 'guix)
           (url "https://git.savannah.gnu.org/git/guix.git")
@@ -40,7 +40,7 @@ Unlike most distros, Guix pulls package definitions from Git repositories, so ad
 
 #+begin_src scheme
   ;; NOTE: This file is generated from System.org.  Please see commentary there.
-  
+
   (use-modules (gnu)
                (nongnu packages linux)
                (nongnu system linux-initrd)
@@ -50,7 +50,7 @@ Unlike most distros, Guix pulls package definitions from Git repositories, so ad
                        sound
                        virtualization nix)
   (use-package-modules package-management)
-  
+
 #+end_src
 
 ** Custom variables
@@ -65,7 +65,7 @@ Unlike most distros, Guix pulls package definitions from Git repositories, so ad
                     "\n"
                     "ACTION==\"add\", SUBSYSTEM==\"backlight\", "
                     "RUN+=\"/run/current-system/profile/bin/chmod g+w /sys/class/backlight/%k/brightness\"")))
-  
+
   ;; Switch DDX driver to intel
   (define %xorg-tear-free-config
     "Section \"Device\"
@@ -76,7 +76,7 @@ Unlike most distros, Guix pulls package definitions from Git repositories, so ad
     Option      \"AccelMethod\" \"sna\"
   EndSection
   ")
-  
+
   ;; overriding %desktop-services
   (define %my-desktop-services
     (modify-services %desktop-services
@@ -96,7 +96,7 @@ Unlike most distros, Guix pulls package definitions from Git repositories, so ad
                                                                         (daemon-conf '((flat-volumes . no)
                                                                                        (exit-idle-time . -1)))))
                      (delete gdm-service-type)))
-  
+
 #+end_src
 
 ** Operating System
@@ -146,26 +146,28 @@ Unlike most distros, Guix pulls package definitions from Git repositories, so ad
 *** System Services
 
 #+begin_src scheme
-    (services
-      (append
-       (list (service slim-service-type
-                      (slim-configuration
-                       (xorg-configuration
-                        (xorg-configuration
-                         ;; (drivers '("i915" "nouveau"))
-                         (extra-config (list %xorg-tear-free-config))
-                         (keyboard-layout keyboard-layout)))))
-                      
-             ;; VMs
-             (service virtlog-service-type)
-             (service libvirt-service-type
-                      (libvirt-configuration
-                       (unix-sock-group "libvirt")
-                       (tls-port "16555")))
-  
-             ;; Nix
-             (service nix-service-type))
-       %my-desktop-services))
+  (services
+    (append
+     (list (service slim-service-type
+                    (slim-configuration
+                     (xorg-configuration
+                      (xorg-configuration
+                       ;; (drivers '("i915" "nouveau"))
+                       (extra-config (list %xorg-tear-free-config))
+                       (keyboard-layout keyboard-layout)))))
+
+           ;; VMs
+           (service virtlog-service-type)
+           (service libvirt-service-type
+                    (libvirt-configuration
+                     (unix-sock-group "libvirt")
+                     (tls-port "16555")))
+
+           ;; Nix
+           (service nix-service-type
+                    (nix-configuration
+                     (extra-config '("experimental-features = nix-command flakes")))))
+     %my-desktop-services))
 #+end_src
 
 *** File Systems and Bootloader

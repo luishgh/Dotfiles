@@ -228,8 +228,8 @@ I started using [[https://guix.gnu.org/][GNU Guix]] recently along with my Gento
 #+begin_src emacs-lisp
   (straight-use-package 'f)
   (setq lhgh/is-guix-system (and (require 'f)
-				 (string-equal (f-read "/etc/issue")
-					       "\nThis is the GNU system.  Welcome.\n")))
+                                 (string-equal (f-read "/etc/issue")
+                                               "\nThis is the GNU system.  Welcome.\n")))
 #+end_src
 
 *Guix Packages*
@@ -507,7 +507,7 @@ A more minimal alternative to =Ivy=.  It uses the default completion system, whi
            ("<backspace>" . lhgh/minibuffer-backward-kill))
     :custom-face
     (vertico-current ((t (:background "#3a3f5a"))))
-    :init 
+    :init
     (vertico-mode))
 #+end_src
 
@@ -588,7 +588,7 @@ Corfu can be considered the minimalistic =completion-in-region= counterpart of =
 #+end_src
 
 ** Embark
-Context action for completion minibuffers.  
+Context action for completion minibuffers.
 
 #+begin_src emacs-lisp
   (use-package embark
@@ -941,7 +941,7 @@ Insert empty structural blocks, such as =#+begin_src= … =#+end_src=, by pressi
   (with-eval-after-load 'org
     (require 'org-tempo)
     (add-to-list 'org-modules 'org-tempo)
-  
+
     ;; Custom templates for specific languages
     (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
     (add-to-list 'org-structure-template-alist '("py" . "src python"))
@@ -1132,7 +1132,7 @@ This snippet adds a hook to =org-mode= buffers so that any Org file in the =.dot
       "g"  '(:ignore t :which-key "git")
       "gg" 'magit-status))
 
-  (use-package magit-todos ;; shows TODOs (or similars) in files inside the repo 
+  (use-package magit-todos ;; shows TODOs (or similars) in files inside the repo
     :after magit)
 #+end_src
 
@@ -1175,7 +1175,7 @@ LSP is IMO one of the most important contributions Microsoft has ever done to th
     (lsp-completion-provider :none)
     :config
     (lsp-enable-which-key-integration t))
-  
+
   (use-package lsp-ui
     :straight t
     :hook (lsp-mode . lsp-ui-mode)
@@ -1189,7 +1189,7 @@ LSP is IMO one of the most important contributions Microsoft has ever done to th
     (lsp-ui-doc-show-with-cursor nil))
 #+end_src
 
-*** Add .local/bin to exec path for lsp servers 
+*** Add .local/bin to exec path for lsp servers
 I like to install my language servers to =.local/bin=. This is good because it mantains the installation at a user level. =lsp-mode= finds lsp server executables by executing =executable-find=, which searches in the folders listed in =exec-path=.
 
 #+begin_src emacs-lisp
@@ -1224,7 +1224,7 @@ The second best contribution from VSCode, debugger integration for any editor.
       "dbt" '(dap-breakpoint-toggle :which-key "toggle")
       "dbl" '(dap-breakpoint-log-message :which-key "log-message")
       "dbc" '(dap-breakpoint-condition :which-key "condition")
-      "ds" '(dap-switch-stack-frame :which-key "stack-frame") 
+      "ds" '(dap-switch-stack-frame :which-key "stack-frame")
       "dq" '(dap-disconnect :which-key "disconnect")
       "de" '(dap-debug-edit-template :which-key "edit-template")))
 #+end_src
@@ -1237,7 +1237,7 @@ For snippets, I use yasnippets.
     :hook ((progn-mode . yas-minor-mode)
            (org-mode . yas-minor-mode))
     :config
-    (add-to-list 'yas-snippet-dirs "~/.emacs.d/snippets") 
+    (add-to-list 'yas-snippet-dirs "~/.emacs.d/snippets")
     (yas-reload-all))
 #+end_src
 
@@ -1279,11 +1279,11 @@ For snippets, I use yasnippets.
            (haskell-mode . flycheck-mode))
    :config
    (flycheck-add-next-checker 'haskell-ghc '(info . haskell-hlint)))
-  
+
   (use-package hindent
     :after haskell-mode
     :hook (haskell-mode . hindent-mode))
-  
+
   (use-package dante
     ;; :straight t
     :disabled t
@@ -1344,18 +1344,18 @@ For snippets, I use yasnippets.
     (dap-python-executable "python3")
     (dap-python-debugger 'debugpy)
     )
-  
+
   (use-package lsp-pyright
     :straight t
     :hook (python-mode . (lambda ()
                             (require 'lsp-pyright)
                             (lsp-deferred)
                             (require 'dap-python))))
-  
+
   (use-package pipenv
     :straight t
     :hook (python-mode . pipenv-mode))
-  
+
   (use-package python-docstring
     :hook (python-mode . python-docstring-mode)
     :straight '(:type git
@@ -1369,7 +1369,7 @@ Used primarily for Flutter.
 #+begin_src emacs-lisp
   (use-package dart-mode
     :mode "\\.dart\\'")
-  
+
   (use-package lsp-dart
     :straight t
     :hook (dart-mode . lsp-deferred)
@@ -1378,7 +1378,7 @@ Used primarily for Flutter.
                                   (string-trim (shell-command-to-string "find /nix/store -regex \".*flutter\-.*\-unwrapped$\""))
                                 "~/.local/share/flutter"))
     (lsp-dart-sdk-dir (concat lsp-dart-flutter-sdk-dir "/bin/cache/dart-sdk")))
-  
+
   (use-package flutter
     :straight t
     :after dart-mode
@@ -1538,48 +1538,48 @@ A native code alternative to =term= and =ansi-term=.
   (defun lhgh/configure-eshell ()
     (require 'evil-collection-eshell)
     (evil-collection-eshell-setup)
-  
+
     ;; Save command history when commands are entered
     (add-hook 'eshell-pre-command-hook 'eshell-save-some-history)
-  
+
     ;; Truncate buffer for performance
     (add-to-list 'eshell-output-filter-functions 'eshell-truncate-buffer)
-  
+
     (evil-define-key '(normal emacs insert visual) eshell-mode-map (kbd "C-r") 'consult-history)
     (evil-define-key '(normal emacs insert visual) eshell-mode-map (kbd "<home>") 'eshell-bol)
-  
+
     (setq eshell-history-size 10000
           eshell-buffer-maximum-lines 10000
           eshell-hist-ignore-dups t
           eshell-scroll-to-bottom-on-input t
           eshell-aliases-file (expand-file-name "~/.emacs.d/eshell/alias")))
-  
+
   (use-package eshell-git-prompt
     :straight t
     :after eshell)
-  
+
   (use-package eshell-syntax-highlighting
     :after esh-mode
     :config
     ;; Enable in all Eshell buffers.
     (eshell-syntax-highlighting-global-mode +1))
-  
-  
+
+
   (use-package eshell
     :hook (eshell-first-time-mode . lhgh/configure-eshell)
     :config
     (lhgh/leader-maps
       "ae" '(eshell :which-key "eshell"))
-  
+
     (with-eval-after-load 'em-term
       (setq eshell-destroy-buffer-when-process-dies t)
       (dolist (program '( "nmtui"
                           "nvim"))
         (add-to-list 'eshell-visual-commands program)))
-  
+
     (eshell-git-prompt-use-theme 'powerline))
 #+end_src
- 
+
 *Guix Packages*
 
 #+begin_src scheme

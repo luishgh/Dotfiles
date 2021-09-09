@@ -11,13 +11,13 @@
     "Run command in background (async). Useful for startup programs like nm-applet"
     (let ((command-parts (split-string command "[ ]+")))
       (apply #'call-process `(,(car command-parts) nil 0 nil ,@(cdr command-parts)))))
-  
+
   (defun lhgh/set-wallpaper ()
     (interactive)
     ;; NOTE: You will need to update this to a valid background path!
     (start-process-shell-command
       "feh" nil  "feh --bg-scale ~/Documents/Wallpapers/lord-of-the-rings-wallpapers.jpg"))
-  
+
   (defun lhgh/exwm-init-hook ()
     (with-eval-after-load 'perspective
       ;; Set transparency (TODO: fix this)
@@ -70,7 +70,7 @@
 
     ;; Show battery status in the mode line
     ;; (display-battery-mode 1)
-  
+
     ;; Show the time and date in modeline
     ;; (setq display-time-day-and-date t)
     ;; (setq display-time-format "%a %b %d %H:%M") ;; look for the format-time-string function for the syntax of this variable
@@ -79,18 +79,18 @@
 
     ;; Start the Polybar panel
     (lhgh/start-panel "polybar")
-  
+
     ;; Launch apps that will run in the background
     (lhgh/run-in-background "nm-applet"))
-  
+
   (defun lhgh/exwm-update-class ()
     (exwm-workspace-rename-buffer exwm-class-name))
-  
+
   (defun lhgh/exwm-update-title ()
     (pcase exwm-class-name
       ("qutebrowser" (exwm-workspace-rename-buffer (format "Qutebrowser: %s" exwm-title)))
       ("Firefox" (exwm-workspace-rename-buffer (format "Firefox: %s" exwm-title)))))
-  
+
   (defun lhgh/configure-window-by-class ()
     (interactive)
     (pcase exwm-class-name
@@ -99,7 +99,7 @@
       ("TelegramDesktop" (exwm-workspace-move-window 2))
       ("vimiv" (exwm-workspace-move-window 6))
       ("mpv" (exwm-layout-set-fullscreen))))
-  
+
   (use-package exwm
     :if lhgh/exwm-enabled
     :config
@@ -108,26 +108,26 @@
 
     ;; remap Caps Lock to Ctrl
     (start-process-shell-command "xmodmap" nil "xmodmap ~/.emacs.d/exwm/Xmodmap")
-  
+
     ;; When window "class" updates, use it to set the buffer name
     (add-hook 'exwm-update-class-hook #'lhgh/exwm-update-class)
-  
+
     ;; When window title updates, use it to set the buffer name
     (add-hook 'exwm-update-title-hook #'lhgh/exwm-update-title)
-  
+
     ;; Configure windows as they're created
     (add-hook 'exwm-manage-finish-hook #'lhgh/configure-window-by-class)
-  
+
     ;; When EXWM starts up, do some extra confifuration
     (add-hook 'exwm-init-hook #'lhgh/exwm-init-hook)
-  
+
     (lhgh/set-wallpaper)
-  
+
     ;; Load the system tray before exwm-init
     ;; (require 'exwm-systemtray)
     ;; (setq exwm-systemtray-height 22)
     ;; (exwm-systemtray-enable)
-  
+
     ;; These keys should always pass through to Emacs
     (setq exwm-input-prefix-keys
           '(?\C-x
@@ -139,10 +139,10 @@
             ?\M-&
             ?\M-:
             ?\C-\ ))  ;; Ctrl+Space
-  
+
     ;; Ctrl+Q will enable the next key to be sent directly
     (define-key exwm-mode-map [?\C-q] 'exwm-input-send-next-key)
-  
+
     ;; Set up global key bindings.  These always work, no matter the input state!
     ;; Keep in mind that changing this list after EXWM initializes has no effect.
     (setq exwm-input-global-keys
@@ -151,30 +151,30 @@
             ([?\s-r] . exwm-reset)
             ;; Toggle char-mode
             ([?\s-c] . exwm-input-release-keyboard)
-  
+
             ;; Move between windows
             ([?\s-h] . windmove-left)
             ([?\s-l] . windmove-right)
             ([?\s-k] . windmove-up)
             ([?\s-j] . windmove-down)
-  
+
             ;; Move windows
             ([?\s-H] . windmove-swap-states-left)
             ([?\s-L] . windmove-swap-states-right)
             ([?\s-K] . windmove-swap-states-up)
             ([?\s-J] . windmove-swap-states-down)
-  
+
             ;; Kill buffers
             ([?\s-C] . (lambda () (interactive) (kill-buffer)))
-  
+
             ;; Launch applications via shell command
             ([?\s-&] . (lambda (command)
                          (interactive (list (read-shell-command "$ ")))
                          (start-process-shell-command command nil command)))
-  
+
             ;; Switch workspace
             ([?\s-w] . exwm-workspace-switch)
-  
+
             ;; 's-N': Switch to certain workspace with Super (Win) plus a number key (0 - 9)
             ,@(mapcar (lambda (i)
                         `(,(kbd (format "s-%d" i)) .
@@ -182,7 +182,7 @@
                             (interactive)
                             (exwm-workspace-switch-create ,i))))
                       (number-sequence 0 9))))
-  
+
     (exwm-enable))
 #+end_src
 
@@ -202,9 +202,9 @@
     (desktop-environment-brightness-normal-increment "10%+")
     (desktop-environment-brightness-normal-decrement "10%-")
     (desktop-environment-screenshot-command "flameshot gui -d 200"))
-  
+
   (exwm-input-set-key (kbd "<S-s-return>") 'vterm)
-  
+
   (with-eval-after-load 'hydra
     (defhydra hydra-exwm-resize (:timeout 4)
       "Resize Window (Shift is bigger steps)"
@@ -216,20 +216,20 @@
       ("H" (lambda () (interactive) (exwm-layout-shrink-window-horizontally 30)) "< 30")
       ("l" (lambda () (interactive) (exwm-layout-enlarge-window-horizontally 10)) "> 10")
       ("L" (lambda () (interactive) (exwm-layout-enlarge-window-horizontally 30)) "> 30"))
-  
+
     (exwm-input-set-key (kbd "s-R") 'hydra-exwm-resize/body))
-  
+
   (defun lhgh/set-keyboard-layout (layout)
     "Set X keyboard layout to given layout"
     (start-process-shell-command "setting-keyboard-layout" nil (concat "setxkbmap " layout " && xmodmap ~/.emacs.d/exwm/Xmodmap")))
-  
+
   (defun lhgh/toggle-keyboard-layout ()
     "Toggle keyboard layout between us and pt-br (abnt2)"
     (interactive)
     (pcase (string-trim (shell-command-to-string "setxkbmap -query | awk '/layout/ {print $2}'"))
       ("us" (lhgh/set-keyboard-layout "br"))
       ("br" (lhgh/set-keyboard-layout "us"))))
-  
+
   (exwm-input-set-key (kbd "s-SPC") 'lhgh/toggle-keyboard-layout)
 #+end_src
 
@@ -271,9 +271,9 @@ This launcher script is invoked by =EXWM.desktop= to start Emacs and load our de
 #+begin_src shell :tangle .emacs.d/exwm/start-exwm.sh :shebang #!/bin/sh
   # Source .profile for common environment vars
   . ~/.profile
-  
+
   xhost +SI:localuser:$USER
-  
+
   # Run the screen compositor
   picom &
 
@@ -282,7 +282,7 @@ This launcher script is invoked by =EXWM.desktop= to start Emacs and load our de
 
   # Enable screen locking on suspend
   # xss-lock -- slock &
-  
+
   # Fire it up
   exec dbus-launch --exit-with-session emacs -mm --debug-init --use-exwm
 #+end_src

@@ -32,8 +32,8 @@
 
 (straight-use-package 'f)
 (setq lhgh/is-guix-system (and (require 'f)
-			       (string-equal (f-read "/etc/issue")
-					     "\nThis is the GNU system.  Welcome.\n")))
+                               (string-equal (f-read "/etc/issue")
+                                             "\nThis is the GNU system.  Welcome.\n")))
 
 (straight-use-package 'use-package) ;; Use straight.el for use-package expressions
 (setq straight-use-package-by-default (not lhgh/is-guix-system)) ;; Install a package if it isn't installed already on non-Guix systems
@@ -135,7 +135,7 @@
          ("<backspace>" . lhgh/minibuffer-backward-kill))
   :custom-face
   (vertico-current ((t (:background "#3a3f5a"))))
-  :init 
+  :init
   (vertico-mode))
 
 (defun lhgh/get-project-root ()
@@ -483,7 +483,7 @@
     "g"  '(:ignore t :which-key "git")
     "gg" 'magit-status))
 
-(use-package magit-todos ;; shows TODOs (or similars) in files inside the repo 
+(use-package magit-todos ;; shows TODOs (or similars) in files inside the repo
   :after magit)
 
 (use-package forge
@@ -540,7 +540,7 @@
     "dbt" '(dap-breakpoint-toggle :which-key "toggle")
     "dbl" '(dap-breakpoint-log-message :which-key "log-message")
     "dbc" '(dap-breakpoint-condition :which-key "condition")
-    "ds" '(dap-switch-stack-frame :which-key "stack-frame") 
+    "ds" '(dap-switch-stack-frame :which-key "stack-frame")
     "dq" '(dap-disconnect :which-key "disconnect")
     "de" '(dap-debug-edit-template :which-key "edit-template")))
 

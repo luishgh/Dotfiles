@@ -1,4 +1,4 @@
-#+TITLE: Managing Mail inside Emacs 
+#+TITLE: Managing Mail inside Emacs
 #+AUTHOR: Luis Henrique
 #+PROPERTY: header-args:emacs-lisp :tangle .emacs.d/lisp/lhgh-mail.el :mkdirp yes
 
@@ -78,13 +78,13 @@ If you wonder how you can expose Gmail categories - like =Updates= or =Promotion
     ;; Function to use for sending mail
     (setq message-send-mail-function 'smtpmail-send-it)
 
-    ;; Make sure plain text mails flow correclty for recipients
+    ;; Make sure plain text mails flow correctly for recipients
     (setq mu4e-compose-format-flowed t)
 
     ;; Kill mail buffer when mail is sent
     (setq message-kill-buffer-on-exit t)
 
-    ;; Run mu4e in the background to sync mail periodically 
+    ;; Run mu4e in the background to sync mail periodically
     (mu4e t))
 #+end_src
 
@@ -98,15 +98,15 @@ If you wonder how you can expose Gmail categories - like =Updates= or =Promotion
   User luishenriquegh2701@gmail.com
   PassCmd "pass email/mbsync-gmail"
   CertificateFile /etc/ssl/certs/ca-certificates.crt
-  
+
   IMAPStore gmail-remote
   Account gmail
-  
+
   MaildirStore gmail-local
   Subfolders Verbatim
   Path ~/Mail/
   Inbox ~/Mail/Inbox
-  
+
   Channel gmail
   Master :gmail-remote:
   Slave :gmail-local:
