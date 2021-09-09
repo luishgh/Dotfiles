@@ -81,6 +81,9 @@ If you wonder how you can expose Gmail categories - like =Updates= or =Promotion
     ;; Make sure plain text mails flow correclty for recipients
     (setq mu4e-compose-format-flowed t)
 
+    ;; Kill mail buffer when mail is sent
+    (setq message-kill-buffer-on-exit t)
+
     ;; Run mu4e in the background to sync mail periodically 
     (mu4e t))
 #+end_src
