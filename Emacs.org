@@ -653,12 +653,20 @@ Do I really need to explain the following options? Just look at that default too
 ** Fonts
 
 #+begin_src emacs-lisp
-  (set-face-attribute 'default nil
-    :font "JetBrains Mono 11"
-    :weight 'medium)
-  (set-face-attribute 'variable-pitch nil
-    :font "Iosevka Aile 15"
-    :weight 'medium)
+  (defun lhgh/set-font-faces ()
+    (set-face-attribute 'default nil
+      :font "JetBrains Mono 11"
+      :weight 'medium)
+    (set-face-attribute 'variable-pitch nil
+      :font "Iosevka Aile 15"
+      :weight 'medium))
+
+  (if (daemonp)
+    (add-hook 'after-make-frame-functions
+              (lambda (frame)
+               (with-selected-frame frame
+                (lhgh/set-font-faces))))
+    (lhgh/set-font-faces))
 #+end_src
 
 ** Column and Line Numbers
@@ -674,6 +682,7 @@ Disabling line numbers for some modes where it doesn't help.
 
 #+begin_src emacs-lisp
   (dolist (mode '(term-mode-hook
+                  compilation-mode
                   vterm-mode-hook
                   dired-mode-hook
                   calendar-mode-hook

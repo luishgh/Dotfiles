@@ -207,18 +207,27 @@
 
 (setq ring-bell-function 'ignore)
 
-(set-face-attribute 'default nil
-  :font "JetBrains Mono 11"
-  :weight 'medium)
-(set-face-attribute 'variable-pitch nil
-  :font "Iosevka Aile 15"
-  :weight 'medium)
+(defun lhgh/set-font-faces ()
+  (set-face-attribute 'default nil
+    :font "JetBrains Mono 11"
+    :weight 'medium)
+  (set-face-attribute 'variable-pitch nil
+    :font "Iosevka Aile 15"
+    :weight 'medium))
+
+(if (daemonp)
+  (add-hook 'after-make-frame-functions
+            (lambda (frame)
+             (with-selected-frame frame
+              (lhgh/set-font-faces))))
+  (lhgh/set-font-faces))
 
 (column-number-mode) ;; Shows column number in mode-line
 (global-display-line-numbers-mode t) ;; Shows line numbers
 (setq display-line-numbers-type 'relative) ;; Relative line numbers
 
 (dolist (mode '(term-mode-hook
+                compilation-mode
                 vterm-mode-hook
                 dired-mode-hook
                 calendar-mode-hook
