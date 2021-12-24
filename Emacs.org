@@ -52,11 +52,13 @@
   - [[#fonts][Fonts]]
   - [[#column-and-line-numbers][Column and Line Numbers]]
   - [[#visual-lines][Visual lines]]
+  - [[#tabs-and-indentation][Tabs and indentation]]
   - [[#icons][Icons]]
   - [[#colorscheme-theme][Colorscheme (theme)]]
   - [[#modeline-statusline-in-vimish][Modeline (statusline in vimish)]]
   - [[#startup-screen][Startup Screen]]
   - [[#workspaces][Workspaces]]
+  - [[#use-better-versions-of-unix-utilities][Use better versions of UNIX utilities]]
 - [[#org-mode][Org Mode]]
   - [[#binding-prefix][Binding Prefix]]
   - [[#org-configuration][Org Configuration]]
@@ -87,7 +89,9 @@
   - [[#debug-adapter-protocol][Debug Adapter Protocol]]
   - [[#snippets][Snippets]]
   - [[#languages][Languages]]
+    - [[#meta-lisp][Meta Lisp]]
     - [[#emacs-lisp][Emacs Lisp]]
+    - [[#scheme-lisp][Scheme Lisp]]
     - [[#nix][Nix]]
     - [[#haskell][Haskell]]
     - [[#typescript][TypeScript]]
@@ -98,6 +102,7 @@
       - [[#markdown-toc][markdown-toc]]
     - [[#html][HTML]]
       - [[#tailwind-css][Tailwind CSS]]
+    - [[#shell-scripting][Shell scripting]]
   - [[#productivity][Productivity]]
     - [[#syntax-checking-with-flycheck][Syntax checking with Flycheck]]
     - [[#raibow-delimiters][Raibow Delimiters]]
@@ -125,14 +130,16 @@
   - [[#elpher][Elpher]]
   - [[#languagetool][LanguageTool]]
   - [[#mail-management][Mail management]]
+  - [[#pomodoro-timer][Pomodoro timer]]
 - [[#credential-management][Credential Management]]
 - [[#utility-functions][Utility Functions]]
 - [[#runtime-performance][Runtime Performance]]
 - [[#emacs-profile][Emacs Profile]]
+- [[#local-variables][Local Variables]]
 :END:
 
 * Setting Up a Literate Config
-Having this in my =init.el= permits using =config.org= to configure Emacs.
+Having this in your =init.el= permits using =config.org= to configure Emacs.
 
 #+begin_example
 (org-babel-load-file
@@ -141,10 +148,10 @@ Having this in my =init.el= permits using =config.org= to configure Emacs.
     user-emacs-directory))
 #+end_example
 
-Other possibility is having this in the top of your org config file:
+Other possibility is having this in the top of your org config file (I'm using this):
 
 #+begin_example
-#+PROPERTY: header-args:emacs-lisp :tangle ./init.el :mkdirp yes
+#+PROPERTY: header-args:emacs-lisp :tangle ~/.emacs.d/init.el :mkdirp yes
 #+end_example
 
 Another important thing to remember is that for this to work, your elisp snippets need to be marked as =emacs-lisp=. Although =elisp= works as well for everything else, specifically for =org-babel-load-file= is doesn't. Not really sure why :/.
@@ -326,15 +333,13 @@ This is the main section of configuration that makes Emacs usable for me. Before
     (setq evil-want-integration t)
     (setq evil-want-keybinding nil) ;; required by evil-collection
     (setq evil-want-C-u-scroll t) ;; an optional part of `evil-want-integration', I personally like it
+    (setq evil-want-Y-yank-to-eol t) ;; Y => y$ (like in Neovim)
+    (setq evil-respect-visual-line-mode t) ;; move by visual lines
     (setq evil-vsplit-window-right t)
     (setq evil-split-window-below t)
     :config
     (evil-mode 1)
-    (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state) ;; C-g is trully equal to ESC
-
-    ;; j and k move through visual lines
-    (evil-global-set-key 'motion "j" 'evil-next-visual-line)
-    (evil-global-set-key 'motion "k" 'evil-previous-visual-line))
+    (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)) ;; C-g is trully equal to ESC
 #+end_src
 
 *Guix Packages*
@@ -555,14 +560,15 @@ Marginalia provides helpful annotations for various types of minibuffer completi
 #+end_src
 
 ** Corfu
-Corfu can be considered the minimalistic =completion-in-region= counterpart of =Vertico=. Similar to it, because it uses the same plugggable backend format that the built int =completion-at-point= uses, it has full compatibility with a lot of Emacs packages, like =lsp-mode=.
+Corfu can be considered the minimalistic =completion-at-point= counterpart of =Vertico=. Similar to it. Because it uses the same plugggable backend format that the built in =completion-at-point= uses, it has full compatibility with a lot of Emacs packages, like =lsp-mode=.
 
 #+begin_src emacs-lisp
   (use-package corfu
     :demand t
     :bind (:map corfu-map
            ("M-j" . corfu-next)
-           ("M-k" . corfu-previous))
+           ("M-k" . corfu-previous)
+           ("M-g" . corfu-quit))
     :custom
     (corfu-cycle t)
     :config
@@ -687,6 +693,7 @@ Disabling line numbers for some modes where it doesn't help.
                   dired-mode-hook
                   calendar-mode-hook
                   shell-mode-hook
+                  dashboard-mode-hook
                   eshell-mode-hook))
     (add-hook mode (lambda () (display-line-numbers-mode 0))))
 #+end_src
@@ -698,6 +705,14 @@ Word wrapping is disabled by default. I like it to be on in certain modes, like 
   (dolist (mode '(org-mode-hook
                   markdown-mode-hook))
     (add-hook mode (lambda () (visual-line-mode t))))
+#+end_src
+
+** Tabs and indentation
+
+#+begin_src emacs-lisp
+  (setq-default tab-always-indent 'complete)
+  (setq-default tab-width 4)
+  (setq-default indent-tabs-mode nil)
 #+end_src
 
 ** Icons
@@ -809,6 +824,20 @@ I use [[https://github.com/emacs-dashboard/emacs-dashboard][Emacs Dashboard]] as
   "emacs-perspective"
 #+end_src
 
+** Use better versions of UNIX utilities
+
+*** COMMENT Grep
+
+#+begin_src emacs-lisp
+  ;; TODO try to fix this https://www.reddit.com/r/emacs/comments/gyusav/comment/ftdl00c/?utm_source=share&utm_medium=web2x&context=3
+  (grep-apply-setting
+   'grep-find-command
+   '("find . -type f -exec rg --no-heading --color always -0 -H -e '' \\{\\} +" . 63))
+
+  (grep-apply-setting
+   'grep-template "rg --no-heading -H -uu -g <F> <R> <D>")
+#+end_src
+
 * Org Mode
 [[https://orgmode.org/][Org Mode]] is for keeping notes, maintaining to-do lists, planning projects, authoring documents, computational notebooks, literate programming and more — in a fast and effective plain text system.
 
@@ -830,6 +859,9 @@ I use [[https://github.com/emacs-dashboard/emacs-dashboard][Emacs Dashboard]] as
     :hook (org-mode . lhgh/org-mode-setup)
     :commands (org-capture org-agenda) ;; Org is deferred, these commands are autoloaded so they can be used before opening an Org file
     :general
+    (org-mode-map
+     :states 'normal
+     "<tab>" 'org-cycle)
     (lhgh/leader-maps org-mode-map
       "mh" '(consult-org-heading :which-key "find-header")
       "mtc" '(org-toggle-checkbox :which-key "checkbox"))
@@ -966,11 +998,18 @@ For academic documents, I'm starting to use Org mode for the general content and
     (add-to-list 'org-latex-classes
                  '("homework"
                    "\\documentclass[11pt]{article}
-[DEFAULT-PACKAGES]
+[NO-DEFAULT-PACKAGES]
+[PACKAGES]
 \\usepackage[]{babel}
 \\pagenumbering{gobble}
 \\usepackage[margin=0.5in]{geometry}
-\\usepackage{enumitem}"
+\\usepackage{enumitem}
+\\usepackage{hyperref}
+
+[EXTRA]
+
+
+"
                    ("\\section{%s}" . "\\section*{%s}")
                    ("\\subsection{%s}" . "\\subsection*{%s}")
                    ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
@@ -990,7 +1029,7 @@ ToC (Table of Contents) sections are nice in documentation and literate configs.
 
 #+begin_src emacs-lisp
   (use-package org-make-toc
-    :hook (org-mode . org-make-toc-mode))
+    :defer)
 #+end_src
 
 *Guix Packages*
@@ -1120,7 +1159,7 @@ This snippet adds a hook to =org-mode= buffers so that any Org file in the =.dot
 #+end_src
 
 *** counsel-projectile
-[[https://github.com/ericdanan/counsel-projectile][counsel-projectile]] provides further ivy integration into projectile.
+[[https://github.com/ericdanan/counsel-projectile][counsel-projectile]] provides further ivy integration into projectile. (not using at the moment, see [[*Old Setup (Ivy)][here]])
 
 #+begin_src emacs-lisp :tangle no
   (use-package counsel-projectile
@@ -1158,8 +1197,6 @@ NOTE: Remember to configure GitHub and/or GitLab tokens before using this packag
 
 #+begin_src emacs-lisp
   (use-package forge
-    :init
-    (setq auth-sources '("~/.authinfo"))
     :after magit)
 #+end_src
 
@@ -1243,10 +1280,17 @@ For snippets, I use yasnippets.
 
 #+begin_src emacs-lisp
   (use-package yasnippet
-    :hook ((progn-mode . yas-minor-mode)
+    :hook ((prog-mode . yas-minor-mode)
            (org-mode . yas-minor-mode))
     :config
     (add-to-list 'yas-snippet-dirs "~/.emacs.d/snippets")
+
+    ;; Remove yas-expand from tab
+    (define-key yas-minor-mode-map (kbd "<tab>") nil)
+    (define-key yas-minor-mode-map (kbd "TAB") nil)
+
+    ;; Bind yas-expand to C-tab
+    (define-key yas-minor-mode-map (kbd "C-<tab>") #'yas-expand)
     (yas-reload-all))
 #+end_src
 
@@ -1259,10 +1303,58 @@ For snippets, I use yasnippets.
 
 ** Languages
 
+*** Meta Lisp
+#+begin_src emacs-lisp
+  (use-package lispy
+    :disabled
+    :hook ((emacs-lisp-mode . lispy-mode)
+           (scheme-mode . lispy-mode)))
+
+  (use-package lispyville
+    :disabled
+    :hook (lispy-mode . lispyville-mode)
+    :config
+    (lispyville-set-key-theme
+     '(operators c-w additional prettify additional-movement)))
+
+  (use-package symex
+    :hook ((emacs-lisp-mode . symex-mode)
+           (scheme-mode . symex-mode))
+    :general
+    (symex-mode-map
+     "C-;" 'symex-mode-interface)
+    :custom
+    (symex-modal-backend 'evil)
+    :config
+    (symex-initialize))
+#+end_src
+
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-lispy"
+  "emacs-lispyville"
+  "emacs-symex"
+#+end_src
+
 *** Emacs Lisp
 
 #+begin_src emacs-lisp
   (add-hook 'emacs-lisp-mode-hook #'flycheck-mode)
+#+end_src
+
+*** Scheme Lisp
+
+#+begin_src emacs-lisp
+  (use-package geiser
+    :hook (scheme-mode . geiser-mode))
+#+end_src
+
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-geiser"
+  "emacs-geiser-guile"
 #+end_src
 
 *** Nix
@@ -1458,6 +1550,16 @@ Check out Tailwind [[https://tailwindcss.com/][here]].
                 :repo "merrickluo/lsp-tailwindcss"))
 #+end_src
 
+*** Shell scripting
+
+#+begin_src emacs-lisp
+  (defun lhgh/sh-mode-config()
+    (flycheck-select-checker 'sh-shellcheck))
+
+  (add-hook 'sh-mode-hook #'flycheck-mode)
+  (add-hook 'sh-mode-hook #'lhgh/sh-mode-config)
+#+end_src
+
 ** Productivity
 
 *** Syntax checking with Flycheck
@@ -1548,14 +1650,42 @@ A native code alternative to =term= and =ansi-term=.
     (require 'evil-collection-eshell)
     (evil-collection-eshell-setup)
 
+    (require 'xterm-color)
+
+    (add-to-list 'eshell-preoutput-filter-functions 'xterm-color-filter)
+    (delq 'eshell-handle-ansi-color eshell-output-filter-functions)
+
+    (add-hook 'eshell-before-prompt-hook
+              (lambda ()
+                (setq xterm-color-preserve-properties t)))
+
+    ;; Truncate buffer for performance
+    (add-to-list 'eshell-output-filter-functions 'eshell-truncate-buffer)
+
+    ;; We want to use xterm-256color when running interactive commands
+    ;; in eshell but not during other times when we might be launching
+    ;; a shell command to gather its output.
+    (add-hook 'eshell-pre-command-hook
+              (lambda () (setenv "TERM" "xterm-256color")))
+    (add-hook 'eshell-post-command-hook
+              (lambda () (setenv "TERM" "dumb")))
+
     ;; Save command history when commands are entered
     (add-hook 'eshell-pre-command-hook 'eshell-save-some-history)
 
     ;; Truncate buffer for performance
     (add-to-list 'eshell-output-filter-functions 'eshell-truncate-buffer)
 
+    ;; Initialize the shell history
+    (eshell-hist-initialize)
+
     (evil-define-key '(normal emacs insert visual) eshell-mode-map (kbd "C-r") 'consult-history)
     (evil-define-key '(normal emacs insert visual) eshell-mode-map (kbd "<home>") 'eshell-bol)
+
+    ;; Required for keymaps to work
+    (evil-normalize-keymaps)
+
+    (setenv "PAGER" "cat")
 
     (setq eshell-history-size 10000
           eshell-buffer-maximum-lines 10000
@@ -1593,6 +1723,7 @@ A native code alternative to =term= and =ansi-term=.
 
 #+begin_src scheme
   "emacs-eshell-syntax-highlighting"
+  "emacs-xterm-color"
 #+end_src
 
 ** File Browsing
@@ -1765,7 +1896,7 @@ Just a cheatsheet with the commands I use most frequently. Disclaimer: this docu
                  '(file))
            (list (openwith-make-extension-regexp
                   '("xbm" "pbm" "pgm" "ppm" "pnm"
-                    "png" "gif" "bmp" "tif" "jpeg")) ;; Removed jpg because Telega uses it
+                    "gif" "bmp" "tif" "jpeg")) ;; Removed jpg and png because Telega uses them
                  "vimiv"
                  '(file)))))
 #+end_src
@@ -1795,6 +1926,7 @@ Just a cheatsheet with the commands I use most frequently. Disclaimer: this docu
 
 #+begin_src scheme
   "emacs-telega"
+  "libwebp" ;; dwebp binary is required by telega
 #+end_src
 
 *** ERC
@@ -1882,6 +2014,20 @@ Load up the configuration present in [[file:Mail.org][Mail.org]]
   (require 'lhgh-mail)
 #+end_src
 
+** Pomodoro timer
+
+#+begin_src emacs-lisp
+  (use-package pomm
+    :commands pomm
+    )
+#+end_src
+
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-pomm"
+#+end_src
+
 * Credential Management
 The [[https://github.com/zx2c4/password-store/tree/master/contrib/emacs][password-store]] package permits interacting with [[https://www.passwordstore.org/][pass]] inside Emacs. The [[https://elpa.gnu.org/packages/pinentry.html][pinentry]] package allows GnuPG passphrases to be prompted through the minibuffer. This only works if you change your gpg-agent config to use =pinentry-emacs= as its =pinentry-program=. It can be installed through package managers like guix or enabling the emacs USE flag for the pinentry package in portage.
 
@@ -1942,3 +2088,8 @@ Dial the GC threshold back down so that garbage collection happens more frequent
      <<packages>>
   ))
 #+end_src
+
+* Local Variables
+# Local Variables:
+# before-save-hook: (org-make-toc)
+# End:

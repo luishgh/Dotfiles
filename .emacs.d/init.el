@@ -70,15 +70,13 @@
   (setq evil-want-integration t)
   (setq evil-want-keybinding nil) ;; required by evil-collection
   (setq evil-want-C-u-scroll t) ;; an optional part of `evil-want-integration', I personally like it
+  (setq evil-want-Y-yank-to-eol t) ;; Y => y$ (like in Neovim)
+  (setq evil-respect-visual-line-mode t) ;; move by visual lines
   (setq evil-vsplit-window-right t)
   (setq evil-split-window-below t)
   :config
   (evil-mode 1)
-  (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state) ;; C-g is trully equal to ESC
-
-  ;; j and k move through visual lines
-  (evil-global-set-key 'motion "j" 'evil-next-visual-line)
-  (evil-global-set-key 'motion "k" 'evil-previous-visual-line))
+  (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)) ;; C-g is trully equal to ESC
 
 (use-package evil-collection
   :after evil
@@ -157,7 +155,8 @@
   :demand t
   :bind (:map corfu-map
          ("M-j" . corfu-next)
-         ("M-k" . corfu-previous))
+         ("M-k" . corfu-previous)
+         ("M-g" . corfu-quit))
   :custom
   (corfu-cycle t)
   :config
@@ -232,12 +231,17 @@
                 dired-mode-hook
                 calendar-mode-hook
                 shell-mode-hook
+                dashboard-mode-hook
                 eshell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
 (dolist (mode '(org-mode-hook
                 markdown-mode-hook))
   (add-hook mode (lambda () (visual-line-mode t))))
+
+(setq-default tab-always-indent 'complete)
+(setq-default tab-width 4)
+(setq-default indent-tabs-mode nil)
 
 (use-package all-the-icons
   :if (display-graphic-p)
@@ -305,6 +309,9 @@
   :hook (org-mode . lhgh/org-mode-setup)
   :commands (org-capture org-agenda) ;; Org is deferred, these commands are autoloaded so they can be used before opening an Org file
   :general
+  (org-mode-map
+   :states 'normal
+   "<tab>" 'org-cycle)
   (lhgh/leader-maps org-mode-map
     "mh" '(consult-org-heading :which-key "find-header")
     "mtc" '(org-toggle-checkbox :which-key "checkbox"))
@@ -404,11 +411,18 @@
     (add-to-list 'org-latex-classes
                  '("homework"
                    "\\documentclass[11pt]{article}
-[DEFAULT-PACKAGES]
+[NO-DEFAULT-PACKAGES]
+[PACKAGES]
 \\usepackage[]{babel}
 \\pagenumbering{gobble}
 \\usepackage[margin=0.5in]{geometry}
-\\usepackage{enumitem}"
+\\usepackage{enumitem}
+\\usepackage{hyperref}
+
+[EXTRA]
+
+
+"
                    ("\\section{%s}" . "\\section*{%s}")
                    ("\\subsection{%s}" . "\\subsection*{%s}")
                    ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
@@ -419,7 +433,7 @@
 )
 
 (use-package org-make-toc
-  :hook (org-mode . org-make-toc-mode))
+  :defer)
 
 (use-package org-superstar
   :hook (org-mode . org-superstar-mode)
@@ -496,8 +510,6 @@
   :after magit)
 
 (use-package forge
-  :init
-  (setq auth-sources '("~/.authinfo"))
   :after magit)
 
 (use-package lsp-mode
@@ -554,13 +566,46 @@
     "de" '(dap-debug-edit-template :which-key "edit-template")))
 
 (use-package yasnippet
-  :hook ((progn-mode . yas-minor-mode)
+  :hook ((prog-mode . yas-minor-mode)
          (org-mode . yas-minor-mode))
   :config
   (add-to-list 'yas-snippet-dirs "~/.emacs.d/snippets")
+
+  ;; Remove yas-expand from tab
+  (define-key yas-minor-mode-map (kbd "<tab>") nil)
+  (define-key yas-minor-mode-map (kbd "TAB") nil)
+
+  ;; Bind yas-expand to C-tab
+  (define-key yas-minor-mode-map (kbd "C-<tab>") #'yas-expand)
   (yas-reload-all))
 
+(use-package lispy
+  :disabled
+  :hook ((emacs-lisp-mode . lispy-mode)
+         (scheme-mode . lispy-mode)))
+
+(use-package lispyville
+  :disabled
+  :hook (lispy-mode . lispyville-mode)
+  :config
+  (lispyville-set-key-theme
+   '(operators c-w additional prettify additional-movement)))
+
+(use-package symex
+  :hook ((emacs-lisp-mode . symex-mode)
+         (scheme-mode . symex-mode))
+  :general
+  (symex-mode-map
+   "C-;" 'symex-mode-interface)
+  :custom
+  (symex-modal-backend 'evil)
+  :config
+  (symex-initialize))
+
 (add-hook 'emacs-lisp-mode-hook #'flycheck-mode)
+
+(use-package geiser
+  :hook (scheme-mode . geiser-mode))
 
 (use-package nix-mode
   :mode "\\.nix\\'")
@@ -674,6 +719,12 @@
               :host github
               :repo "merrickluo/lsp-tailwindcss"))
 
+(defun lhgh/sh-mode-config()
+  (flycheck-select-checker 'sh-shellcheck))
+
+(add-hook 'sh-mode-hook #'flycheck-mode)
+(add-hook 'sh-mode-hook #'lhgh/sh-mode-config)
+
 (use-package flycheck
   :hook (lsp-mode . flycheck-mode))
 
@@ -707,14 +758,42 @@
   (require 'evil-collection-eshell)
   (evil-collection-eshell-setup)
 
+  (require 'xterm-color)
+
+  (add-to-list 'eshell-preoutput-filter-functions 'xterm-color-filter)
+  (delq 'eshell-handle-ansi-color eshell-output-filter-functions)
+
+  (add-hook 'eshell-before-prompt-hook
+            (lambda ()
+              (setq xterm-color-preserve-properties t)))
+
+  ;; Truncate buffer for performance
+  (add-to-list 'eshell-output-filter-functions 'eshell-truncate-buffer)
+
+  ;; We want to use xterm-256color when running interactive commands
+  ;; in eshell but not during other times when we might be launching
+  ;; a shell command to gather its output.
+  (add-hook 'eshell-pre-command-hook
+            (lambda () (setenv "TERM" "xterm-256color")))
+  (add-hook 'eshell-post-command-hook
+            (lambda () (setenv "TERM" "dumb")))
+
   ;; Save command history when commands are entered
   (add-hook 'eshell-pre-command-hook 'eshell-save-some-history)
 
   ;; Truncate buffer for performance
   (add-to-list 'eshell-output-filter-functions 'eshell-truncate-buffer)
 
+  ;; Initialize the shell history
+  (eshell-hist-initialize)
+
   (evil-define-key '(normal emacs insert visual) eshell-mode-map (kbd "C-r") 'consult-history)
   (evil-define-key '(normal emacs insert visual) eshell-mode-map (kbd "<home>") 'eshell-bol)
+
+  ;; Required for keymaps to work
+  (evil-normalize-keymaps)
+
+  (setenv "PAGER" "cat")
 
   (setq eshell-history-size 10000
         eshell-buffer-maximum-lines 10000
@@ -829,7 +908,7 @@
                '(file))
          (list (openwith-make-extension-regexp
                 '("xbm" "pbm" "pgm" "ppm" "pnm"
-                  "png" "gif" "bmp" "tif" "jpeg")) ;; Removed jpg because Telega uses it
+                  "gif" "bmp" "tif" "jpeg")) ;; Removed jpg and png because Telega uses them
                "vimiv"
                '(file)))))
 
@@ -897,6 +976,10 @@
     (normal-top-level-add-subdirs-to-load-path)))
 
 (require 'lhgh-mail)
+
+(use-package pomm
+  :commands pomm
+  )
 
 (use-package pinentry
   :straight (:source gnu-elpa-mirror)
