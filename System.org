@@ -7,7 +7,7 @@
 I started using Guix System after David's [[https://youtube.com/playlist?list=PLEoMzSkcN8oNxnj7jm5V2ZcGc52002pQU]["Craft Your System with GNU Guix"]] video series. For now, I only do a simple =system.scm= due to only having one notebook. Due to not having it on the default path, I run ~sudo -E guix system reconfigure $HOME/.config/guix/system.scm~, which passes the system configuration as an argument and uses ~sudo~ with the ~-E~ flag to use the channels specified at =~/.config/guix/channels.scm=.
 
 * Channels
-Unlike most distros, Guix pulls package definitions from Git repositories, so adding a new collection of packages is as easy as adding a new git repo to this code. At the moment, I only use the default guix channel and nonguix channel (for non-free drivers).
+Unlike most distros, Guix pulls package definitions from Git repositories, so adding a new collection of packages is as easy as adding a new git repo to this code. At the moment, I only use the default guix channel, nonguix channel (for non-free drivers), and [[https://github.com/luishgh/guix-channel][my personal channel]].
 
 *.config/guix/channels.scm*
 
@@ -23,6 +23,9 @@ Unlike most distros, Guix pulls package definitions from Git repositories, so ad
               "9edb3f66fd807b096b48283debdcddccfea34bad"
               (openpgp-fingerprint
                 "BBB0 2DDF 2CEA F6A8 0D1D  E643 A2A0 6DF2 A33A 54FA"))))
+        (channel
+         (name 'lhgh-channel)
+         (url "file:///home/luishgh/Projects/Code/guix-channel"))
         (channel
           (name 'nonguix)
           (url "https://gitlab.com/nonguix/nonguix")
@@ -69,17 +72,53 @@ Unlike most distros, Guix pulls package definitions from Git repositories, so ad
   ;; Switch DDX driver to intel
   (define %xorg-tear-free-config
     "Section \"Device\"
-    Identifier  \"Intel Graphics\"
-    Driver      \"intel\"
-    Option \"Backlight\" \"intel_backlight\"
-    Option      \"TearFree\"    \"true\"
-    Option      \"AccelMethod\" \"sna\"
-  EndSection
-  ")
+      Identifier  \"Intel Graphics\"
+      Driver      \"intel\"
+      Option \"Backlight\" \"intel_backlight\"
+      Option      \"TearFree\"    \"true\"
+      Option      \"AccelMethod\" \"sna\"
+    EndSection
+    ")
+
+  ;; Define a libinput configuration that works well for modern touchpads
+  (define %xorg-libinput-config
+    "Section \"InputClass\"
+      Identifier \"Touchpads\"
+      Driver \"libinput\"
+      MatchDevicePath \"/dev/input/event*\"
+      MatchIsTouchpad \"on\"
+      Option \"Tapping\" \"on\"
+      Option \"TappingDrag\" \"on\"
+      Option \"DisableWhileTyping\" \"on\"
+      Option \"MiddleEmulation\" \"on\"
+      Option \"ScrollMethod\" \"twofinger\"
+    EndSection
+    Section \"InputClass\"
+      Identifier \"Keyboards\"
+      Driver \"libinput\"
+      MatchDevicePath \"/dev/input/event*\"
+      MatchIsKeyboard \"on\"
+    EndSection
+    ")
 
   ;; overriding %desktop-services
   (define %my-desktop-services
     (modify-services %desktop-services
+                     ;; Configure the substitute server for the Nonguix repo
+                     (guix-service-type config =>
+                                        (guix-configuration
+                                         (inherit config)
+                                         (substitute-urls
+                                          (append (list "https://substitutes.nonguix.org")
+                                                  %default-substitute-urls))
+                                         (authorized-keys
+                                          (append (list (plain-file "substitutes.nonguix.org.pub" "(public-key
+   (ecc
+    (curve Ed25519)
+    (q #C1FD53E5D4CE971933EC50C9F307AE2171A2D3B52C804642A7A35F84F3A4EA98#)
+    )
+   )"))
+                                %default-authorized-guix-keys))))
                      (elogind-service-type config =>
                                            (elogind-configuration (inherit config)
                                                                   (handle-lid-switch-external-power 'suspend)))
@@ -123,9 +162,8 @@ Unlike most distros, Guix pulls package definitions from Git repositories, so ad
                     (group "users")
                     (home-directory "/home/luishgh")
                     (supplementary-groups
-                     '("wheel" "netdev"
-                       "audio" "video"
-                       "libvirt" "kvm")))
+                     '("wheel" "netdev" "audio"
+                       "video" "libvirt" "kvm")))
                   %base-user-accounts))
 #+end_src
 
@@ -153,7 +191,7 @@ Unlike most distros, Guix pulls package definitions from Git repositories, so ad
                      (xorg-configuration
                       (xorg-configuration
                        ;; (drivers '("i915" "nouveau"))
-                       (extra-config (list %xorg-tear-free-config))
+                       (extra-config (list %xorg-tear-free-config %xorg-libinput-config))
                        (keyboard-layout keyboard-layout)))))
 
            ;; VMs
@@ -173,29 +211,32 @@ Unlike most distros, Guix pulls package definitions from Git repositories, so ad
 *** File Systems and Bootloader
 
 #+begin_src scheme
-    (bootloader
-     (bootloader-configuration
-      (bootloader grub-efi-bootloader)
-      (target "/boot/efi")
-      (keyboard-layout keyboard-layout)))
-    (swap-devices
-      (list (uuid "835d6068-ad0b-4a76-831c-99156d78af80")))
-    (file-systems
-      (cons* (file-system
-               (mount-point "/")
-               (device
-                 (uuid "7e442e31-8bb9-43f1-b32d-bac04909ab45"
-                       'ext4))
-               (type "ext4"))
-             (file-system
-               (mount-point "/mnt/hdd")
-               (device (uuid "3113a99e-a55b-4a3f-8d54-d36c86abbf46"
-                             'ext4))
-               (type "ext4")
-               (create-mount-point? #t))
-             (file-system
-               (mount-point "/boot/efi")
-               (device (uuid "D20C-1BEE" 'fat32))
-               (type "vfat"))
-             %base-file-systems)))
+  (bootloader
+   (bootloader-configuration
+    (bootloader grub-efi-bootloader)
+    (targets '("/boot/efi"))
+    (keyboard-layout keyboard-layout)))
+  (swap-devices
+   (list
+    (swap-space
+     (target (uuid "835d6068-ad0b-4a76-831c-99156d78af80"))
+     (discard? #t))))
+  (file-systems
+    (cons* (file-system
+             (mount-point "/")
+             (device
+               (uuid "7e442e31-8bb9-43f1-b32d-bac04909ab45"
+                     'ext4))
+             (type "ext4"))
+           (file-system
+             (mount-point "/mnt/hdd")
+             (device (uuid "3113a99e-a55b-4a3f-8d54-d36c86abbf46"
+                           'ext4))
+             (type "ext4")
+             (create-mount-point? #t))
+           (file-system
+             (mount-point "/boot/efi")
+             (device (uuid "D20C-1BEE" 'fat32))
+             (type "vfat"))
+           %base-file-systems)))
 #+end_src
