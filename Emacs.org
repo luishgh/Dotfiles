@@ -9,8 +9,8 @@
 :TOC:      :include all :ignore this
 :END:
 :CONTENTS:
-- [[#setting-up-a-literate-config][Setting Up a Literate Config]]
 - [[#about-this-config][About This Config]]
+- [[#setting-up-a-literate-config][Setting Up a Literate Config]]
 - [[#startup-performance][Startup Performance]]
 - [[#global-mappings][Global Mappings]]
   - [[#esc-cancels-commands][ESC cancels commands]]
@@ -62,6 +62,7 @@
 - [[#org-mode][Org Mode]]
   - [[#binding-prefix][Binding Prefix]]
   - [[#org-configuration][Org Configuration]]
+  - [[#faces][Faces]]
   - [[#tags][Tags]]
   - [[#capture-templates][Capture Templates]]
   - [[#agenda][Agenda]]
@@ -71,6 +72,9 @@
   - [[#latex-workflow][LaTeX workflow]]
   - [[#end-use-package][End use-package]]
   - [[#update-toc-on-save][Update TOC on Save]]
+  - [[#citations][Citations]]
+  - [[#org-roam][Org Roam]]
+  - [[#flashcards][Flashcards]]
   - [[#packages][Packages]]
     - [[#org-superstar][org-superstar]]
     - [[#grip-mode][grip-mode]]
@@ -92,6 +96,7 @@
     - [[#meta-lisp][Meta Lisp]]
     - [[#emacs-lisp][Emacs Lisp]]
     - [[#scheme-lisp][Scheme Lisp]]
+    - [[#common-lisp][Common Lisp]]
     - [[#nix][Nix]]
     - [[#haskell][Haskell]]
     - [[#typescript][TypeScript]]
@@ -106,12 +111,15 @@
   - [[#productivity][Productivity]]
     - [[#syntax-checking-with-flycheck][Syntax checking with Flycheck]]
     - [[#raibow-delimiters][Raibow Delimiters]]
+    - [[#rainbow-mode][Rainbow Mode]]
     - [[#highlight-todos][Highlight TODOs]]
   - [[#tree-sitter][Tree-Sitter]]
+  - [[#direnv][Direnv]]
 - [[#applications][Applications]]
   - [[#binding-prefix][Binding Prefix]]
   - [[#vterm][Vterm]]
   - [[#eshell][Eshell]]
+    - [[#aliases][Aliases]]
   - [[#file-browsing][File Browsing]]
     - [[#dired][Dired]]
       - [[#key-bindingschords-cheatsheet][Key Bindings/Chords Cheatsheet]]
@@ -131,12 +139,16 @@
   - [[#languagetool][LanguageTool]]
   - [[#mail-management][Mail management]]
   - [[#pomodoro-timer][Pomodoro timer]]
+  - [[#reference-browsing][Reference browsing]]
 - [[#credential-management][Credential Management]]
 - [[#utility-functions][Utility Functions]]
 - [[#runtime-performance][Runtime Performance]]
 - [[#emacs-profile][Emacs Profile]]
 - [[#local-variables][Local Variables]]
 :END:
+
+* About This Config
+This is my GNU Emacs config. I had been using [[https://github.com/hlissner/doom-emacs][Doom Emacs]] for a little while and really liked the experience of using Emacs. However, I wanted to try configuring Emacs myself, so that I could tune it to my personal workflow. So I stopped using Doom Emacs and came to good old GNU Emacs. This is my configuration.
 
 * Setting Up a Literate Config
 Having this in your =init.el= permits using =config.org= to configure Emacs.
@@ -148,22 +160,22 @@ Having this in your =init.el= permits using =config.org= to configure Emacs.
     user-emacs-directory))
 #+end_example
 
+One important thing to remember is that for this to work, your elisp snippets need to be marked as =emacs-lisp=. Although =elisp= works as well for everything else, specifically for =org-babel-load-file= is doesn't. Not really sure why :/.
+
 Other possibility is having this in the top of your org config file (I'm using this):
 
 #+begin_example
 #+PROPERTY: header-args:emacs-lisp :tangle ~/.emacs.d/init.el :mkdirp yes
 #+end_example
 
-Another important thing to remember is that for this to work, your elisp snippets need to be marked as =emacs-lisp=. Although =elisp= works as well for everything else, specifically for =org-babel-load-file= is doesn't. Not really sure why :/.
-
-* About This Config
-This is my GNU Emacs config. I had been using [[https://github.com/hlissner/doom-emacs][Doom Emacs]] for a little while and really liked the experience of using Emacs. However, I wanted to try configure Emacs myself, so that I could tune it to my personal workflow. So I stopped using Doom Emacs and came to good old GNU Emacs. This is my configuration.
-
 * Startup Performance
 
-#+begin_src emacs-lisp
+Some operations for startup performance. This is tangled to =early-init.el= to be executed earlier in the startup process. Heavily inspired by [[https://github.com/hlissner/doom-emacs/blob/develop/early-init.el][Doom's early-init.el]].
+
+#+begin_src emacs-lisp :tangle .emacs.d/early-init.el
+  ;; -*- lexical-binding: t; -*-
   ;; The default is 800 kilobytes.  Measured in bytes.
-  (setq gc-cons-threshold (* 50 1000 1000))
+  (setq gc-cons-threshold most-positive-fixnum)
 
   (defun lhgh/display-startup-time ()
     (message "Emacs loaded in %s with %d garbage collections."
@@ -173,6 +185,28 @@ This is my GNU Emacs config. I had been using [[https://github.com/hlissner/doom
              gcs-done))
 
   (add-hook 'emacs-startup-hook #'lhgh/display-startup-time)
+
+  ;; Premature redisplays can substantially affect startup times and produce
+  ;; ugly flashes of unstyled Emacs.
+  (setq-default inhibit-redisplay t
+                inhibit-message t)
+  (add-hook 'window-setup-hook
+            (lambda ()
+              (setq-default inhibit-redisplay nil
+                            inhibit-message nil)
+              (redisplay)))
+
+  ;; Site files tend to use `load-file', which emits "Loading X..." messages in
+  ;; the echo area, which in turn triggers a redisplay. Redisplays can have a
+  ;; substantial effect on startup times and in this case happens so early that
+  ;; Emacs may flash white while starting up.
+  (define-advice load-file (:override (file) silence)
+    (load file nil 'nomessage))
+
+  ;; Undo our `load-file' advice above, to limit the scope of any edge cases it
+  ;; may introduce down the road.
+  (define-advice startup--load-user-init-file (:before (&rest _) remove-load-file-silence)
+    (advice-remove #'load-file #'load-file@silence))
 #+end_src
 
 * Global Mappings
@@ -242,8 +276,12 @@ I started using [[https://guix.gnu.org/][GNU Guix]] recently along with my Gento
 *Guix Packages*
 
 #+begin_src scheme
+
   "emacs-guix"
   "emacs-f"
+  "make"
+  "cmake"
+
 #+end_src
 
 ** =use-package= setup
@@ -283,9 +321,12 @@ I personally use [[https://github.com/jwiegley/use-package][use-package]] becaus
   (load custom-file t)
 #+end_src
 
-*Guix Package*
+*Guix Packages*
+
 #+begin_src scheme
+
   "emacs-no-littering"
+
 #+end_src
 
 * Update Load Path
@@ -307,12 +348,15 @@ Load up the desktop environment if the =--use-exwm= argument was passed to Emacs
 #+end_src
 
 *Guix Packages*
+
 Despite the code being in Desktop.org, include the emacs packages for the desktop environment in this file so that they can be included in the Emacs profile.
 
 #+begin_src scheme
+
   "emacs-exwm"
   "emacs-desktop-environment"
   ;; "emacs-app-launcher"
+
 #+end_src
 
 * Key Bindings
@@ -345,8 +389,10 @@ This is the main section of configuration that makes Emacs usable for me. Before
 *Guix Packages*
 
 #+begin_src scheme
+
   "emacs-evil"
   "emacs-undo-tree"
+
 #+end_src
 
 *** Enhancing evil
@@ -377,8 +423,10 @@ This is the main section of configuration that makes Emacs usable for me. Before
 *Guix Packages*
 
 #+begin_src scheme
+
   "emacs-evil-collection"
   "emacs-evil-nerd-commenter"
+
 #+end_src
 
 ** general.el
@@ -393,6 +441,10 @@ This is the main section of configuration that makes Emacs usable for me. Before
       :prefix "SPC" ;; The prefix in normal state
       :global-prefix "C-SPC") ;; The prefix accessible in any state
 
+    (general-create-definer lhgh/ctrl-c-binds
+      :states '(normal insert emacs)
+      :prefix "C-c")
+
     (lhgh/leader-maps
       "t"  '(:ignore t :which-key "toggles")
       "tt" '(consult-theme :which-key "choose theme")
@@ -402,7 +454,9 @@ This is the main section of configuration that makes Emacs usable for me. Before
 *Guix Packages*
 
 #+begin_src scheme
+
   "emacs-general"
+
 #+end_src
 
 ** Hydra
@@ -416,7 +470,9 @@ This is the main section of configuration that makes Emacs usable for me. Before
 *Guix Packages*
 
 #+begin_src scheme
+
   "emacs-hydra"
+
 #+end_src
 
 ** which-key
@@ -433,7 +489,9 @@ This is the main section of configuration that makes Emacs usable for me. Before
 *Guix Packages*
 
 #+begin_src scheme
+
   "emacs-which-key"
+
 #+end_src
 
 * Completion
@@ -519,7 +577,9 @@ A more minimal alternative to =Ivy=.  It uses the default completion system, whi
 *Guix Packages*
 
 #+begin_src scheme
+
   "emacs-vertico"
+
 #+end_src
 
 ** Consult
@@ -540,7 +600,9 @@ Consult provides a lot of useful completion commands similar to Ivy’s Counsel.
 *Guix Packages*
 
 #+begin_src scheme
+
   "emacs-consult"
+
 #+end_src
 
 ** Marginalia
@@ -556,7 +618,9 @@ Marginalia provides helpful annotations for various types of minibuffer completi
 *Guix Packages*
 
 #+begin_src scheme
+
   "emacs-marginalia"
+
 #+end_src
 
 ** Corfu
@@ -579,7 +643,9 @@ Corfu can be considered the minimalistic =completion-at-point= counterpart of =V
 *Guix Packages*
 
 #+begin_src scheme
+
   "emacs-corfu"
+
 #+end_src
 
 ** Orderless
@@ -603,6 +669,8 @@ Context action for completion minibuffers.
            :map minibuffer-local-map
            ("C-d" . embark-act))
     :config
+    ;; Use Embark to show command prefix help
+    (setq prefix-help-command #'embark-prefix-help-command)
 
     ;; Show Embark actions via which-key
     (setq embark-action-indicator
@@ -610,6 +678,15 @@ Context action for completion minibuffers.
             (which-key--show-keymap "Embark" map nil nil 'no-paging)
             #'which-key--hide-popup-ignore-command)
           embark-become-indicator embark-action-indicator))
+
+  (use-package embark-consult
+    :straight t
+    :after (embark consult)
+    :demand t ; only necessary if you have the hook below
+    ;; if you want to have consult previews as you move around an
+    ;; auto-updating embark collect buffer
+    :hook
+    (embark-collect-mode . consult-preview-at-point-mode))
 #+end_src
 
 ** Helpful
@@ -626,7 +703,9 @@ Context action for completion minibuffers.
 *Guix Packages*
 
 #+begin_src scheme
+
   "emacs-helpful"
+
 #+end_src
 
 ** Bindings
@@ -643,7 +722,7 @@ Context action for completion minibuffers.
 ** Removing some default ui elements
 Do I really need to explain the following options? Just look at that default toolbar, *eww*.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle .emacs.d/early-init.el
   (setq inhibit-startup-message t)
 
   (scroll-bar-mode -1)
@@ -663,6 +742,9 @@ Do I really need to explain the following options? Just look at that default too
     (set-face-attribute 'default nil
       :font "JetBrains Mono 11"
       :weight 'medium)
+    (set-face-attribute 'fixed-pitch nil
+      :font "JetBrains Mono 11"
+      :weight 'medium)
     (set-face-attribute 'variable-pitch nil
       :font "Iosevka Aile 15"
       :weight 'medium))
@@ -676,25 +758,21 @@ Do I really need to explain the following options? Just look at that default too
 #+end_src
 
 ** Column and Line Numbers
-Enabling column and line numbers.
+Enabling column in mode-line and line numbers for some modes.
 
 #+begin_src emacs-lisp
   (column-number-mode) ;; Shows column number in mode-line
-  (global-display-line-numbers-mode t) ;; Shows line numbers
+  ;; (global-display-line-numbers-mode t) ;; Shows line numbers globally
   (setq display-line-numbers-type 'relative) ;; Relative line numbers
-#+end_src
 
-Disabling line numbers for some modes where it doesn't help.
+  ;; Enable line numbers for some modes
+  (dolist (mode '(text-mode-hook
+                  prog-mode-hook
+                  conf-mode-hook))
+    (add-hook mode (lambda () (display-line-numbers-mode 1))))
 
-#+begin_src emacs-lisp
-  (dolist (mode '(term-mode-hook
-                  compilation-mode
-                  vterm-mode-hook
-                  dired-mode-hook
-                  calendar-mode-hook
-                  shell-mode-hook
-                  dashboard-mode-hook
-                  eshell-mode-hook))
+  ;; Override some modes which derive from the above
+  (dolist (mode '(org-mode-hook))
     (add-hook mode (lambda () (display-line-numbers-mode 0))))
 #+end_src
 
@@ -708,6 +786,7 @@ Word wrapping is disabled by default. I like it to be on in certain modes, like 
 #+end_src
 
 ** Tabs and indentation
+Enabling TAB key for completion and disabling its indentation functionality. I have tried using =indent-tabs-mode= for a while, but it was way too confusing for me. I prefer for =TAB= to *always* complete and to do indentation with evil's === comands.
 
 #+begin_src emacs-lisp
   (setq-default tab-always-indent 'complete)
@@ -731,7 +810,9 @@ Word wrapping is disabled by default. I like it to be on in certain modes, like 
 *Guix Packages*
 
 #+begin_src scheme
+
   "emacs-all-the-icons"
+
 #+end_src
 
 ** Colorscheme (theme)
@@ -758,7 +839,9 @@ I use [[https://github.com/hlissner/emacs-doom-themes#doom-emacs][doom-themes]] 
 *Guix Packages*
 
 #+begin_src scheme
+
   "emacs-doom-themes"
+
 #+end_src
 
 ** Modeline (statusline in vimish)
@@ -775,7 +858,9 @@ I use [[https://github.com/seagle0128/doom-modeline][doom-modeline]] because it 
 *Guix Packages*
 
 #+begin_src scheme
+
   "emacs-doom-modeline"
+
 #+end_src
 
 ** Startup Screen
@@ -783,6 +868,7 @@ I use [[https://github.com/emacs-dashboard/emacs-dashboard][Emacs Dashboard]] as
 
 #+begin_src emacs-lisp
   (use-package dashboard
+    :disabled t ; depends on page-break-lines, which is currently breaking Org-roam
     :defer lhgh/exwm-enabled ;; defer if in EXWM because it doesn't make sense in that context
     :init
     (setq dashboard-set-heading-icons t)
@@ -799,7 +885,9 @@ I use [[https://github.com/emacs-dashboard/emacs-dashboard][Emacs Dashboard]] as
 *Guix Packages*
 
 #+begin_src scheme
-  "emacs-dashboard"
+
+ ; "emacs-dashboard"
+
 #+end_src
 
 ** Workspaces
@@ -821,7 +909,9 @@ I use [[https://github.com/emacs-dashboard/emacs-dashboard][Emacs Dashboard]] as
 *Guix Packages*
 
 #+begin_src scheme
+
   "emacs-perspective"
+
 #+end_src
 
 ** Use better versions of UNIX utilities
@@ -853,7 +943,12 @@ I use [[https://github.com/emacs-dashboard/emacs-dashboard][Emacs Dashboard]] as
 #+begin_src emacs-lisp
   (defun lhgh/org-mode-setup ()
     (org-indent-mode)
+    (variable-pitch-mode)
     (setq evil-auto-indent nil))
+
+  (when lhgh/is-guix-system
+    ;; Use org provided by Guix
+    (straight-use-package '(org :type built-in)))
 
   (use-package org
     :hook (org-mode . lhgh/org-mode-setup)
@@ -875,10 +970,42 @@ I use [[https://github.com/emacs-dashboard/emacs-dashboard][Emacs Dashboard]] as
 *Guix Packages*
 
 #+begin_src scheme
+
   "emacs-org"
+
 #+end_src
 
-** Tags
+** Faces
+I try to make Org Mode buffers seem more like notebooks, using mostly a variable pitch font. However, I still use a fixed pitch font in places like code for practicality.
+
+#+begin_src emacs-lisp
+  ;; Increase the size of various headings
+  (with-eval-after-load 'org-indent
+    (set-face-attribute 'org-document-title nil :weight 'bold :height 1.3 :inherit 'variable-pitch)
+
+    (dolist (face '((org-level-1 . 1.2)
+                    (org-level-2 . 1.1)
+                    (org-level-3 . 1.05)
+                    (org-level-4 . 1.0)
+                    (org-level-5 . 1.1)
+                    (org-level-6 . 1.1)
+                    (org-level-7 . 1.1)
+                    (org-level-8 . 1.1)))
+      (set-face-attribute (car face) nil :font "Iosevka Aile" :weight 'medium :height (cdr face)))
+
+    ;; Ensure that anything that should be fixed-pitch in Org files appears that way
+    (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
+    (set-face-attribute 'org-table nil  :inherit 'fixed-pitch)
+    (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
+    (set-face-attribute 'org-code nil   :inherit '(shadow fixed-pitch))
+    (set-face-attribute 'org-indent nil :inherit '(org-hide fixed-pitch))
+    (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
+    (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
+    (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
+    (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch))
+#+end_src
+
+** TODO Tags
 
 #+begin_src emacs-lisp
   (setq org-tag-alist
@@ -1035,7 +1162,127 @@ ToC (Table of Contents) sections are nice in documentation and literate configs.
 *Guix Packages*
 
 #+begin_src scheme
+
   "emacs-org-make-toc"
+
+#+end_src
+
+** Citations
+
+I make use of Org's built-in citation system through [[https://github.com/bdarcus/citar][citar]].
+
+#+begin_src emacs-lisp
+  (use-package citar
+    :no-require
+    :custom
+    (org-cite-global-bibliography '("~/Documents/biblio.bib"))
+    (citar-library-paths '("~/Documents/Library"))
+    (org-cite-insert-processor 'citar)
+    (org-cite-follow-processor 'citar)
+    (org-cite-activate-processor 'citar)
+    (citar-bibliography org-cite-global-bibliography)
+    ;; optional: org-cite-insert is also bound to C-c C-x C-@
+    (citar-symbols `((file ,(all-the-icons-faicon "file-o" :face 'all-the-icons-green :v-adjust -0.1) . " ")
+                     (note ,(all-the-icons-material "speaker_notes" :face 'all-the-icons-blue :v-adjust -0.3) . " ")
+                     (link ,(all-the-icons-octicon "link" :face 'all-the-icons-orange :v-adjust 0.01) . " ")))
+    (citar-symbol-separator "  ")
+    :bind
+    (:map org-mode-map :package org
+          ("C-c b" . #'org-cite-insert))
+    :config
+    (with-eval-after-load 'citar
+      (define-key citar-map (kbd "d") (cons "download entry" #'citar-download-entry))))
+#+end_src
+
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-citar"
+#+end_src
+
+** Org Roam
+
+#+begin_src emacs-lisp
+  (use-package org-roam
+    :after org
+    :init
+    (setq org-roam-v2-ack t)
+    :custom
+    (org-roam-directory "~/Documents/Org/org-roam")
+    (org-roam-capture-templates
+     '(("m" "main" plain
+        "%?"
+        :if-new (file+head "main/${slug}.org"
+                           "#+title: ${title}\n")
+        :unnarrowed t)
+       ("r" "reference" plain "%?"
+        :if-new (file+head "reference/${title}.org"
+                           "#+title: ${title}\n")
+        :unnarrowed t)
+       ("b" "bibliography reference" plain "%?"
+          :if-new
+          (file+head "reference/${citekey}.org" "#+title: ${author} :: ${title}\n")
+          :unnarrowed t)))
+    (org-roam-node-display-template
+     (concat "${type:15} ${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+    :general
+    (lhgh/ctrl-c-binds
+      "n" '(:ignore t :which-key "notes")
+      "nl" 'org-roam-buffer-toggle
+      "nf" 'org-roam-node-find
+      "ni" 'org-roam-node-insert)
+    :config
+    (org-roam-db-autosync-enable)
+    (cl-defmethod org-roam-node-type ((node org-roam-node))
+      "Return the TYPE of NODE."
+      (condition-case nil
+          (file-name-nondirectory
+           (directory-file-name
+            (file-name-directory
+             (file-relative-name (org-roam-node-file node) org-roam-directory))))
+        (error "")))
+    (add-to-list 'display-buffer-alist
+                 '("\\*org-roam\\*"
+                   (display-buffer-in-direction)
+                   (direction . right)
+                   (window-width . 0.33)
+                   (window-height . fit-window-to-buffer))))
+
+  (use-package org-roam-bibtex
+    :after org-roam
+    :hook (org-roam-mode . org-roam-bibtex-mode)
+    :custom
+    (orb-roam-ref-format 'org-cite)
+    (bibtex-completion-bibliography org-cite-global-bibliography)
+    (bibtex-completion-notes-path org-roam-directory)
+    (bibtex-completion-library-path "~/Documents/Library"))
+#+end_src
+
+*Guix Packages*
+
+#+begin_src scheme
+
+  "emacs-org-roam"
+  "emacs-org-roam-bibtex"
+
+#+end_src
+
+** Flashcards
+
+I use [[https://github.com/louietan/anki-editor][anki-editor]] to include flashcards on certain Org documents. I use them to review their contents.
+
+#+begin_src emacs-lisp
+  (use-package anki-editor
+    :defer t)
+#+end_src
+
+*Guix Packages*
+
+Obs: this is commented at the time due to guix's Anki being broken ATM.
+
+#+begin_src scheme
+  ;; "emacs-anki-editor"
+  ;; "anki"
 #+end_src
 
 ** Packages
@@ -1054,7 +1301,9 @@ ToC (Table of Contents) sections are nice in documentation and literate configs.
 *Guix Packages*
 
 #+begin_src scheme
+
   "emacs-org-superstar"
+
 #+end_src
 
 *** grip-mode
@@ -1088,7 +1337,9 @@ ToC (Table of Contents) sections are nice in documentation and literate configs.
 *Guix Packages*
 
 #+begin_src scheme
+
   "emacs-org-mime"
+
 #+end_src
 
 *** org-appear
@@ -1155,7 +1406,9 @@ This snippet adds a hook to =org-mode= buffers so that any Org file in the =.dot
 *Guix Packages*
 
 #+begin_src scheme
+
   "emacs-projectile"
+
 #+end_src
 
 *** counsel-projectile
@@ -1187,8 +1440,10 @@ This snippet adds a hook to =org-mode= buffers so that any Org file in the =.dot
 *Guix Packages*
 
 #+begin_src scheme
+
   "emacs-magit"
   "emacs-magit-todos"
+
 #+end_src
 
 *** Forge
@@ -1203,7 +1458,9 @@ NOTE: Remember to configure GitHub and/or GitLab tokens before using this packag
 *Guix Packages*
 
 #+begin_src scheme
+
   "emacs-forge"
+
 #+end_src
 
 ** Language Server Protocol
@@ -1297,27 +1554,31 @@ For snippets, I use yasnippets.
 *Guix Packages*
 
 #+begin_src scheme
+
   "emacs-yasnippet"
   "emacs-yasnippet-snippets"
+
 #+end_src
 
 ** Languages
 
 *** Meta Lisp
+
 #+begin_src emacs-lisp
   (use-package lispy
-    :disabled
+    ;; :disabled
     :hook ((emacs-lisp-mode . lispy-mode)
            (scheme-mode . lispy-mode)))
 
   (use-package lispyville
-    :disabled
+    ;; :disabled
     :hook (lispy-mode . lispyville-mode)
     :config
     (lispyville-set-key-theme
      '(operators c-w additional prettify additional-movement)))
 
   (use-package symex
+    :disabled
     :hook ((emacs-lisp-mode . symex-mode)
            (scheme-mode . symex-mode))
     :general
@@ -1332,9 +1593,11 @@ For snippets, I use yasnippets.
 *Guix Packages*
 
 #+begin_src scheme
+
   "emacs-lispy"
   "emacs-lispyville"
   "emacs-symex"
+
 #+end_src
 
 *** Emacs Lisp
@@ -1353,9 +1616,27 @@ For snippets, I use yasnippets.
 *Guix Packages*
 
 #+begin_src scheme
+
   "emacs-geiser"
   "emacs-geiser-guile"
+
 #+end_src
+
+*** Common Lisp
+
+#+begin_src emacs-lisp
+  (use-package sly
+    :mode "\\.lisp\\'")
+#+end_src
+
+*Guix Packages*
+
+#+begin_src scheme
+
+  "emacs-sly"
+
+#+end_src
+
 
 *** Nix
 
@@ -1367,7 +1648,9 @@ For snippets, I use yasnippets.
 *Guix Packages*
 
 #+begin_src scheme
+
   "emacs-nix-mode"
+
 #+end_src
 
 *** Haskell
@@ -1399,11 +1682,13 @@ For snippets, I use yasnippets.
 *Guix Packages*
 
 #+begin_src scheme
+
   "emacs-haskell-mode"
   "emacs-dante" ;; outdated version
   "ghc" ;; for haskell-interactive-mode
   "ghc-hindent"
   "hlint"
+
 #+end_src
 
 *** TypeScript
@@ -1423,7 +1708,9 @@ For snippets, I use yasnippets.
 *Guix Packages*
 
 #+begin_src scheme
+
   "emacs-typescript-mode"
+
 #+end_src
 
 *** Python
@@ -1491,7 +1778,9 @@ Used primarily for Flutter.
 *Guix Packages*
 
 #+begin_src scheme
+
   "emacs-dart-mode"
+
 #+end_src
 
 *** Markdown
@@ -1508,7 +1797,9 @@ Used primarily for Flutter.
 *Guix Packages*
 
 #+begin_src scheme
+
   "emacs-markdown-mode"
+
 #+end_src
 
 **** markdown-toc
@@ -1538,7 +1829,9 @@ Used primarily for Flutter.
 *Guix Packages*
 
 #+begin_src scheme
+
   "emacs-web-mode"
+
 #+end_src
 
 **** Tailwind CSS
@@ -1560,6 +1853,12 @@ Check out Tailwind [[https://tailwindcss.com/][here]].
   (add-hook 'sh-mode-hook #'lhgh/sh-mode-config)
 #+end_src
 
+*Guix Packages*
+
+#+begin_src scheme
+  "shellcheck"
+#+end_src
+
 ** Productivity
 
 *** Syntax checking with Flycheck
@@ -1572,7 +1871,9 @@ Check out Tailwind [[https://tailwindcss.com/][here]].
 *Guix Packages*
 
 #+begin_src scheme
+
   "emacs-flycheck"
+
 #+end_src
 
 *** Raibow Delimiters
@@ -1586,20 +1887,37 @@ Check out Tailwind [[https://tailwindcss.com/][here]].
 *Guix Packages*
 
 #+begin_src scheme
+
   "emacs-rainbow-delimiters"
+
+#+end_src
+
+*** Rainbow Mode
+
+#+begin_src emacs-lisp
+  (use-package rainbow-mode
+    :hook (text-mode . rainbow-mode))
+#+end_src
+
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-rainbow-mode"
 #+end_src
 
 *** Highlight TODOs
 
 #+begin_src emacs-lisp
   (use-package hl-todo
-    :defer t)
+    :hook (prog-mode . hl-todo-mode))
 #+end_src
 
 *Guix Packages*
 
 #+begin_src scheme
+
   "emacs-hl-todo"
+
 #+end_src
 
 ** Tree-Sitter
@@ -1613,6 +1931,23 @@ Check out Tailwind [[https://tailwindcss.com/][here]].
   (use-package tree-sitter-langs
     :after tree-sitter
     :straight t)
+#+end_src
+
+** Direnv
+I have started to use =direnv= to automatically enable =guix shell= environments. [[https://github.com/purcell/envrc][envrc]] permits enabling those on a per-buffer basis.
+
+#+begin_src emacs-lisp
+  (use-package envrc
+    :after projectile
+    :config
+    (envrc-global-mode))
+#+end_src
+
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-envrc"
+  "direnv"
 #+end_src
 
 * Applications
@@ -1640,7 +1975,9 @@ A native code alternative to =term= and =ansi-term=.
 *Guix Packages*
 
 #+begin_src scheme
+
   "emacs-vterm"
+
 #+end_src
 
 ** Eshell
@@ -1705,7 +2042,8 @@ A native code alternative to =term= and =ansi-term=.
 
 
   (use-package eshell
-    :hook (eshell-first-time-mode . lhgh/configure-eshell)
+    :hook ((eshell-first-time-mode . lhgh/configure-eshell)
+           (eshell-mode . eshell-alias-initialize))
     :config
     (lhgh/leader-maps
       "ae" '(eshell :which-key "eshell"))
@@ -1722,8 +2060,19 @@ A native code alternative to =term= and =ansi-term=.
 *Guix Packages*
 
 #+begin_src scheme
+
   "emacs-eshell-syntax-highlighting"
   "emacs-xterm-color"
+
+#+end_src
+
+*** Aliases
+
+#+begin_src conf :tangle .emacs.d/eshell/alias :mkdirp yes
+  alias e find-file $1
+  alias edit find-file $1
+  alias gs magit-status-here
+  alias ffo find-file-other-window $1
 #+end_src
 
 ** File Browsing
@@ -1870,9 +2219,11 @@ Just a cheatsheet with the commands I use most frequently. Disclaimer: this docu
 *Guix Packages*
 
 #+begin_src scheme
+
   "emacs-all-the-icons-dired"
   ;; "emacs-dired-single"
   "emacs-dired-hacks"
+
 #+end_src
 
 *** Opening Files Externally
@@ -1904,7 +2255,9 @@ Just a cheatsheet with the commands I use most frequently. Disclaimer: this docu
 *Guix Packages*
 
 #+begin_src scheme
+
   "emacs-openwith"
+
 #+end_src
 
 ** Chat
@@ -1925,8 +2278,10 @@ Just a cheatsheet with the commands I use most frequently. Disclaimer: this docu
 *Guix Packages*
 
 #+begin_src scheme
+
   "emacs-telega"
   "libwebp" ;; dwebp binary is required by telega
+
 #+end_src
 
 *** ERC
@@ -1988,7 +2343,9 @@ A relatively full-featured gopher and gemini client for GNU Emacs.
 *Guix Packages*
 
 #+begin_src scheme
+
   "emacs-elpher"
+
 #+end_src
 
 ** LanguageTool
@@ -2025,7 +2382,78 @@ Load up the configuration present in [[file:Mail.org][Mail.org]]
 *Guix Packages*
 
 #+begin_src scheme
+
   "emacs-pomm"
+
+#+end_src
+
+** Reference browsing
+
+I use [[https://github.com/cpitclaudel/biblio.el][biblio.el]] to download papers and generate bibtex entries.
+
+#+begin_src emacs-lisp
+  (defun lhgh/bibtex-get-key (bibtex-string)
+    "Get cite key from BIBTEX-STRING."
+    (when (stringp bibtex-string)
+      (with-temp-buffer
+        (bibtex-mode)
+        (insert bibtex-string)
+        (bibtex-generate-autokey))))
+
+  (defun lhgh/biblio--selection-insert-at-org-cite-bibfile-callback (bibtex entry)
+    "Add BIBTEX (from ENTRY) to end of first file in `org-cite-global-bibliography'."
+    (with-current-buffer (find-file-noselect (car org-cite-global-bibliography))
+      (save-excursion
+        (bibtex-mode)
+        (goto-char (point-max))
+        (insert "\n")
+        (save-restriction
+          (narrow-to-region (point) (point-max))
+          (insert bibtex)
+          (bibtex-clean-entry)
+          (let ((current-key (bibtex-key-in-head))
+                (new-key (bibtex-generate-autokey)))
+            (when (not (string= current-key new-key))
+              (message (format "Inserting autokey %s to replace %s" new-key current-key))
+              (goto-char (point-min))
+              (search-forward current-key)
+              (replace-match new-key))))
+        (bibtex-sort-buffer)
+        (save-buffer)))
+    (message "Inserted bibtex entry for %S."
+             (biblio--prepare-title (biblio-alist-get 'title entry))))
+
+  (defun lhgh/biblio-selection-insert-at-org-cite-bibfile ()
+    "Insert BibTeX of current entry in `org-cite-global-bibliography'."
+    (interactive)
+    (biblio--selection-forward-bibtex #'lhgh/biblio--selection-insert-at-org-cite-bibfile-callback))
+
+  (defun lhgh/biblio-selection-add-to-collection ()
+    "Insert current entry at global-bibliography and download paper to library."
+    (interactive)
+    (lhgh/biblio-selection-insert-at-org-cite-bibfile)
+    (biblio--selection-extended-action #'biblio-download--action))
+
+  (use-package biblio
+    :custom
+    (biblio-download-directory "~/Documents/Library/")
+    :general
+    (biblio-selection-mode-map
+     "a" #'lhgh/biblio-selection-add-to-collection)
+    :init
+    (define-advice biblio-download--action (:filter-args (args) replace-identifier-with-key)
+      (let* ((record (car args))
+             (key nil))
+        (biblio--selection-forward-bibtex (lambda (bibtex _)
+                                            (setq key (lhgh/bibtex-get-key bibtex))))
+        (setf (alist-get 'identifier record) key)
+        (list record))))
+#+end_src
+
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-biblio"
 #+end_src
 
 * Credential Management
@@ -2053,10 +2481,12 @@ The [[https://github.com/zx2c4/password-store/tree/master/contrib/emacs][passwor
 *Guix Packages*
 
 #+begin_src scheme
+
   ;; "emacs-pinentry"
   "pinentry-emacs"
   "emacs-password-store"
   "emacs-auth-source-pass"
+
 #+end_src
 
 * Utility Functions
@@ -2075,7 +2505,7 @@ Dial the GC threshold back down so that garbage collection happens more frequent
 
 #+begin_src emacs-lisp
  ;; Make gc pauses faster by decreasing the threshold.
-  (setq gc-cons-threshold (* 2 1000 1000))
+  (setq gc-cons-threshold (* 20 1000 1000))
 #+end_src
 
 * Emacs Profile

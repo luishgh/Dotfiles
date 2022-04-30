@@ -1,0 +1,11 @@
+use_guix() {
+  if [ -f channels.scm ]
+  then
+    log_status "Using Guix version from channels.scm"
+    export GUIX_ENVIRONMENT=$(guix time-machine -C channels.scm -- shell "$@" -- bash -c 'echo $GUIX_ENVIRONMENT')
+    eval "$(guix time-machine -C channels.scm -- shell "$@" --search-paths)"
+  else
+    export GUIX_ENVIRONMENT=$(guix shell "$@" -- bash -c 'echo $GUIX_ENVIRONMENT')
+    eval "$(guix shell "$@" --search-paths)"
+  fi
+}

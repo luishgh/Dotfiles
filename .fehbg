@@ -1,2 +1,2 @@
 #!/bin/sh
-feh --no-fehbg --bg-fill $HOME/Documents/Wallpapers/1920px-There_is_an_Emacs_command_to_do_that.svg.png
+feh --no-fehbg --bg-scale '/home/luishgh/Documents/Wallpapers/lord-of-the-rings-wallpapers.jpg'

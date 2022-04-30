@@ -20,7 +20,7 @@
 
   (defun lhgh/exwm-init-hook ()
     (with-eval-after-load 'perspective
-      ;; Set transparency (TODO: fix this)
+      ;; Set transparency
       (set-frame-parameter (selected-frame) 'alpha '(90 . 90))
       (add-to-list 'default-frame-alist '(alpha . (90 . 90)))
 
@@ -326,13 +326,14 @@ This part of the configuration should work with any panel. Curently using Polyba
       (6 "")
       (7 "")
       (8 "")
-      (9 "")))
+      (9 "")
+      (0 "")))
 
   (defvar lhgh/panel-process nil
-    "Holds the process of the running panel instance, if any")
+    "Hold the process of the running panel instance, if any.")
 
   (defun lhgh/kill-panel ()
-    "Kills the current running panel if any is present"
+    "Kill the current running panel if any is present."
     (interactive)
     (when lhgh/panel-process
       (ignore-errors
@@ -340,12 +341,15 @@ This part of the configuration should work with any panel. Curently using Polyba
     (setq lhgh/panel-process nil))
 
   (defun lhgh/start-panel (panel-name)
-    "Start the given panel after killing the running instance if present. `panel-name' must be lowercase"
-    (interactive "sName of the panel: ")
+    "Start the given panel after killing the running instance if present.  PANEL-NAME must be lowercase."
+    (interactive (list
+                  (completing-read "Name of the panel: "
+                                   '("polybar"))))
     (lhgh/kill-panel) ;; kill any present panel
     (pcase panel-name
       ("polybar"
-        (setq lhgh/panel-process (start-process-shell-command "polybar" nil "polybar panel")))))
+       (setq lhgh/panel-process (start-process-shell-command
+                                 "polybar" nil "polybar panel")))))
 #+end_src
 
 *** Panel Configuration
@@ -366,7 +370,7 @@ This elisp snippet sets the necessary hook for updating the workspace icon in Po
   (add-hook 'exwm-workspace-switch-hook #'lhgh/send-polybar-exwm-workspace)
 #+end_src
 
-This is the Polybar configuration. TODO: tangle to other directory and symlink instead.
+This is the Polybar configuration.
 
 #+begin_src conf :tangle .config/polybar/config :mkdirp yes
   ; Docs: https://github.com/polybar/polybar
@@ -388,6 +392,7 @@ This is the Polybar configuration. TODO: tangle to other directory and symlink i
   secondary = #e60053
   alert = #bd2c40
   underline-1 = #c792ea
+  underline-2 = #a52a2a
 
   [bar/panel]
   width = 100%
@@ -417,7 +422,7 @@ This is the Polybar configuration. TODO: tangle to other directory and symlink i
   font-2 = "JetBrainsMono Nerd Font Mono:size=17;5"
 
   modules-left = exwm-workspace
-  modules-right = cpu temperature battery updates date
+  modules-right = network cpu temperature battery updates date
 
   tray-position = right
   tray-padding = 2
@@ -449,6 +454,26 @@ This is the Polybar configuration. TODO: tangle to other directory and symlink i
   ramp-coreload-4 = ▅
   ramp-coreload-5 = ▆
   ramp-coreload-6 = ▇
+
+  [module/network]
+  type = internal/network
+  interface = wlp2s0
+  interval = 3.0
+
+  format-connected = <ramp-signal> <label-connected>
+  format-connected-underline = ${colors.underline-1}
+  label-connected =  %essid%%upspeed:9%%downspeed:9%
+
+  format-disconnected = 睊 <label-disconnected>
+  format-disconnected-underline = ${colors.underline-2}
+  label-disconnected = not connected
+
+  ramp-signal-0 = 😱
+  ramp-signal-1 = 😠
+  ramp-signal-2 = 😒
+  ramp-signal-3 = 😊
+  ramp-signal-4 = 😃
+  ramp-signal-5 = 😈
 
   [module/date]
   type = internal/date

@@ -2,4 +2,3 @@ alias e find-file $1
 alias edit find-file $1
 alias gs magit-status-here
 alias ffo find-file-other-window $1
-alias dotrepo git --git-dir=$HOME/Documents/dotfiles --work-tree=$HOME $*

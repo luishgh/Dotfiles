@@ -4,7 +4,9 @@
 #+PROPERTY: header-args:scheme :tangle .config/guix/system.scm
 
 * About This Config
-I started using Guix System after David's [[https://youtube.com/playlist?list=PLEoMzSkcN8oNxnj7jm5V2ZcGc52002pQU]["Craft Your System with GNU Guix"]] video series. For now, I only do a simple =system.scm= due to only having one notebook. Due to not having it on the default path, I run ~sudo -E guix system reconfigure $HOME/.config/guix/system.scm~, which passes the system configuration as an argument and uses ~sudo~ with the ~-E~ flag to use the channels specified at =~/.config/guix/channels.scm=.
+I started using Guix System after David's [[https://youtube.com/playlist?list=PLEoMzSkcN8oNxnj7jm5V2ZcGc52002pQU]["Craft Your System with GNU Guix"]] video series. For now, I only do a simple =system.scm= due to only having one notebook. Due to not having it on the default path, I run ~sudo guix system reconfigure $HOME/.config/guix/system.scm~, which passes the system configuration as an argument.
+
+Obs: In the past, I used ~sudo -E~ to run ~guix system reconfigure~, but it turns out it is not necessary and [[https://github.com/daviwil/dotfiles/issues/11][causes problems]].
 
 * Channels
 Unlike most distros, Guix pulls package definitions from Git repositories, so adding a new collection of packages is as easy as adding a new git repo to this code. At the moment, I only use the default guix channel, nonguix channel (for non-free drivers), and [[https://github.com/luishgh/guix-channel][my personal channel]].
@@ -49,8 +51,10 @@ Unlike most distros, Guix pulls package definitions from Git repositories, so ad
                (nongnu system linux-initrd)
                (srfi srfi-1)) ; for extended delete procedure
   (use-service-modules desktop networking
+                       sddm
                        ssh xorg
-                       sound
+                       sound sysctl
+                       syncthing
                        virtualization nix)
   (use-package-modules package-management)
 
@@ -68,6 +72,14 @@ Unlike most distros, Guix pulls package definitions from Git repositories, so ad
                     "\n"
                     "ACTION==\"add\", SUBSYSTEM==\"backlight\", "
                     "RUN+=\"/run/current-system/profile/bin/chmod g+w /sys/class/backlight/%k/brightness\"")))
+
+  (define %netfilter-bridges-sysctl-config
+    '(("net.bridge.bridge-nf-call-ip6tables" . "0")
+      ("net.bridge.bridge-nf-call-iptables" . "0")
+      ("net.bridge.bridge-nf-call-arptables" . "0")))
+
+  (define %ipv4-forwarding-sysctl-config
+    '(("net.ipv4.ip_forward" . "1")))
 
   ;; Switch DDX driver to intel
   (define %xorg-tear-free-config
@@ -122,13 +134,17 @@ Unlike most distros, Guix pulls package definitions from Git repositories, so ad
                      (elogind-service-type config =>
                                            (elogind-configuration (inherit config)
                                                                   (handle-lid-switch-external-power 'suspend)))
-                     (network-manager-service-type config =>
-                                                   (network-manager-configuration (inherit config)
-                                                                                  (dns "dnsmasq")))
                      (udev-service-type config =>
                                         (udev-configuration (inherit config)
                                                             (rules (cons %backlight-udev-rule
                                                                          (udev-configuration-rules config)))))
+
+                     (sysctl-service-type config =>
+                                          (sysctl-configuration
+                                           (settings (append %ipv4-forwarding-sysctl-config
+                                                             %netfilter-bridges-sysctl-config
+                                                             %default-sysctl-settings))))
+
                      (pulseaudio-service-type config =>
                                               (pulseaudio-configuration (inherit config)
                                                                         (client-conf '((autospawn . no )))
@@ -170,42 +186,66 @@ Unlike most distros, Guix pulls package definitions from Git repositories, so ad
 *** System Packages
 
 #+begin_src scheme
-    (packages
-      (append
-       (list (specification->package "emacs")
-             (specification->package "setxkbmap")
-             (specification->package "xhost")
-             (specification->package "picom")
-             (specification->package "feh")
-             (specification->package "nss-certs"))
-        %base-packages))
+  (packages
+   (append
+    (list (specification->package "emacs")
+
+          ;; Xorg
+          (specification->package "setxkbmap")
+          (specification->package "xhost")
+          (specification->package "picom")
+
+          ;; Wayland
+          (specification->package "sway")
+          (specification->package "bemenu")
+  
+          (specification->package "feh")
+          (specification->package "nss-certs"))
+    %base-packages))
 #+end_src
 
 *** System Services
 
 #+begin_src scheme
-  (services
-    (append
-     (list (service slim-service-type
-                    (slim-configuration
-                     (xorg-configuration
-                      (xorg-configuration
-                       ;; (drivers '("i915" "nouveau"))
-                       (extra-config (list %xorg-tear-free-config %xorg-libinput-config))
-                       (keyboard-layout keyboard-layout)))))
+      (services
+       (append
+        (list
+         ;; (service slim-service-type
+         ;;               (slim-configuration
+         ;;                (default-user "luishgh")
+         ;; (xorg-configuration
+         ;;  (xorg-configuration
+         ;;   (extra-config (list %xorg-tear-free-config %xorg-libinput-config))
+         ;;   (keyboard-layout keyboard-layout)))))
+         (service sddm-service-type
+                  (sddm-configuration
+                   (auto-login-user "luishgh")
+                   (display-server "wayland")
+                   (xorg-configuration
+                    (xorg-configuration
+                     (extra-config (list %xorg-tear-free-config %xorg-libinput-config))
+                     (keyboard-layout keyboard-layout)))))
 
-           ;; VMs
-           (service virtlog-service-type)
-           (service libvirt-service-type
-                    (libvirt-configuration
-                     (unix-sock-group "libvirt")
-                     (tls-port "16555")))
+         ;; VMs
+         (service virtlog-service-type)
+         (service libvirt-service-type
+                  (libvirt-configuration
+                   (unix-sock-group "libvirt")
+                   (tls-port "16555")))
 
-           ;; Nix
-           (service nix-service-type
-                    (nix-configuration
-                     (extra-config '("experimental-features = nix-command flakes")))))
-     %my-desktop-services))
+         ;; Guix dev
+         (service qemu-binfmt-service-type
+                  (qemu-binfmt-configuration
+                   (platforms (lookup-qemu-platforms "ppc64le"))))
+
+         (service syncthing-service-type
+                  (syncthing-configuration (user "luishgh")))
+
+         ;; Nix
+         (service nix-service-type
+                  (nix-configuration
+                   (extra-config '("experimental-features = nix-command flakes")))))
+        %my-desktop-services))
 #+end_src
 
 *** File Systems and Bootloader

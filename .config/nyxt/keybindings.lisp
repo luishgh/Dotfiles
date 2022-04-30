@@ -10,9 +10,10 @@
   "Dummy mode for the custom key bindings in `*my-keymap*'."
   ((keymap-scheme (keymap:make-scheme
                    ;; scheme:cua *my-keymap*
-                   ;; scheme:emacs *my-keymap*
-                   scheme:vi-normal *my-keymap*))))
+                   scheme:emacs *my-keymap*
+                   scheme:vi-normal *my-keymap*
+                   ))))
 
 ;; Enabling `my-mode' and Vi bindings by default
 (define-configuration (buffer web-buffer)
-  ((default-modes (append '(nyxt::vi-normal-mode) '(my-mode) %slot-default%))))
+  ((default-modes (append '(nyxt::emacs-mode) '(my-mode) %slot-default%))))

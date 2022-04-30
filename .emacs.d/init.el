@@ -1,15 +1,3 @@
-;; The default is 800 kilobytes.  Measured in bytes.
-(setq gc-cons-threshold (* 50 1000 1000))
-
-(defun lhgh/display-startup-time ()
-  (message "Emacs loaded in %s with %d garbage collections."
-           (format "%.2f seconds"
-                   (float-time
-                    (time-subtract after-init-time before-init-time)))
-           gcs-done))
-
-(add-hook 'emacs-startup-hook #'lhgh/display-startup-time)
-
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
 ;; Bootstrap straight.el
@@ -99,6 +87,10 @@
     :prefix "SPC" ;; The prefix in normal state
     :global-prefix "C-SPC") ;; The prefix accessible in any state
 
+  (general-create-definer lhgh/ctrl-c-binds
+    :states '(normal insert emacs)
+    :prefix "C-c")
+
   (lhgh/leader-maps
     "t"  '(:ignore t :which-key "toggles")
     "tt" '(consult-theme :which-key "choose theme")
@@ -176,6 +168,8 @@
          :map minibuffer-local-map
          ("C-d" . embark-act))
   :config
+  ;; Use Embark to show command prefix help
+  (setq prefix-help-command #'embark-prefix-help-command)
 
   ;; Show Embark actions via which-key
   (setq embark-action-indicator
@@ -183,6 +177,15 @@
           (which-key--show-keymap "Embark" map nil nil 'no-paging)
           #'which-key--hide-popup-ignore-command)
         embark-become-indicator embark-action-indicator))
+
+(use-package embark-consult
+  :straight t
+  :after (embark consult)
+  :demand t ; only necessary if you have the hook below
+  ;; if you want to have consult previews as you move around an
+  ;; auto-updating embark collect buffer
+  :hook
+  (embark-collect-mode . consult-preview-at-point-mode))
 
 (use-package helpful
   :bind
@@ -195,19 +198,11 @@
   "b" '(:ignore t :which-key "buffers")
   "bb" '(consult-buffer :which-key "switch buffer"))
 
-(setq inhibit-startup-message t)
-
-(scroll-bar-mode -1)
-(tool-bar-mode -1)
-(tooltip-mode -1)
-(set-fringe-mode 10)
-
-(menu-bar-mode -1)
-
-(setq ring-bell-function 'ignore)
-
 (defun lhgh/set-font-faces ()
   (set-face-attribute 'default nil
+    :font "JetBrains Mono 11"
+    :weight 'medium)
+  (set-face-attribute 'fixed-pitch nil
     :font "JetBrains Mono 11"
     :weight 'medium)
   (set-face-attribute 'variable-pitch nil
@@ -222,17 +217,17 @@
   (lhgh/set-font-faces))
 
 (column-number-mode) ;; Shows column number in mode-line
-(global-display-line-numbers-mode t) ;; Shows line numbers
+;; (global-display-line-numbers-mode t) ;; Shows line numbers globally
 (setq display-line-numbers-type 'relative) ;; Relative line numbers
 
-(dolist (mode '(term-mode-hook
-                compilation-mode
-                vterm-mode-hook
-                dired-mode-hook
-                calendar-mode-hook
-                shell-mode-hook
-                dashboard-mode-hook
-                eshell-mode-hook))
+;; Enable line numbers for some modes
+(dolist (mode '(text-mode-hook
+                prog-mode-hook
+                conf-mode-hook))
+  (add-hook mode (lambda () (display-line-numbers-mode 1))))
+
+;; Override some modes which derive from the above
+(dolist (mode '(org-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
 (dolist (mode '(org-mode-hook
@@ -274,6 +269,7 @@
   (doom-modeline-buffer-encoding nil))
 
 (use-package dashboard
+  :disabled t ; depends on page-break-lines, which is currently breaking Org-roam
   :defer lhgh/exwm-enabled ;; defer if in EXWM because it doesn't make sense in that context
   :init
   (setq dashboard-set-heading-icons t)
@@ -303,7 +299,12 @@
 
 (defun lhgh/org-mode-setup ()
   (org-indent-mode)
+  (variable-pitch-mode)
   (setq evil-auto-indent nil))
+
+(when lhgh/is-guix-system
+  ;; Use org provided by Guix
+  (straight-use-package '(org :type built-in)))
 
 (use-package org
   :hook (org-mode . lhgh/org-mode-setup)
@@ -320,6 +321,31 @@
         org-hide-emphasis-markers t)
 
 ;; NOTE: Subsequent sections are still part of this use-package block!
+
+;; Increase the size of various headings
+(with-eval-after-load 'org-indent
+  (set-face-attribute 'org-document-title nil :weight 'bold :height 1.3 :inherit 'variable-pitch)
+
+  (dolist (face '((org-level-1 . 1.2)
+                  (org-level-2 . 1.1)
+                  (org-level-3 . 1.05)
+                  (org-level-4 . 1.0)
+                  (org-level-5 . 1.1)
+                  (org-level-6 . 1.1)
+                  (org-level-7 . 1.1)
+                  (org-level-8 . 1.1)))
+    (set-face-attribute (car face) nil :font "Iosevka Aile" :weight 'medium :height (cdr face)))
+
+  ;; Ensure that anything that should be fixed-pitch in Org files appears that way
+  (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-table nil  :inherit 'fixed-pitch)
+  (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
+  (set-face-attribute 'org-code nil   :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-indent nil :inherit '(org-hide fixed-pitch))
+  (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
+  (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
+  (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch))
 
 (setq org-tag-alist
   '((:startgroup) ;; mutually exclusive tags go here
@@ -434,6 +460,84 @@
 
 (use-package org-make-toc
   :defer)
+
+(use-package citar
+  :no-require
+  :custom
+  (org-cite-global-bibliography '("~/Documents/biblio.bib"))
+  (citar-library-paths '("~/Documents/Library"))
+  (org-cite-insert-processor 'citar)
+  (org-cite-follow-processor 'citar)
+  (org-cite-activate-processor 'citar)
+  (citar-bibliography org-cite-global-bibliography)
+  ;; optional: org-cite-insert is also bound to C-c C-x C-@
+  (citar-symbols `((file ,(all-the-icons-faicon "file-o" :face 'all-the-icons-green :v-adjust -0.1) . " ")
+                   (note ,(all-the-icons-material "speaker_notes" :face 'all-the-icons-blue :v-adjust -0.3) . " ")
+                   (link ,(all-the-icons-octicon "link" :face 'all-the-icons-orange :v-adjust 0.01) . " ")))
+  (citar-symbol-separator "  ")
+  :bind
+  (:map org-mode-map :package org
+        ("C-c b" . #'org-cite-insert))
+  :config
+  (with-eval-after-load 'citar
+    (define-key citar-map (kbd "d") (cons "download entry" #'citar-download-entry))))
+
+(use-package org-roam
+  :after org
+  :init
+  (setq org-roam-v2-ack t)
+  :custom
+  (org-roam-directory "~/Documents/Org/org-roam")
+  (org-roam-capture-templates
+   '(("m" "main" plain
+      "%?"
+      :if-new (file+head "main/${slug}.org"
+                         "#+title: ${title}\n")
+      :unnarrowed t)
+     ("r" "reference" plain "%?"
+      :if-new (file+head "reference/${title}.org"
+                         "#+title: ${title}\n")
+      :unnarrowed t)
+     ("b" "bibliography reference" plain "%?"
+        :if-new
+        (file+head "reference/${citekey}.org" "#+title: ${author} :: ${title}\n")
+        :unnarrowed t)))
+  (org-roam-node-display-template
+   (concat "${type:15} ${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+  :general
+  (lhgh/ctrl-c-binds
+    "n" '(:ignore t :which-key "notes")
+    "nl" 'org-roam-buffer-toggle
+    "nf" 'org-roam-node-find
+    "ni" 'org-roam-node-insert)
+  :config
+  (org-roam-db-autosync-enable)
+  (cl-defmethod org-roam-node-type ((node org-roam-node))
+    "Return the TYPE of NODE."
+    (condition-case nil
+        (file-name-nondirectory
+         (directory-file-name
+          (file-name-directory
+           (file-relative-name (org-roam-node-file node) org-roam-directory))))
+      (error "")))
+  (add-to-list 'display-buffer-alist
+               '("\\*org-roam\\*"
+                 (display-buffer-in-direction)
+                 (direction . right)
+                 (window-width . 0.33)
+                 (window-height . fit-window-to-buffer))))
+
+(use-package org-roam-bibtex
+  :after org-roam
+  :hook (org-roam-mode . org-roam-bibtex-mode)
+  :custom
+  (orb-roam-ref-format 'org-cite)
+  (bibtex-completion-bibliography org-cite-global-bibliography)
+  (bibtex-completion-notes-path org-roam-directory)
+  (bibtex-completion-library-path "~/Documents/Library"))
+
+(use-package anki-editor
+  :defer t)
 
 (use-package org-superstar
   :hook (org-mode . org-superstar-mode)
@@ -580,18 +684,19 @@
   (yas-reload-all))
 
 (use-package lispy
-  :disabled
+  ;; :disabled
   :hook ((emacs-lisp-mode . lispy-mode)
          (scheme-mode . lispy-mode)))
 
 (use-package lispyville
-  :disabled
+  ;; :disabled
   :hook (lispy-mode . lispyville-mode)
   :config
   (lispyville-set-key-theme
    '(operators c-w additional prettify additional-movement)))
 
 (use-package symex
+  :disabled
   :hook ((emacs-lisp-mode . symex-mode)
          (scheme-mode . symex-mode))
   :general
@@ -606,6 +711,9 @@
 
 (use-package geiser
   :hook (scheme-mode . geiser-mode))
+
+(use-package sly
+  :mode "\\.lisp\\'")
 
 (use-package nix-mode
   :mode "\\.nix\\'")
@@ -731,8 +839,11 @@
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
 
+(use-package rainbow-mode
+  :hook (text-mode . rainbow-mode))
+
 (use-package hl-todo
-  :defer t)
+  :hook (prog-mode . hl-todo-mode))
 
 (use-package tree-sitter
   :straight t
@@ -742,6 +853,11 @@
 (use-package tree-sitter-langs
   :after tree-sitter
   :straight t)
+
+(use-package envrc
+  :after projectile
+  :config
+  (envrc-global-mode))
 
 (lhgh/leader-maps
   "a" '(:ignore t :which-key "applications"))
@@ -813,7 +929,8 @@
 
 
 (use-package eshell
-  :hook (eshell-first-time-mode . lhgh/configure-eshell)
+  :hook ((eshell-first-time-mode . lhgh/configure-eshell)
+         (eshell-mode . eshell-alias-initialize))
   :config
   (lhgh/leader-maps
     "ae" '(eshell :which-key "eshell"))
@@ -981,6 +1098,63 @@
   :commands pomm
   )
 
+(defun lhgh/bibtex-get-key (bibtex-string)
+  "Get cite key from BIBTEX-STRING."
+  (when (stringp bibtex-string)
+    (with-temp-buffer
+      (bibtex-mode)
+      (insert bibtex-string)
+      (bibtex-generate-autokey))))
+
+(defun lhgh/biblio--selection-insert-at-org-cite-bibfile-callback (bibtex entry)
+  "Add BIBTEX (from ENTRY) to end of first file in `org-cite-global-bibliography'."
+  (with-current-buffer (find-file-noselect (car org-cite-global-bibliography))
+    (save-excursion
+      (bibtex-mode)
+      (goto-char (point-max))
+      (insert "\n")
+      (save-restriction
+        (narrow-to-region (point) (point-max))
+        (insert bibtex)
+        (bibtex-clean-entry)
+        (let ((current-key (bibtex-key-in-head))
+              (new-key (bibtex-generate-autokey)))
+          (when (not (string= current-key new-key))
+            (message (format "Inserting autokey %s to replace %s" new-key current-key))
+            (goto-char (point-min))
+            (search-forward current-key)
+            (replace-match new-key))))
+      (bibtex-sort-buffer)
+      (save-buffer)))
+  (message "Inserted bibtex entry for %S."
+           (biblio--prepare-title (biblio-alist-get 'title entry))))
+
+(defun lhgh/biblio-selection-insert-at-org-cite-bibfile ()
+  "Insert BibTeX of current entry in `org-cite-global-bibliography'."
+  (interactive)
+  (biblio--selection-forward-bibtex #'lhgh/biblio--selection-insert-at-org-cite-bibfile-callback))
+
+(defun lhgh/biblio-selection-add-to-collection ()
+  "Insert current entry at global-bibliography and download paper to library."
+  (interactive)
+  (lhgh/biblio-selection-insert-at-org-cite-bibfile)
+  (biblio--selection-extended-action #'biblio-download--action))
+
+(use-package biblio
+  :custom
+  (biblio-download-directory "~/Documents/Library/")
+  :general
+  (biblio-selection-mode-map
+   "a" #'lhgh/biblio-selection-add-to-collection)
+  :init
+  (define-advice biblio-download--action (:filter-args (args) replace-identifier-with-key)
+    (let* ((record (car args))
+           (key nil))
+      (biblio--selection-forward-bibtex (lambda (bibtex _)
+                                          (setq key (lhgh/bibtex-get-key bibtex))))
+      (setf (alist-get 'identifier record) key)
+      (list record))))
+
 (use-package pinentry
   :straight (:source gnu-elpa-mirror)
   :config
@@ -1006,4 +1180,4 @@
         nil)))
 
 ;; Make gc pauses faster by decreasing the threshold.
- (setq gc-cons-threshold (* 2 1000 1000))
+ (setq gc-cons-threshold (* 20 1000 1000))

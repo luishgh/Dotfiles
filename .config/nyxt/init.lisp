@@ -6,4 +6,4 @@
   (load file))
 
 (define-configuration browser
-  ((external-editor-program "emacs")))
+  ((external-editor-program "emacsclient")))

@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: guix-package
+# key: <guixp
+# --
+
+*Guix Packages*
+
+#+begin_src scheme
+  "$0"
+#+end_src
