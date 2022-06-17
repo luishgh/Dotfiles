@@ -11,6 +11,13 @@
       ./gaming.nix
     ];
 
+  # Enable flakes
+  nix = {
+    extraOptions = ''
+      experimental-features = nix-command flakes
+    '';
+  };
+
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
@@ -95,6 +102,7 @@
   # $ nix search wget
   environment.systemPackages = with pkgs; [
     git
+    gnumake
     (import ./my-vim.nix)
     firefox
     tdesktop # telegram

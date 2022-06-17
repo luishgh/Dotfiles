@@ -6,6 +6,7 @@ vim_configurable.customize {
 
   vimrcConfig.customRC = ''
       syntax enable
+      set number relativenumber
   '';
 
   vimrcConfig.packages.myVimPackage = with pkgs.vimPlugins; {
