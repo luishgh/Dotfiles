@@ -21,6 +21,7 @@
 
 (define home-direnv-service-type
   (service-type (name 'home-direnv)
+                (description "Install and configure direnv.")
                 (extensions
                  (list (service-extension
                         home-bash-service-type

@@ -266,8 +266,8 @@ Unlike most distros, Guix pulls package definitions from Git repositories, so ad
              (mount-point "/")
              (device
                (uuid "7e442e31-8bb9-43f1-b32d-bac04909ab45"
-                     'ext4))
-             (type "ext4"))
+                     'btrfs))
+             (type "btrfs"))
            (file-system
              (mount-point "/mnt/hdd")
              (device (uuid "3113a99e-a55b-4a3f-8d54-d36c86abbf46"

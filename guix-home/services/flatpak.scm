@@ -25,6 +25,7 @@ fi
 
 (define home-flatpak-service-type
   (service-type (name 'home-flatpak)
+                (description "Install and configure Flatpak.")
                 (extensions
                  (list (service-extension
                         home-shell-profile-service-type

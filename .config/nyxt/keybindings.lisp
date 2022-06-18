@@ -1,3 +1,4 @@
+;;; -*- mode: common-lisp; -*-
 (in-package #:nyxt-user)
 
 (defvar *my-keymap* (make-keymap "my-map"))
@@ -10,7 +11,7 @@
   "Dummy mode for the custom key bindings in `*my-keymap*'."
   ((keymap-scheme (keymap:make-scheme
                    ;; scheme:cua *my-keymap*
-                   scheme:emacs *my-keymap*
+                   ;; scheme:emacs *my-keymap*
                    scheme:vi-normal *my-keymap*
                    ))))
 

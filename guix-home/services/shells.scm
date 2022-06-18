@@ -76,7 +76,8 @@
 
                             "export PS1")))
    (bash-profile
-    (list (home-config-file "bash-profile" ;; Load the default Guix profile
+    (list (home-config-file "bash-profile"
+                            ;; Load the default Guix profile
                             "GUIX_PROFILE=\"/home/luishgh/.guix-profile\""
                             ". \"$GUIX_PROFILE/etc/profile\""
 
@@ -95,10 +96,6 @@
                             "if [ -f /run/current-system/profile/etc/profile.d/nix.sh ]; then"
                             "    . /run/current-system/profile/etc/profile.d/nix.sh"
                             "fi"
-
-                            ;; Don't use the system-wide PulseAudio configuration
-                            "unset PULSE_CONFIG"
-                            "unset PULSE_CLIENTCONFIG"
 
                             "# environment variables:")))
    (environment-variables

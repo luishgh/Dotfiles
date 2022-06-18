@@ -30,7 +30,10 @@
   #:use-module (gnu packages gnome)
   #:use-module (gnu packages fonts)
   #:use-module (gnu packages virtualization)
-  #:use-module (nongnu packages compression)
+  ;; #:use-module (nongnu packages compression)
+
+  #:use-module (guix-home utils)
+
   #:export (home-desktop-service-type))
 
 (define (home-desktop-files-service config)
@@ -47,6 +50,7 @@ Xft/Hinting 0
 Xft/HintStyle \"hintnone\" "))))
 
 (define (home-desktop-profile-service config)
+  ;; TODO: move this to a stumpwm service
   (list stumpwm+slynk
         `(,stumpwm "lib")
         stumpish
@@ -87,7 +91,7 @@ Xft/HintStyle \"hintnone\" "))))
         ;; DE Suite
         libreoffice
         calibre
-        zathura
+        zathura zathura-pdf-mupdf
         xournalpp
         mpv
 
@@ -121,11 +125,12 @@ Xft/HintStyle \"hintnone\" "))))
     (documentation "Run the xsettingsd daemon.")
     (respawn? #t)
     (start #~(make-forkexec-constructor
-              (list #$ (file-append xsettingsd "/bin/xsettingsd"))))
+              (list #$(file-append xsettingsd "/bin/xsettingsd"))))
     (stop #~(make-kill-destructor)))))
 
 (define home-desktop-service-type
   (service-type (name 'home-desktop)
+                (description "Install and configure Desktop Environment")
                 (extensions
                  (list (service-extension
                         home-profile-service-type

@@ -10,17 +10,19 @@
   #:use-module (gnu services)
   #:use-module (guix-home services shells)
   #:use-module (guix-home services desktop)
+  #:use-module (guix-home services sway)
   #:use-module (guix-home services sound)
   #:use-module (guix-home services flatpak)
   #:use-module (guix-home services direnv))
 
 (home-environment
  (services
-  (list home-bash-service
+  (append (list home-bash-service
 
-        ;; Set up desktop environment
-        (service home-desktop-service-type)
+                ;; Set up desktop environment
+                (service home-desktop-service-type)
+                (service home-sway-service-type)
 
-        (service home-sound-service-type)
-        (service home-flatpak-service-type)
-        (service home-direnv-service-type))))
+                (service home-flatpak-service-type)
+                (service home-direnv-service-type))
+          home-sound-services)))
