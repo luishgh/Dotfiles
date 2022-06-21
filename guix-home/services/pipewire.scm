@@ -12,7 +12,7 @@
   '(("RTC_USE_PIPEWIRE" . "true")))
 
 (define (home-pipewire-files-service _)
-  `(("config/alsa/asoundrc"
+  `((".config/alsa/asoundrc"
      ,(mixed-text-file
        "asoundrc"
        #~(string-append

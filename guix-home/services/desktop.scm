@@ -12,6 +12,7 @@
   #:use-module (gnu packages admin)
   #:use-module (gnu packages xorg)
   #:use-module (gnu packages package-management)
+  #:use-module (gnu packages freedesktop)
   #:use-module (gnu packages ssh)
   #:use-module (gnu packages image)
   #:use-module (gnu packages terminals)
@@ -30,7 +31,6 @@
   #:use-module (gnu packages gnome)
   #:use-module (gnu packages fonts)
   #:use-module (gnu packages virtualization)
-  ;; #:use-module (nongnu packages compression)
 
   #:use-module (guix-home utils)
 
@@ -50,18 +50,7 @@ Xft/Hinting 0
 Xft/HintStyle \"hintnone\" "))))
 
 (define (home-desktop-profile-service config)
-  ;; TODO: move this to a stumpwm service
-  (list stumpwm+slynk
-        `(,stumpwm "lib")
-        stumpish
-        emacs-stumpwm-mode
-        sbcl-stumpwm-swm-gaps
-        sbcl-stumpwm-ttf-fonts
-        sbcl-stumpwm-stumptray
-        sbcl-stumpwm-kbd-layouts
-        sbcl
-
-        ;; Xorg
+  (list ;; Xorg
         setxkbmap
         picom
         xsettingsd
@@ -74,8 +63,9 @@ Xft/HintStyle \"hintnone\" "))))
         xsel
 
         ;; Utilities
+        xdg-utils
         ncurses ;; for prompt colors
-        zip unzip ;; urar
+        zip unzip
         neofetch
         stow
         openssh

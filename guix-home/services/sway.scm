@@ -6,7 +6,13 @@
 
 (define (home-sway-files-service config)
   (list (list ".config/sway/config"
-              (local-file "../files/sway-config"))))
+              (local-file "../files/sway-config"))
+        (list ".config/sway/swaybar-command.sh"
+              (program-file "swaybar-command.sh"
+                            #~(system
+                               #$(canonicalize-path (string-append
+                                                     (getcwd)
+                                                     "/files/swaybar-command.sh")))))))
 
 (define (home-sway-environment-variables-service _)
   '(("XDG_CURRENT_DESKTOP" . "sway")
