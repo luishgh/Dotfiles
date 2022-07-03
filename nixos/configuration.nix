@@ -108,6 +108,7 @@
     tdesktop # telegram
     stow
     gnome.gnome-tweaks # TODO: move to gnome.nix
+    spotify
   ];
 
   fonts.fonts = with pkgs; [
