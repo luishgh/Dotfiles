@@ -58,7 +58,6 @@
   - [[#modeline-statusline-in-vimish][Modeline (statusline in vimish)]]
   - [[#startup-screen][Startup Screen]]
   - [[#workspaces][Workspaces]]
-  - [[#use-better-versions-of-unix-utilities][Use better versions of UNIX utilities]]
 - [[#org-mode][Org Mode]]
   - [[#binding-prefix][Binding Prefix]]
   - [[#org-configuration][Org Configuration]]
@@ -83,6 +82,7 @@
   - [[#auto-tangle-configuration-files][Auto-tangle Configuration Files]]
 - [[#development][Development]]
   - [[#binding-prefixes][Binding Prefixes]]
+  - [[#projectel][Project.el]]
   - [[#projectile][Projectile]]
     - [[#counsel-projectile][counsel-projectile]]
   - [[#git][Git]]
@@ -115,6 +115,7 @@
     - [[#highlight-todos][Highlight TODOs]]
   - [[#tree-sitter][Tree-Sitter]]
   - [[#direnv][Direnv]]
+  - [[#compilation-mode][Compilation Mode]]
 - [[#applications][Applications]]
   - [[#binding-prefix][Binding Prefix]]
   - [[#vterm][Vterm]]
@@ -637,7 +638,7 @@ Corfu can be considered the minimalistic =completion-at-point= counterpart of =V
     (corfu-cycle t)
     :config
     (setq tab-always-indent 'complete)
-    (corfu-global-mode 1))
+    (global-corfu-mode 1))
 #+end_src
 
 *Guix Packages*
@@ -912,20 +913,6 @@ I use [[https://github.com/emacs-dashboard/emacs-dashboard][Emacs Dashboard]] as
 
   "emacs-perspective"
 
-#+end_src
-
-** Use better versions of UNIX utilities
-
-*** COMMENT Grep
-
-#+begin_src emacs-lisp
-  ;; TODO try to fix this https://www.reddit.com/r/emacs/comments/gyusav/comment/ftdl00c/?utm_source=share&utm_medium=web2x&context=3
-  (grep-apply-setting
-   'grep-find-command
-   '("find . -type f -exec rg --no-heading --color always -0 -H -e '' \\{\\} +" . 63))
-
-  (grep-apply-setting
-   'grep-template "rg --no-heading -H -uu -g <F> <R> <D>")
 #+end_src
 
 * Org Mode
@@ -1203,59 +1190,58 @@ I make use of Org's built-in citation system through [[https://github.com/bdarcu
 ** Org Roam
 
 #+begin_src emacs-lisp
-  (use-package org-roam
-    :after org
-    :init
-    (setq org-roam-v2-ack t)
-    :custom
-    (org-roam-directory "~/Documents/Org/org-roam")
-    (org-roam-capture-templates
-     '(("m" "main" plain
-        "%?"
-        :if-new (file+head "main/${slug}.org"
-                           "#+title: ${title}\n")
-        :unnarrowed t)
-       ("r" "reference" plain "%?"
-        :if-new (file+head "reference/${title}.org"
-                           "#+title: ${title}\n")
-        :unnarrowed t)
-       ("b" "bibliography reference" plain "%?"
-          :if-new
-          (file+head "reference/${citekey}.org" "#+title: ${author} :: ${title}\n")
+    (use-package org-roam
+      :after org
+      :init
+      (setq org-roam-v2-ack t)
+      :custom
+      (org-roam-directory "~/Documents/Org/org-roam")
+      (org-roam-capture-templates
+       '(("m" "main" plain "%?"
+          :if-new (file+head "main/${slug}.org"
+                             "#+title: ${title}\n")
+          :unnarrowed t)
+         ("r" "reference" plain "%?"
+          :if-new (file+head "reference/${title}.org"
+                             "#+title: ${title}\n")
+          :unnarrowed t)
+         ("b" "bibliography reference" plain "%?"
+          :if-new (file+head "reference/${citekey}.org"
+                             "#+title: ${author} :: ${title}\n")
           :unnarrowed t)))
-    (org-roam-node-display-template
-     (concat "${type:15} ${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
-    :general
-    (lhgh/ctrl-c-binds
-      "n" '(:ignore t :which-key "notes")
-      "nl" 'org-roam-buffer-toggle
-      "nf" 'org-roam-node-find
-      "ni" 'org-roam-node-insert)
-    :config
-    (org-roam-db-autosync-enable)
-    (cl-defmethod org-roam-node-type ((node org-roam-node))
-      "Return the TYPE of NODE."
-      (condition-case nil
-          (file-name-nondirectory
-           (directory-file-name
-            (file-name-directory
-             (file-relative-name (org-roam-node-file node) org-roam-directory))))
-        (error "")))
-    (add-to-list 'display-buffer-alist
-                 '("\\*org-roam\\*"
-                   (display-buffer-in-direction)
-                   (direction . right)
-                   (window-width . 0.33)
-                   (window-height . fit-window-to-buffer))))
+      (org-roam-node-display-template
+       (concat "${type:15} ${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+      :general
+      (lhgh/ctrl-c-binds
+        "n" '(:ignore t :which-key "notes")
+        "nl" 'org-roam-buffer-toggle
+        "nf" 'org-roam-node-find
+        "ni" 'org-roam-node-insert)
+      :config
+      (org-roam-db-autosync-enable)
+      (cl-defmethod org-roam-node-type ((node org-roam-node))
+        "Return the TYPE of NODE."
+        (condition-case nil
+            (file-name-nondirectory
+             (directory-file-name
+              (file-name-directory
+               (file-relative-name (org-roam-node-file node) org-roam-directory))))
+          (error "")))
+      (add-to-list 'display-buffer-alist
+                   '("\\*org-roam\\*"
+                     (display-buffer-in-direction)
+                     (direction . right)
+                     (window-width . 0.33)
+                     (window-height . fit-window-to-buffer))))
 
-  (use-package org-roam-bibtex
-    :after org-roam
-    :hook (org-roam-mode . org-roam-bibtex-mode)
-    :custom
-    (orb-roam-ref-format 'org-cite)
-    (bibtex-completion-bibliography org-cite-global-bibliography)
-    (bibtex-completion-notes-path org-roam-directory)
-    (bibtex-completion-library-path "~/Documents/Library"))
+    (use-package org-roam-bibtex
+      :after org-roam
+      :hook (org-roam-mode . org-roam-bibtex-mode)
+      :custom
+      (orb-roam-ref-format 'org-cite)
+      (bibtex-completion-bibliography org-cite-global-bibliography)
+      (bibtex-completion-notes-path org-roam-directory)
+      (bibtex-completion-library-path "~/Documents/Library"))
 #+end_src
 
 *Guix Packages*
@@ -1311,6 +1297,7 @@ Obs: this is commented at the time due to guix's Anki being broken ATM.
 
 #+begin_src emacs-lisp
 (use-package grip-mode
+  :disabled t ; disabled until the grip package is fixed on Guix: https://issues.guix.gnu.org/56043
   :straight t
   :defer t
   :general
@@ -1320,6 +1307,12 @@ Obs: this is commented at the time due to guix's Anki being broken ATM.
   ;; When nil, update the preview after file saves only, instead of also
   ;; after every text change
   (setq grip-update-after-change nil))
+#+end_src
+
+*Guix Packages*
+
+#+begin_src scheme
+  ;; "grip"
 #+end_src
 
 *** org-mime
@@ -1380,6 +1373,23 @@ This snippet adds a hook to =org-mode= buffers so that any Org file in the =.dot
     "m" '(:ignore t :which-key "mode")
     "mt" '(:ignore t :which-key "toggle")
     "r" '(:ignore t :which-key "generate"))
+#+end_src
+
+** Project.el
+I started using some commands from the built-in project.el. Maybe I'll substitute [[*Projectile][Projectile]] with it when I update to Emacs 28.
+
+#+begin_src emacs-lisp
+  (use-package project
+    :straight (:type built-in)
+    :after projectile
+    :config
+    (customize-set-value 'xref-search-program 'ripgrep))
+#+end_src
+
+*Guix Packages*
+
+#+begin_src scheme
+  "ripgrep"
 #+end_src
 
 ** Projectile
@@ -1575,7 +1585,7 @@ For snippets, I use yasnippets.
     :hook (lispy-mode . lispyville-mode)
     :config
     (lispyville-set-key-theme
-     '(operators c-w additional prettify additional-movement)))
+     '(operators c-w additional prettify additional-movement text-objects)))
 
   (use-package symex
     :disabled
@@ -1760,12 +1770,7 @@ Used primarily for Flutter.
 
   (use-package lsp-dart
     :straight t
-    :hook (dart-mode . lsp-deferred)
-    :custom
-    (lsp-dart-flutter-sdk-dir (if lhgh/is-guix-system
-                                  (string-trim (shell-command-to-string "find /nix/store -regex \".*flutter\-.*\-unwrapped$\""))
-                                "~/.local/share/flutter"))
-    (lsp-dart-sdk-dir (concat lsp-dart-flutter-sdk-dir "/bin/cache/dart-sdk")))
+    :hook (dart-mode . lsp-deferred))
 
   (use-package flutter
     :straight t
@@ -1950,6 +1955,14 @@ I have started to use =direnv= to automatically enable =guix shell= environments
   "direnv"
 #+end_src
 
+** Compilation Mode
+
+#+begin_src emacs-lisp
+  (use-package compile
+   :hook (compilation-filter . ansi-color-compilation-filter)
+   :custom (ansi-color-bold-is-bright 't))
+#+end_src
+
 * Applications
 
 ** Binding Prefix
@@ -2073,6 +2086,7 @@ A native code alternative to =term= and =ansi-term=.
   alias edit find-file $1
   alias gs magit-status-here
   alias ffo find-file-other-window $1
+  alias pp projectile-switch-project
 #+end_src
 
 ** File Browsing
@@ -2163,7 +2177,9 @@ Just a cheatsheet with the commands I use most frequently. Disclaimer: this docu
     (lhgh/leader-maps
       "ad" '(dired-jump :which-key "dired-jump"))
     :custom ((dired-listing-switches "-agho --group-directories-first")
-             (dired-omit-files "^\\.[^.].*"))
+             (dired-omit-files "^\\.[^.].*")
+             (dired-kill-when-opening-new-dired-buffer 't)
+             (dired-compress-directory-default-suffix ".zip"))
     :config
     (setq delete-by-moving-to-trash t)
 
@@ -2191,10 +2207,6 @@ Just a cheatsheet with the commands I use most frequently. Disclaimer: this docu
       (dired-rainbow-define vc "#0074d9" ("git" "gitignore" "gitattributes" "gitmodules"))
       (dired-rainbow-define-chmod executable-unix "#38c172" "-.*x.*"))
 
-    (use-package dired-single
-      :straight t
-      :defer t)
-
     (use-package dired-ranger
       :defer t)
 
@@ -2208,9 +2220,9 @@ Just a cheatsheet with the commands I use most frequently. Disclaimer: this docu
                 (all-the-icons-dired-mode 1)))
 
     (evil-collection-define-key 'normal 'dired-mode-map
-      "h" 'dired-single-up-directory
+      "h" 'dired-up-directory
+      "l" 'dired-find-file
       "H" 'dired-omit-mode
-      "l" 'dired-single-buffer
       "y" 'dired-ranger-copy
       "X" 'dired-ranger-move
       "p" 'dired-ranger-paste))
@@ -2221,7 +2233,6 @@ Just a cheatsheet with the commands I use most frequently. Disclaimer: this docu
 #+begin_src scheme
 
   "emacs-all-the-icons-dired"
-  ;; "emacs-dired-single"
   "emacs-dired-hacks"
 
 #+end_src
@@ -2462,6 +2473,7 @@ The [[https://github.com/zx2c4/password-store/tree/master/contrib/emacs][passwor
 #+begin_src emacs-lisp
   (use-package pinentry
     :straight (:source gnu-elpa-mirror)
+    :demand
     :config
     (setq epg-pinentry-mode 'loopback)
     (pinentry-start))

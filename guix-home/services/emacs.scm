@@ -12,7 +12,7 @@
    #~(system
       (string-append
        #$(home-extra-profile-executable-path emacs emacsclient)
-       " -c -a emacs --eval '(browse-url-mail \""
+       " -c -a emacs --eval '(message-mailto \""
        (car (cdr (command-line))) "\")'"))))
 
 (define (home-emacs-files-service config)

@@ -2,3 +2,4 @@ alias e find-file $1
 alias edit find-file $1
 alias gs magit-status-here
 alias ffo find-file-other-window $1
+alias pp projectile-switch-project

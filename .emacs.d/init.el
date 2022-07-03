@@ -153,7 +153,7 @@
   (corfu-cycle t)
   :config
   (setq tab-always-indent 'complete)
-  (corfu-global-mode 1))
+  (global-corfu-mode 1))
 
 (use-package orderless
   :straight t
@@ -489,8 +489,7 @@
   :custom
   (org-roam-directory "~/Documents/Org/org-roam")
   (org-roam-capture-templates
-   '(("m" "main" plain
-      "%?"
+   '(("m" "main" plain "%?"
       :if-new (file+head "main/${slug}.org"
                          "#+title: ${title}\n")
       :unnarrowed t)
@@ -499,9 +498,9 @@
                          "#+title: ${title}\n")
       :unnarrowed t)
      ("b" "bibliography reference" plain "%?"
-        :if-new
-        (file+head "reference/${citekey}.org" "#+title: ${author} :: ${title}\n")
-        :unnarrowed t)))
+      :if-new (file+head "reference/${citekey}.org"
+                         "#+title: ${author} :: ${title}\n")
+      :unnarrowed t)))
   (org-roam-node-display-template
    (concat "${type:15} ${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
   :general
@@ -546,6 +545,7 @@
   (org-superstar-remove-leading-stars t))
 
 (use-package grip-mode
+  :disabled t ; disabled until the grip package is fixed on Guix: https://issues.guix.gnu.org/56043
   :straight t
   :defer t
   :general
@@ -586,6 +586,12 @@
   "m" '(:ignore t :which-key "mode")
   "mt" '(:ignore t :which-key "toggle")
   "r" '(:ignore t :which-key "generate"))
+
+(use-package project
+  :straight (:type built-in)
+  :after projectile
+  :config
+  (customize-set-value 'xref-search-program 'ripgrep))
 
 (use-package projectile
   :config (projectile-mode)
@@ -693,7 +699,7 @@
   :hook (lispy-mode . lispyville-mode)
   :config
   (lispyville-set-key-theme
-   '(operators c-w additional prettify additional-movement)))
+   '(operators c-w additional prettify additional-movement text-objects)))
 
 (use-package symex
   :disabled
@@ -789,12 +795,7 @@
 
 (use-package lsp-dart
   :straight t
-  :hook (dart-mode . lsp-deferred)
-  :custom
-  (lsp-dart-flutter-sdk-dir (if lhgh/is-guix-system
-                                (string-trim (shell-command-to-string "find /nix/store -regex \".*flutter\-.*\-unwrapped$\""))
-                              "~/.local/share/flutter"))
-  (lsp-dart-sdk-dir (concat lsp-dart-flutter-sdk-dir "/bin/cache/dart-sdk")))
+  :hook (dart-mode . lsp-deferred))
 
 (use-package flutter
   :straight t
@@ -858,6 +859,10 @@
   :after projectile
   :config
   (envrc-global-mode))
+
+(use-package compile
+ :hook (compilation-filter . ansi-color-compilation-filter)
+ :custom (ansi-color-bold-is-bright 't))
 
 (lhgh/leader-maps
   "a" '(:ignore t :which-key "applications"))
@@ -955,7 +960,9 @@
   (lhgh/leader-maps
     "ad" '(dired-jump :which-key "dired-jump"))
   :custom ((dired-listing-switches "-agho --group-directories-first")
-           (dired-omit-files "^\\.[^.].*"))
+           (dired-omit-files "^\\.[^.].*")
+           (dired-kill-when-opening-new-dired-buffer 't)
+           (dired-compress-directory-default-suffix ".zip"))
   :config
   (setq delete-by-moving-to-trash t)
 
@@ -983,10 +990,6 @@
     (dired-rainbow-define vc "#0074d9" ("git" "gitignore" "gitattributes" "gitmodules"))
     (dired-rainbow-define-chmod executable-unix "#38c172" "-.*x.*"))
 
-  (use-package dired-single
-    :straight t
-    :defer t)
-
   (use-package dired-ranger
     :defer t)
 
@@ -1000,9 +1003,9 @@
               (all-the-icons-dired-mode 1)))
 
   (evil-collection-define-key 'normal 'dired-mode-map
-    "h" 'dired-single-up-directory
+    "h" 'dired-up-directory
+    "l" 'dired-find-file
     "H" 'dired-omit-mode
-    "l" 'dired-single-buffer
     "y" 'dired-ranger-copy
     "X" 'dired-ranger-move
     "p" 'dired-ranger-paste))
@@ -1157,6 +1160,7 @@
 
 (use-package pinentry
   :straight (:source gnu-elpa-mirror)
+  :demand
   :config
   (setq epg-pinentry-mode 'loopback)
   (pinentry-start))
