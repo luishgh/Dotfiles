@@ -1,4 +1,6 @@
 switch:
-	sudo nixos-rebuild switch -I nixos-config=./configuration.nix
+	sudo nixos-rebuild switch --flake '.#'
+check:
+	nix flake check .
 test:
-	nixos-rebuild dry-build -I nixos-config=./configuration.nix
+	nixos-rebuild dry-build --flake '.#'
