@@ -27,5 +27,6 @@
     discord
     minecraft
     heroic
+    protonup
   ];
 }

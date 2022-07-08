@@ -24,8 +24,6 @@
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.efi.efiSysMountPoint = "/boot/efi";
 
-  networking.hostName = "LenovoNixOS"; # Define your hostname.
-
   # Enable networking
   networking.networkmanager.enable = true;
 
@@ -90,6 +88,8 @@
     gnumake
     # (import ./my-vim.nix)
     my-vim
+    emacs
+    gcc # for emacs
     firefox
     tdesktop # telegram
     spotify
@@ -102,7 +102,8 @@
     noto-fonts-emoji
     # Coding
     jetbrains-mono
-    iosevka
+    (iosevka-bin.override { variant = "aile"; })
+    emacs-all-the-icons-fonts
   ];
 
   # Secret management tools
