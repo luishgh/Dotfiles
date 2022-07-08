@@ -466,17 +466,18 @@
   :custom
   (org-cite-global-bibliography '("~/Documents/biblio.bib"))
   (citar-library-paths '("~/Documents/Library"))
+  (citar-notes-paths '("~/Documents/Org/org-roam/reference/"))
   (org-cite-insert-processor 'citar)
   (org-cite-follow-processor 'citar)
   (org-cite-activate-processor 'citar)
   (citar-bibliography org-cite-global-bibliography)
-  ;; optional: org-cite-insert is also bound to C-c C-x C-@
   (citar-symbols `((file ,(all-the-icons-faicon "file-o" :face 'all-the-icons-green :v-adjust -0.1) . " ")
                    (note ,(all-the-icons-material "speaker_notes" :face 'all-the-icons-blue :v-adjust -0.3) . " ")
                    (link ,(all-the-icons-octicon "link" :face 'all-the-icons-orange :v-adjust 0.01) . " ")))
   (citar-symbol-separator "  ")
   :bind
   (:map org-mode-map :package org
+        ;; optional: org-cite-insert is also bound to C-c C-x @
         ("C-c b" . #'org-cite-insert))
   :config
   (with-eval-after-load 'citar
@@ -717,6 +718,8 @@
 
 (use-package geiser
   :hook (scheme-mode . geiser-mode))
+(use-package geiser-guile
+  :defer t)
 
 (use-package sly
   :mode "\\.lisp\\'")
