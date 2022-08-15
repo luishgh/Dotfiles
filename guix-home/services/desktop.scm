@@ -32,6 +32,8 @@
   #:use-module (gnu packages fonts)
   #:use-module (gnu packages virtualization)
 
+  #:use-module (nongnu packages mozilla)
+
   #:use-module (guix-home utils)
 
   #:export (home-desktop-service-type))
@@ -74,7 +76,7 @@ Xft/HintStyle \"hintnone\" "))))
 
         ;; Browsers
         ungoogled-chromium
-        icecat
+        firefox/wayland
         qutebrowser
         nyxt
 

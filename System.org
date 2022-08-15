@@ -189,6 +189,7 @@ Unlike most distros, Guix pulls package definitions from Git repositories, so ad
   (packages
    (append
     (list (specification->package "emacs")
+          (specification->package "git")
 
           ;; Xorg
           (specification->package "setxkbmap")
@@ -198,6 +199,8 @@ Unlike most distros, Guix pulls package definitions from Git repositories, so ad
           ;; Wayland
           (specification->package "sway")
           (specification->package "bemenu")
+          (specification->package "xdg-desktop-portal")
+          (specification->package "xdg-desktop-portal-wlr")
   
           (specification->package "feh")
           (specification->package "nss-certs"))

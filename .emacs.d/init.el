@@ -41,6 +41,13 @@
         (expand-file-name (format "emacs-custom-%s.el" (user-uid)) temporary-file-directory)))
 (load custom-file t)
 
+;; Keep backup files under `user-emacs-directory'
+(setq backup-directory-alist `(("." . ,(expand-file-name "backups/" user-emacs-directory))))
+
+;; Keep auto-save files under `user-emacs-directory'
+(setq auto-save-file-name-transforms
+      `((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
+
 (push "~/.emacs.d/lisp" load-path)
 
 (setq lhgh/exwm-enabled (and (eq window-system 'x)
