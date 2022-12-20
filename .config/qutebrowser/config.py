@@ -5,6 +5,9 @@
 #   \__, |\__,_|\__\___|_.__/|_|  \___/ \_/\_/ |___/\___|_|
 #      |_|
 
+# temporary workaround for https://issues.guix.gnu.org/54297
+c.qt.args = ["no-sandbox"]
+
 # Uncomment this to still load settings configured via autoconfig.yml
 # config.load_autoconfig()
 config.load_autoconfig(False)

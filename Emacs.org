@@ -110,7 +110,7 @@
     - [[#shell-scripting][Shell scripting]]
   - [[#productivity][Productivity]]
     - [[#syntax-checking-with-flycheck][Syntax checking with Flycheck]]
-    - [[#raibow-delimiters][Raibow Delimiters]]
+    - [[#rainbow-delimiters][Rainbow Delimiters]]
     - [[#rainbow-mode][Rainbow Mode]]
     - [[#highlight-todos][Highlight TODOs]]
   - [[#tree-sitter][Tree-Sitter]]
@@ -938,6 +938,7 @@ I use [[https://github.com/emacs-dashboard/emacs-dashboard][Emacs Dashboard]] as
   (defun lhgh/org-mode-setup ()
     (org-indent-mode)
     (variable-pitch-mode)
+    (face-remap-add-relative 'tree-sitter-hl-face:punctuation nil  :inherit 'fixed-pitch)
     (setq evil-auto-indent nil))
 
   (when lhgh/is-guix-system
@@ -999,44 +1000,15 @@ I try to make Org Mode buffers seem more like notebooks, using mostly a variable
     (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch))
 #+end_src
 
-** TODO Tags
+** Tags
+
+I used to use this a lot during high school for task management. Currently I'm not using org for task management at Uni, so this part of the config will remain meh for the time being. I plan to come back to using this again later though.
 
 #+begin_src emacs-lisp
   (setq org-tag-alist
-    '((:startgroup) ;; mutually exclusive tags go here
-
-      ;; CEFET tags
-      (:startgroup)
-      ("@CEFET"     . ?C)
-      (:grouptags)
-      (:startgroup)
-      ("Ensino Médio" . ?E)
-      (:grouptags)
-      ("Português" . ?p)
-      ("Matemática" . ?m)
-      ("Física"     . ?f)
-      ("História"   . ?h)
-      ("Inglês"     . ?i)
-      ("Química"    . ?q)
-      ("Redação"    . ?r)
-      ("Sociologia" . ?s)
-      (:endgroup)
-      (:startgroup)
-      ("Técnico" . ?T)
-      (:grouptags)
-      ("PDM"        . ?d)
-      ("TCC"        . ?t)
-      ("PS"         . ?a)
-      ("RC"         . ?c)
-      ("SO"         . ?o)
-      ("TEI"        . ?e)
-      (:endgroup)
-
-      ;; Other major tags
-      ("@mandarim" . ?M)
-      ("@redacao"  . ?R)
-      ("@pessoal"  . ?P)
-      (:endgroup)))
+    '(("@mandarim" . ?M)
+      ("@pessoal" . ?P)
+      ("@UFMG" . ?U)))
 #+end_src
 
 ** Capture Templates
@@ -1068,10 +1040,10 @@ I try to make Org Mode buffers seem more like notebooks, using mostly a variable
     (setq org-agenda-custom-commands
       '(("d" "Dashboard"
          ((agenda "" ((org-deadline-warning-days 7)))
-          (tags-todo "+@CEFET"
-            ((org-agenda-overriding-header "Next CEFET Tasks")
+          (tags-todo "+@UFMG"
+            ((org-agenda-overriding-header "Next UFMG Tasks")
              (org-agenda-max-todos 5)))
-          (tags-todo "+@mandarim|@redacao|@pessoal"
+          (tags-todo "+@mandarim|@pessoal"
             ((org-agenda-overriding-header "Next Other Tasks")))))))
 #+end_src
 
@@ -1657,7 +1629,6 @@ For snippets, I use yasnippets.
 
 #+end_src
 
-
 *** Nix
 
 #+begin_src emacs-lisp
@@ -1891,8 +1862,8 @@ Check out Tailwind [[https://tailwindcss.com/][here]].
 
 #+end_src
 
-*** Raibow Delimiters
-[[https://github.com/Fanael/rainbow-delimiters][raibow-delimeters]] helps spotting matching delimiters, orienting yourself in the code and telling which statements are at a given depth.
+*** Rainbow Delimiters
+[[https://github.com/Fanael/rainbow-delimiters][rainbow-delimeters]] helps spotting matching delimiters, orienting yourself in the code and telling which statements are at a given depth.
 
 #+begin_src emacs-lisp
   (use-package rainbow-delimiters

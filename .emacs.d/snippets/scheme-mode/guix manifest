@@ -1,0 +1,5 @@
+# key: manifest
+# name: guix manifest
+# --
+(specifications->manifest
+ '( "$0" ))

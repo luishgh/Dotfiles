@@ -8,7 +8,7 @@ I manage my emails inside Emacs through the Mu4e email client. For syncing the m
 ** Tip for gmail users
 If you wonder how you can expose Gmail categories - like =Updates= or =Promotions= - to IMAP, check [[https://dylanconlin.svbtle.com/exposing-gmails-categories-to-imap][this blog post]]. Labels are exposed by default, so don't worry about them.
 
-* Mu4e configuratio
+* Mu4e configuration
 
 #+begin_src emacs-lisp
   (use-package mu4e

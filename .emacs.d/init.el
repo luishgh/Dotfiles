@@ -307,6 +307,7 @@
 (defun lhgh/org-mode-setup ()
   (org-indent-mode)
   (variable-pitch-mode)
+  (face-remap-add-relative 'tree-sitter-hl-face:punctuation nil  :inherit 'fixed-pitch)
   (setq evil-auto-indent nil))
 
 (when lhgh/is-guix-system
@@ -355,40 +356,9 @@
   (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch))
 
 (setq org-tag-alist
-  '((:startgroup) ;; mutually exclusive tags go here
-
-    ;; CEFET tags
-    (:startgroup)
-    ("@CEFET"     . ?C)
-    (:grouptags)
-    (:startgroup)
-    ("Ensino Médio" . ?E)
-    (:grouptags)
-    ("Português" . ?p)
-    ("Matemática" . ?m)
-    ("Física"     . ?f)
-    ("História"   . ?h)
-    ("Inglês"     . ?i)
-    ("Química"    . ?q)
-    ("Redação"    . ?r)
-    ("Sociologia" . ?s)
-    (:endgroup)
-    (:startgroup)
-    ("Técnico" . ?T)
-    (:grouptags)
-    ("PDM"        . ?d)
-    ("TCC"        . ?t)
-    ("PS"         . ?a)
-    ("RC"         . ?c)
-    ("SO"         . ?o)
-    ("TEI"        . ?e)
-    (:endgroup)
-
-    ;; Other major tags
-    ("@mandarim" . ?M)
-    ("@redacao"  . ?R)
-    ("@pessoal"  . ?P)
-    (:endgroup)))
+  '(("@mandarim" . ?M)
+    ("@pessoal" . ?P)
+    ("@UFMG" . ?U)))
 
 (setq org-capture-templates
   '(("t" "Tasks")
@@ -412,10 +382,10 @@
 (setq org-agenda-custom-commands
   '(("d" "Dashboard"
      ((agenda "" ((org-deadline-warning-days 7)))
-      (tags-todo "+@CEFET"
-        ((org-agenda-overriding-header "Next CEFET Tasks")
+      (tags-todo "+@UFMG"
+        ((org-agenda-overriding-header "Next UFMG Tasks")
          (org-agenda-max-todos 5)))
-      (tags-todo "+@mandarim|@redacao|@pessoal"
+      (tags-todo "+@mandarim|@pessoal"
         ((org-agenda-overriding-header "Next Other Tasks")))))))
 
 (require 'org-habit)
