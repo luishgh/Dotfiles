@@ -16,11 +16,10 @@
                         (map
                          (lambda (path)
                            (string-append
-                            "\""
                             path
-                            "\":"))
+                            ":"))
                          paths)
-                        '("\"$PATH\""))))
+                        '("$PATH"))))
 
 (define-syntax-rule (augment-path! path ...)
   (cons "PATH" (augment-path-string path ...)))
@@ -34,7 +33,7 @@
     
     ;; We're in Emacs, yo
     ("VISUAL" . "emacsclient")
-    ("EDITOR" . "\"$VISUAL\"")
+    ("EDITOR" . "$VISUAL")
 
     ;; Augment PATH
     ,(augment-path!
