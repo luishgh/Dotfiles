@@ -31,29 +31,51 @@ If you wonder how you can expose Gmail categories - like =Updates= or =Promotion
     (setq mu4e-get-mail-command "mbsync -a")
     (setq mu4e-maildir "~/Mail")
 
-    ;; something about ourselves
-    (setq
-     user-mail-address "luishenriquegh2701@gmail.com"
-     user-full-name "Luis Henrique Gomes Higino"
-     mu4e-compose-signature
-       (concat
-         "Luis H. Higino - "
-         "Representante do 3 Ano de Informática do CEFET-MG Campus V"))
+    (setq mu4e-contexts
+          (list
+           ;; Main account
+           (make-mu4e-context
+            :name "Gmail"
+            :match-func
+            (lambda (msg)
+              (when msg
+                (string-prefix-p "/Gmail" (mu4e-message-field msg :maildir))))
+            :vars '((smtpmail-smtp-server . "smtp.gmail.com")
+                    (smtpmail-smtp-service . 465)
+                    (smtpmail-stream-type . 'ssl)
+                    (user-mail-address . "luishenriquegh2701@gmail.com")
+                    (user-full-name . "Luis Henrique Gomes Higino")
+                    (mu4e-drafts-folder . "/Gmail/[Gmail]/Drafts")
+                    (mu4e-sent-folder . "/Gmail/[Gmail]/Sent Mail")
+                    (mu4e-refile-folder . "/Gmail/[Gmail]/All Mail")
+                    (mu4e-trash-folder . "/Gmail/[Gmail]/Trash")
+                    (mu4e-compose-signature . "Luis H. Higino")))
 
-    ;; folders
-    (setq mu4e-drafts-folder "/[Gmail]/Drafts")
-    (setq mu4e-sent-folder   "/[Gmail]/Sent Mail")
-    (setq mu4e-refile-folder "/[Gmail]/All Mail")
-    (setq mu4e-trash-folder  "/[Gmail]/Trash")
+           ;; DCC/UFMG account
+           (make-mu4e-context
+            :name "DCC"
+            :match-func
+            (lambda (msg)
+              (when msg
+                (string-prefix-p "/DCC" (mu4e-message-field msg :maildir))))
+            :vars '((smtpmail-smtp-server . "smtp.dcc.ufmg.br")
+                    (smtpmail-smtp-service . 587)
+                    (smtpmail-stream-type . 'ssl)
+                    (user-mail-address . "luis.higino@dcc.ufmg.br")
+                    (user-full-name . "Luis Henrique Gomes Higino")
+                    (mu4e-drafts-folder . "/DCC/Drafts")
+                    (mu4e-sent-folder . "/DCC/Sent")
+                    (mu4e-refile-folder . "/DCC/Archive")
+                    (mu4e-trash-folder . "/DCC/Deleted Items")
+                    (mu4e-compose-signature . "Luis H. Higino")))))
 
     ;; shortcuts
     (setq mu4e-maildir-shortcuts
-      '((:maildir "/primary"           :key ?i)
-        (:maildir "/academic"          :key ?a)
-        (:maildir "/[Gmail]/Sent Mail" :key ?s)
-        (:maildir "/[Gmail]/Trash"     :key ?t)
-        (:maildir "/[Gmail]/Drafts"    :key ?d)
-        (:maildir "/[Gmail]/All Mail"  :key ?A)))
+      '((:maildir "/Gmail/primary"           :key ?i)
+        (:maildir "/Gmail/[Gmail]/Sent Mail" :key ?s)
+        (:maildir "/Gmail/[Gmail]/Trash"     :key ?t)
+        (:maildir "/Gmail/[Gmail]/Drafts"    :key ?d)
+        (:maildir "/Gmail/[Gmail]/All Mail"  :key ?A)))
 
     ;; custom actions
     (defun lhgh/capture-mail-read-later (msg)
@@ -67,13 +89,12 @@ If you wonder how you can expose Gmail categories - like =Updates= or =Promotion
     (add-to-list 'mu4e-view-actions
       '("read later" . lhgh/capture-mail-read-later) t)
 
+    ;; adding custom bookmarks
+    (add-to-list 'mu4e-bookmarks
+                 '(:name "Academic messages" :query "m:/Gmail/academic or m:/DCC/Inbox" :key ?a))
+
     ;; setting mu4e to complete with completing-read
     (setq mu4e-completing-read-function 'completing-read)
-
-    ;; SMTP Settings
-    (setq smtpmail-smtp-server "smtp.gmail.com"
-          smtpmail-smtp-service 465
-          smtpmail-stream-type  'ssl)
 
     ;; Function to use for sending mail
     (setq message-send-mail-function 'smtpmail-send-it)
@@ -83,6 +104,11 @@ If you wonder how you can expose Gmail categories - like =Updates= or =Promotion
 
     ;; Kill mail buffer when mail is sent
     (setq message-kill-buffer-on-exit t)
+
+    ;; Only ask for a context when composing if one hasn't been previously picked
+    (setq mu4e-compose-context-policy 'ask-if-none)
+
+    (setq mu4e-headers-date-format "%d/%m/%y")
 
     ;; Run mu4e in the background to sync mail periodically
     (mu4e t))
@@ -104,13 +130,42 @@ If you wonder how you can expose Gmail categories - like =Updates= or =Promotion
 
   MaildirStore gmail-local
   Subfolders Verbatim
-  Path ~/Mail/
-  Inbox ~/Mail/Inbox
+  Path ~/Mail/Gmail/
+  Inbox ~/Mail/Gmail/Inbox
 
   Channel gmail
-  Master :gmail-remote:
-  Slave :gmail-local:
+  Far :gmail-remote:
+  Near :gmail-local:
   Patterns * ![Gmail]* "[Gmail]/Sent Mail" "[Gmail]/Starred" "[Gmail]/All Mail" "[Gmail]/Trash"
+  Create Both
+  SyncState *
+
+  # DCC/UFMG account
+
+  IMAPAccount dcc
+  Host imap.dcc.ufmg.br 
+  SSLType IMAPS
+  AuthMechs LOGIN
+  User luis.higino
+  PassCmd "pass academic/dcc.ufmg.br"
+  CertificateFile /etc/ssl/certs/ca-certificates.crt
+
+  IMAPStore dcc-remote
+  Account dcc
+
+  MaildirStore dcc-local
+  Subfolders Verbatim
+  Path ~/Mail/DCC/
+  Inbox ~/Mail/DCC/Inbox
+  Trash "~/Mail/DCC/Deleted Items"
+
+  Channel dcc
+  Far :dcc-remote:
+  Near :dcc-local:
+  Patterns *
+  Expunge None
+  CopyArrivalDate yes
+  Sync All
   Create Both
   SyncState *
 #+end_src
