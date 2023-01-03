@@ -86,7 +86,7 @@
     git
     stow
     gnumake
-    # (import ./my-vim.nix)
+    pass
     my-vim
     emacs
     gcc # for emacs

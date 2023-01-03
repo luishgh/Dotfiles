@@ -28,5 +28,6 @@
     minecraft
     heroic
     protonup
+    vulkan-tools
   ];
 }
