@@ -1087,27 +1087,29 @@ Insert empty structural blocks, such as =#+begin_src= … =#+end_src=, by pressi
 For academic documents, I'm starting to use Org mode for the general content and LaTeX for formatting.
 
 #+begin_src emacs-lisp
-  (with-eval-after-load 'ox-latex
-    (add-to-list 'org-latex-classes
-                 '("homework"
-                   "\\documentclass[11pt]{article}
-[NO-DEFAULT-PACKAGES]
-[PACKAGES]
-\\usepackage[]{babel}
-\\pagenumbering{gobble}
-\\usepackage[margin=0.5in]{geometry}
-\\usepackage{enumitem}
-\\usepackage{hyperref}
+    (with-eval-after-load 'ox-latex
+      (add-to-list 'org-latex-classes
+                   '("homework"
+                     "\\documentclass[11pt]{article}
+  [NO-DEFAULT-PACKAGES]
+  [PACKAGES]
+  \\usepackage[]{babel}
+  \\pagenumbering{gobble}
+  \\usepackage[margin=0.5in]{geometry}
+  \\usepackage{enumitem}
+  \\usepackage{hyperref}
 
-[EXTRA]
+  [EXTRA]
 
 
-"
-                   ("\\section{%s}" . "\\section*{%s}")
-                   ("\\subsection{%s}" . "\\subsection*{%s}")
-                   ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
-                   ("\\paragraph{%s}" . "\\paragraph*{%s}")
-                   ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))))
+  "
+                     ("\\section{%s}" . "\\section*{%s}")
+                     ("\\subsection{%s}" . "\\subsection*{%s}")
+                     ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+                     ("\\paragraph{%s}" . "\\paragraph*{%s}")
+                     ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+
+      (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0)))
 #+end_src
 
 ** End =use-package=

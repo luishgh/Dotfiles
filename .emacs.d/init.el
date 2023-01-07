@@ -430,7 +430,9 @@
                    ("\\subsection{%s}" . "\\subsection*{%s}")
                    ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
                    ("\\paragraph{%s}" . "\\paragraph*{%s}")
-                   ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))))
+                   ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+
+    (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0)))
 
 ;; This ends the use-package org block
 )
