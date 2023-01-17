@@ -978,12 +978,6 @@
 (use-package elpher
   :commands elpher)
 
-(use-package langtool
-  :straight t
-  :commands langtool-check
-  :config
-  (setq langtool-language-tool-server-jar "~/.local/bin/LanguageTool-5.3/languagetool-server.jar"))
-
 (when lhgh/is-guix-system
   ;; Load mu4e from mail profile
   (let ((default-directory (expand-file-name "~/.guix-extra-profiles/mail/mail/share/emacs")))

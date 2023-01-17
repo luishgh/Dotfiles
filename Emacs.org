@@ -34,11 +34,6 @@
   - [[#hydra][Hydra]]
   - [[#which-key][which-key]]
 - [[#completion][Completion]]
-  - [[#old-setup-ivy][Old Setup (Ivy)]]
-    - [[#ivy][Ivy]]
-    - [[#counsel][Counsel]]
-    - [[#navigation-bindings][Navigation bindings]]
-    - [[#helpful][Helpful]]
   - [[#vertico][Vertico]]
   - [[#consult][Consult]]
   - [[#marginalia][Marginalia]]
@@ -134,7 +129,6 @@
     - [[#erc][ERC]]
     - [[#discord][Discord]]
   - [[#elpher][Elpher]]
-  - [[#languagetool][LanguageTool]]
   - [[#mail-management][Mail management]]
   - [[#pomodoro-timer][Pomodoro timer]]
   - [[#reference-browsing][Reference browsing]]
@@ -500,56 +494,6 @@ This is the main section of configuration that makes Emacs usable for me. Before
 #+end_src
 
 * Completion
-
-** Old Setup (Ivy)
-Not using these right now. Trying =vertico=.
-
-*** Ivy
-I use [[http://oremacs.com/swiper/][ivy]] for generic completion in Emacs, basically because I got accustomed to it in [[https://github.com/hlissner/doom-emacs][Doom Emacs]] (which has it enabled by default).
-
-#+begin_src emacs-lisp :tangle no
-  (use-package ivy
-    :diminish
-    :bind (("C-s" . swiper)) ;; replaces I-search with swiper
-    :config
-    (ivy-mode 1))
-  (use-package ivy-rich ;; richer ivy and counsel commands (descriptions, key bindings, etc)
-    :init (ivy-rich-mode 1))
-#+end_src
-
-*** Counsel
-[[https://github.com/abo-abo/swiper#counsel][Counsel]] is a collection of Ivy-enhanced versions of common Emacs commands, like =counsel-find-file=.
-
-#+begin_src emacs-lisp :tangle no
-  (use-package counsel
-    :init (counsel-mode 1)
-    :config
-    (setq ivy-initial-inputs-alist nil)) ;; Don't start searches with ^
-#+end_src
-
-*** Navigation bindings
-
-#+begin_src emacs-lisp :tangle no
-  (lhgh/leader-maps
-    "."  '(counsel-find-file :which-key "find file")
-    "b" '(:ignore t :which-key "buffers")
-    "bb" '(ivy-switch-buffer :which-key "switch buffer"))
-#+end_src
-
-*** Helpful
-[[https://github.com/Wilfred/helpful][Helpful]] enhances Help buffers (this is here because you generally get to help pages from counsel commands, so yeah).
-
-#+begin_src emacs-lisp :tangle no
-  (use-package helpful
-    :custom
-    (counsel-describe-function-function #'helpful-callable)
-    (counsel-describe-variable-function #'helpful-variable)
-    :bind
-    ([remap describe-function] . counsel-describe-function)
-    ([remap describe-command] . helpful-command)
-    ([remap describe-variable] . counsel-describe-variable)
-    ([remap describe-key] . helpful-key))
-#+end_src
 
 ** Vertico
 A more minimal alternative to =Ivy=.  It uses the default completion system, which means it achieves full compatibility with built-in Emacs commands and completion tables.
@@ -1435,9 +1379,9 @@ I like to install my language servers to =.local/bin=. This is good because it m
   (push "~/.local/bin" exec-path)
 #+end_src
 
-** Debug Adapter Protocol
+** TODO Debug Adapter Protocol
 The second best contribution from VSCode, debugger integration for any editor.
-- [[https://emacs-lsp.github.io/dap-mode/page/configuration/][dap-mode configuration page]]
+OBS: Find an alternative for dap-mode that works without lsp-mode (I'll probably do it only when I come to need it again).
 
 #+begin_src emacs-lisp
 #+end_src
@@ -2235,16 +2179,6 @@ A relatively full-featured gopher and gemini client for GNU Emacs.
 
   "emacs-elpher"
 
-#+end_src
-
-** LanguageTool
-
-#+begin_src emacs-lisp
-  (use-package langtool
-    :straight t
-    :commands langtool-check
-    :config
-    (setq langtool-language-tool-server-jar "~/.local/bin/LanguageTool-5.3/languagetool-server.jar"))
 #+end_src
 
 ** Mail management
