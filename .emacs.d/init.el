@@ -525,8 +525,6 @@
   (org-superstar-remove-leading-stars t))
 
 (use-package grip-mode
-  :disabled t ; disabled until the grip package is fixed on Guix: https://issues.guix.gnu.org/56043
-  :straight t
   :defer t
   :general
   (lhgh/leader-maps '(markdown-mode-map gfm-mode-map org-mode-map)
@@ -573,22 +571,6 @@
   :config
   (customize-set-value 'xref-search-program 'ripgrep))
 
-(use-package projectile
-  :config (projectile-mode)
-  :bind-keymap ("C-c p" . projectile-command-map)
-  :general
-  (lhgh/leader-maps
-    "p"  '(:ignore t :which-key "projectile")
-    "pp" '(projectile-switch-project :which-key "switch-project")
-    "pf" '(projectile-find-file :which-key "find-file")
-    "pF" '(projectile-find-file-other-window :which-key "find-file-other-window")
-    "pq" '(projectile-kill-buffers :which-key "quit project")
-    "pt" '(projectile-test-project :which-key "test-project"))
-  :init
-  (when (file-directory-p "~/Projects/Code")
-    (setq projectile-project-search-path '("~/Projects/Code")))
-  (setq projectile-switch-project-action #'projectile-dired))
-
 (use-package magit
   :commands (magit-status magit-get-current-branch)
   :general
@@ -602,58 +584,11 @@
 (use-package forge
   :after magit)
 
-(use-package lsp-mode
-  :straight t
-  :commands (lsp lsp-deferred)
-  :init
-  (setq lsp-keymap-prefix "C-c l")
-  :bind (:map lsp-mode-map
-         ("TAB" . completion-at-point))
-  :custom
-  (lsp-completion-provider :none)
-  :config
-  (lsp-enable-which-key-integration t))
-
-(use-package lsp-ui
-  :straight t
-  :hook (lsp-mode . lsp-ui-mode)
-  :custom
-  (lsp-eldoc-enable-hover nil)
-  ;; (lsp-ui-doc-position 'bottom))
-  (lsp-lens-enable nil)
-  (lsp-ui-sideline-show-code-actions nil)
-  (lsp-ui-sideline-show-hover nil)
-  (lsp-signature-render-documentation nil)
-  (lsp-ui-doc-show-with-cursor nil))
+(use-package eglot)
 
 (push "~/.local/bin" exec-path)
 
-(use-package dap-mode
-  :straight t
-  :after lsp-mode
-  :custom
-  (lsp-emable-dap-auto-configure nil)
-  :config
-  (dap-ui-mode 1)
-  :general
-  (lhgh/leader-maps
-    "d"  '(:ignore t :which-key "debugger")
-    "dd" '(dap-debug "debug")
-    "dl" '(dap-debug-last :which-key "debug-last")
-    "dr" '(dap-debug-recent :which-key "debug-recent")
-    "du" '(:ignore t :which-key "ui")
-    "dur" '(dap-ui-repl :which-key "repl")
-    "dul" '(dap-ui-locals :which-key "locals")
-    "dub" '(dap-ui-breakpoints :which-key "breakpoints")
-    "due" '(dap-ui-expressions :which-key "expresions")
-    "dh" '(dap-hydra :which-key "dap-hydra")
-    "db" '(:ignore t :which-key "breakpoints")
-    "dbt" '(dap-breakpoint-toggle :which-key "toggle")
-    "dbl" '(dap-breakpoint-log-message :which-key "log-message")
-    "dbc" '(dap-breakpoint-condition :which-key "condition")
-    "ds" '(dap-switch-stack-frame :which-key "stack-frame")
-    "dq" '(dap-disconnect :which-key "disconnect")
-    "de" '(dap-debug-edit-template :which-key "edit-template")))
+
 
 (use-package yasnippet
   :hook ((prog-mode . yas-minor-mode)
@@ -693,7 +628,7 @@
   :config
   (symex-initialize))
 
-(add-hook 'emacs-lisp-mode-hook #'flycheck-mode)
+(add-hook 'emacs-lisp-mode-hook #'flymake-mode)
 
 (use-package geiser
   :hook (scheme-mode . geiser-mode))
@@ -710,9 +645,11 @@
   :hook ((haskell-mode . interactive-haskell-mode)
          (haskell-mode . haskell-indent-mode)
          (haskell-mode . haskell-doc-mode)
-         (haskell-mode . flycheck-mode))
+         ;; (haskell-mode . flycheck-mode)
+         )
  :config
- (flycheck-add-next-checker 'haskell-ghc '(info . haskell-hlint)))
+ ;; (flycheck-add-next-checker 'haskell-ghc '(info . haskell-hlint))
+ )
 
 (use-package hindent
   :after haskell-mode
@@ -723,20 +660,17 @@
   :disabled t
   :after haskell-mode
   :commands 'dante-mode
-  :hook ((haskell-mode . flycheck-mode)
+  :hook (;; (haskell-mode . flycheck-mode)
          (haskell-mode . dante-mode))
   :config
-  (flycheck-add-next-checker 'haskell-dante '(info . haskell-hlint)))
+  ;; (flycheck-add-next-checker 'haskell-dante '(info . haskell-hlint))
+  )
 
 (use-package typescript-mode
   :mode "\\.ts\\'"
-  :hook (typescript-mode . lsp-deferred)
+  ;; :hook (typescript-mode . lsp-deferred)
   :config
-  (setq typescript-indent-level 2)
-
-  ;; debugger
-  (require 'dap-node)
-  (dap-node-setup)) ;; Automatically installs Node debug adapter if needed
+  (setq typescript-indent-level 2))
 
 (use-package python-mode
   ;; :hook (python-mode . lsp-deferred)
@@ -750,21 +684,7 @@
     "mrf" '(python-shell-send-defun :which-key "send function to repl")
     "mrF" '(python-shell-send-file :which-key "send file to repl"))
   :custom
-  (python-shell-interpreter "python3")
-  (dap-python-executable "python3")
-  (dap-python-debugger 'debugpy)
-  )
-
-(use-package lsp-pyright
-  :straight t
-  :hook (python-mode . (lambda ()
-                          (require 'lsp-pyright)
-                          (lsp-deferred)
-                          (require 'dap-python))))
-
-(use-package pipenv
-  :straight t
-  :hook (python-mode . pipenv-mode))
+  (python-shell-interpreter "python3"))
 
 (use-package python-docstring
   :hook (python-mode . python-docstring-mode)
@@ -775,10 +695,6 @@
 (use-package dart-mode
   :mode "\\.dart\\'")
 
-(use-package lsp-dart
-  :straight t
-  :hook (dart-mode . lsp-deferred))
-
 (use-package flutter
   :straight t
   :after dart-mode
@@ -788,7 +704,7 @@
 
 (use-package markdown-mode
   :mode ("README\\.md\\'" . gfm-mode)
-  :init (setq makrdown-command "marked"))
+  :init (setq markdown-command "marked"))
 
 (use-package markdown-toc
   :straight t
@@ -799,25 +715,22 @@
 
 (use-package web-mode
   :mode "(\\.\\(html?\\|ejs\\|tsx\\|jsx\\)\\'"
-  :hook (web-mode . lsp-deferred)
+  ;; :hook (web-mode . lsp-deferred)
   :config
   (setq-default web-mode-code-indent-offset 2)
   (setq-default web-mode-markup-indent-offset 2)
   (setq-default web-mode-attribute-indent-offset 2))
 
-(use-package lsp-tailwindcss
-  :straight '(:type git
-              :host github
-              :repo "merrickluo/lsp-tailwindcss"))
+;; (use-package lsp-tailwindcss
+;;   :straight '(:type git
+;;               :host github
+;;               :repo "merrickluo/lsp-tailwindcss"))
 
-(defun lhgh/sh-mode-config()
-  (flycheck-select-checker 'sh-shellcheck))
+;; (defun lhgh/sh-mode-config()
+;;   (flycheck-select-checker 'sh-shellcheck))
 
-(add-hook 'sh-mode-hook #'flycheck-mode)
-(add-hook 'sh-mode-hook #'lhgh/sh-mode-config)
-
-(use-package flycheck
-  :hook (lsp-mode . flycheck-mode))
+;; (add-hook 'sh-mode-hook #'flycheck-mode)
+;; (add-hook 'sh-mode-hook #'lhgh/sh-mode-config)
 
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
@@ -838,7 +751,7 @@
   :straight t)
 
 (use-package envrc
-  :after projectile
+  :after project
   :config
   (envrc-global-mode))
 

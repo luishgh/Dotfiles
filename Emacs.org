@@ -82,9 +82,7 @@
   - [[#auto-tangle-configuration-files][Auto-tangle Configuration Files]]
 - [[#development][Development]]
   - [[#binding-prefixes][Binding Prefixes]]
-  - [[#projectel][Project.el]]
-  - [[#projectile][Projectile]]
-    - [[#counsel-projectile][counsel-projectile]]
+  - [[#projects][Projects]]
   - [[#git][Git]]
     - [[#magit][Magit]]
     - [[#forge][Forge]]
@@ -109,7 +107,6 @@
       - [[#tailwind-css][Tailwind CSS]]
     - [[#shell-scripting][Shell scripting]]
   - [[#productivity][Productivity]]
-    - [[#syntax-checking-with-flycheck][Syntax checking with Flycheck]]
     - [[#rainbow-delimiters][Rainbow Delimiters]]
     - [[#rainbow-mode][Rainbow Mode]]
     - [[#highlight-todos][Highlight TODOs]]
@@ -865,9 +862,10 @@ I use [[https://github.com/seagle0128/doom-modeline][doom-modeline]] because it 
 
 *Guix Packages*
 
+*OBS:* momentary hotfix for https://github.com/seagle0128/doom-modeline/issues/594
 #+begin_src scheme
 
-  "emacs-doom-modeline"
+  ;; "emacs-doom-modeline"
 
 #+end_src
 
@@ -1279,8 +1277,6 @@ Obs: this is commented at the time due to guix's Anki being broken ATM.
 
 #+begin_src emacs-lisp
 (use-package grip-mode
-  :disabled t ; disabled until the grip package is fixed on Guix: https://issues.guix.gnu.org/56043
-  :straight t
   :defer t
   :general
   (lhgh/leader-maps '(markdown-mode-map gfm-mode-map org-mode-map)
@@ -1294,7 +1290,7 @@ Obs: this is commented at the time due to guix's Anki being broken ATM.
 *Guix Packages*
 
 #+begin_src scheme
-  ;; "grip"
+  "grip"
 #+end_src
 
 *** org-mime
@@ -1357,8 +1353,8 @@ This snippet adds a hook to =org-mode= buffers so that any Org file in the =.dot
     "r" '(:ignore t :which-key "generate"))
 #+end_src
 
-** Project.el
-I started using some commands from the built-in project.el. Maybe I'll substitute [[*Projectile][Projectile]] with it when I update to Emacs 28.
+** Projects
+I started the built-in project.el instead of projectile.
 
 #+begin_src emacs-lisp
   (use-package project
@@ -1372,44 +1368,6 @@ I started using some commands from the built-in project.el. Maybe I'll substitut
 
 #+begin_src scheme
   "ripgrep"
-#+end_src
-
-** Projectile
-[[https://github.com/bbatsov/projectile][Projectile]] brings project capabilities to Emacs.
-
-#+begin_src emacs-lisp
-  (use-package projectile
-    :config (projectile-mode)
-    :bind-keymap ("C-c p" . projectile-command-map)
-    :general
-    (lhgh/leader-maps
-      "p"  '(:ignore t :which-key "projectile")
-      "pp" '(projectile-switch-project :which-key "switch-project")
-      "pf" '(projectile-find-file :which-key "find-file")
-      "pF" '(projectile-find-file-other-window :which-key "find-file-other-window")
-      "pq" '(projectile-kill-buffers :which-key "quit project")
-      "pt" '(projectile-test-project :which-key "test-project"))
-    :init
-    (when (file-directory-p "~/Projects/Code")
-      (setq projectile-project-search-path '("~/Projects/Code")))
-    (setq projectile-switch-project-action #'projectile-dired))
-#+end_src
-
-*Guix Packages*
-
-#+begin_src scheme
-
-  "emacs-projectile"
-
-#+end_src
-
-*** counsel-projectile
-[[https://github.com/ericdanan/counsel-projectile][counsel-projectile]] provides further ivy integration into projectile. (not using at the moment, see [[*Old Setup (Ivy)][here]])
-
-#+begin_src emacs-lisp :tangle no
-  (use-package counsel-projectile
-    :after projectile
-    :config (counsel-projectile-mode))
 #+end_src
 
 ** Git
@@ -1456,32 +1414,18 @@ NOTE: Remember to configure GitHub and/or GitLab tokens before using this packag
 #+end_src
 
 ** Language Server Protocol
-LSP is IMO one of the most important contributions Microsoft has ever done to the dev community and surely the best aspect of the creation of Visual Studio Code. It makes possible to have IDE level features in almost any text editor, from VSCode itself to (Neo)vim and Emacs.
+LSP is IMO one of the most important contributions Microsoft has ever done to the dev community and surely the best aspect of the creation of Visual Studio Code. It makes possible to have IDE level features in almost any text editor, from VSCode itself to (Neo)vim and Emacs. Right now I'm migrating from =lsp-mode= to =eglot= as the latter was recently included into the Emacs core.
 
 #+begin_src emacs-lisp
-  (use-package lsp-mode
-    :straight t
-    :commands (lsp lsp-deferred)
-    :init
-    (setq lsp-keymap-prefix "C-c l")
-    :bind (:map lsp-mode-map
-           ("TAB" . completion-at-point))
-    :custom
-    (lsp-completion-provider :none)
-    :config
-    (lsp-enable-which-key-integration t))
+  (use-package eglot)
+#+end_src
 
-  (use-package lsp-ui
-    :straight t
-    :hook (lsp-mode . lsp-ui-mode)
-    :custom
-    (lsp-eldoc-enable-hover nil)
-    ;; (lsp-ui-doc-position 'bottom))
-    (lsp-lens-enable nil)
-    (lsp-ui-sideline-show-code-actions nil)
-    (lsp-ui-sideline-show-hover nil)
-    (lsp-signature-render-documentation nil)
-    (lsp-ui-doc-show-with-cursor nil))
+*Guix Packages*
+
+#+begin_src scheme
+
+  "emacs-eglot"
+
 #+end_src
 
 *** Add .local/bin to exec path for lsp servers
@@ -1496,32 +1440,6 @@ The second best contribution from VSCode, debugger integration for any editor.
 - [[https://emacs-lsp.github.io/dap-mode/page/configuration/][dap-mode configuration page]]
 
 #+begin_src emacs-lisp
-  (use-package dap-mode
-    :straight t
-    :after lsp-mode
-    :custom
-    (lsp-emable-dap-auto-configure nil)
-    :config
-    (dap-ui-mode 1)
-    :general
-    (lhgh/leader-maps
-      "d"  '(:ignore t :which-key "debugger")
-      "dd" '(dap-debug "debug")
-      "dl" '(dap-debug-last :which-key "debug-last")
-      "dr" '(dap-debug-recent :which-key "debug-recent")
-      "du" '(:ignore t :which-key "ui")
-      "dur" '(dap-ui-repl :which-key "repl")
-      "dul" '(dap-ui-locals :which-key "locals")
-      "dub" '(dap-ui-breakpoints :which-key "breakpoints")
-      "due" '(dap-ui-expressions :which-key "expresions")
-      "dh" '(dap-hydra :which-key "dap-hydra")
-      "db" '(:ignore t :which-key "breakpoints")
-      "dbt" '(dap-breakpoint-toggle :which-key "toggle")
-      "dbl" '(dap-breakpoint-log-message :which-key "log-message")
-      "dbc" '(dap-breakpoint-condition :which-key "condition")
-      "ds" '(dap-switch-stack-frame :which-key "stack-frame")
-      "dq" '(dap-disconnect :which-key "disconnect")
-      "de" '(dap-debug-edit-template :which-key "edit-template")))
 #+end_src
 
 ** Snippets
@@ -1595,7 +1513,7 @@ For snippets, I use yasnippets.
 *** Emacs Lisp
 
 #+begin_src emacs-lisp
-  (add-hook 'emacs-lisp-mode-hook #'flycheck-mode)
+  (add-hook 'emacs-lisp-mode-hook #'flymake-mode)
 #+end_src
 
 *** Scheme Lisp
@@ -1646,16 +1564,19 @@ For snippets, I use yasnippets.
 
 #+end_src
 
-*** Haskell
+*** TODO Haskell
+Migrate this to flymake
 
 #+begin_src emacs-lisp
   (use-package haskell-mode
     :hook ((haskell-mode . interactive-haskell-mode)
            (haskell-mode . haskell-indent-mode)
            (haskell-mode . haskell-doc-mode)
-           (haskell-mode . flycheck-mode))
+           ;; (haskell-mode . flycheck-mode)
+           )
    :config
-   (flycheck-add-next-checker 'haskell-ghc '(info . haskell-hlint)))
+   ;; (flycheck-add-next-checker 'haskell-ghc '(info . haskell-hlint))
+   )
 
   (use-package hindent
     :after haskell-mode
@@ -1666,10 +1587,11 @@ For snippets, I use yasnippets.
     :disabled t
     :after haskell-mode
     :commands 'dante-mode
-    :hook ((haskell-mode . flycheck-mode)
+    :hook (;; (haskell-mode . flycheck-mode)
            (haskell-mode . dante-mode))
     :config
-    (flycheck-add-next-checker 'haskell-dante '(info . haskell-hlint)))
+    ;; (flycheck-add-next-checker 'haskell-dante '(info . haskell-hlint))
+    )
 #+end_src
 
 *Guix Packages*
@@ -1677,25 +1599,22 @@ For snippets, I use yasnippets.
 #+begin_src scheme
 
   "emacs-haskell-mode"
-  "emacs-dante" ;; outdated version
+  "emacs-dante"
   "ghc" ;; for haskell-interactive-mode
   "ghc-hindent"
   "hlint"
 
 #+end_src
 
-*** TypeScript
+*** TODO TypeScript
+Migrate this to eglot
 
 #+begin_src emacs-lisp
 (use-package typescript-mode
   :mode "\\.ts\\'"
-  :hook (typescript-mode . lsp-deferred)
+  ;; :hook (typescript-mode . lsp-deferred)
   :config
-  (setq typescript-indent-level 2)
-
-  ;; debugger
-  (require 'dap-node)
-  (dap-node-setup)) ;; Automatically installs Node debug adapter if needed
+  (setq typescript-indent-level 2))
 #+end_src
 
 *Guix Packages*
@@ -1706,7 +1625,8 @@ For snippets, I use yasnippets.
 
 #+end_src
 
-*** Python
+*** TODO Python
+Migrate this to eglot
 
 #+begin_src emacs-lisp
   (use-package python-mode
@@ -1721,21 +1641,7 @@ For snippets, I use yasnippets.
       "mrf" '(python-shell-send-defun :which-key "send function to repl")
       "mrF" '(python-shell-send-file :which-key "send file to repl"))
     :custom
-    (python-shell-interpreter "python3")
-    (dap-python-executable "python3")
-    (dap-python-debugger 'debugpy)
-    )
-
-  (use-package lsp-pyright
-    :straight t
-    :hook (python-mode . (lambda ()
-                            (require 'lsp-pyright)
-                            (lsp-deferred)
-                            (require 'dap-python))))
-
-  (use-package pipenv
-    :straight t
-    :hook (python-mode . pipenv-mode))
+    (python-shell-interpreter "python3"))
 
   (use-package python-docstring
     :hook (python-mode . python-docstring-mode)
@@ -1744,16 +1650,14 @@ For snippets, I use yasnippets.
                 :repo "glyph/python-docstring-mode"))
 #+end_src
 
-*** Dart
+*** TODO Dart
+PS: Migrate this to eglot
+
 Used primarily for Flutter.
 
 #+begin_src emacs-lisp
   (use-package dart-mode
     :mode "\\.dart\\'")
-
-  (use-package lsp-dart
-    :straight t
-    :hook (dart-mode . lsp-deferred))
 
   (use-package flutter
     :straight t
@@ -1779,7 +1683,7 @@ Used primarily for Flutter.
 #+begin_src emacs-lisp
   (use-package markdown-mode
     :mode ("README\\.md\\'" . gfm-mode)
-    :init (setq makrdown-command "marked"))
+    :init (setq markdown-command "marked"))
 #+end_src
 
 *Guix Packages*
@@ -1802,12 +1706,13 @@ Used primarily for Flutter.
       "rt" '(markdown-toc-generate-or-refresh-toc :which-key "generate or refresh markdown toc")))
 #+end_src
 
-*** HTML
+*** TODO HTML
+Migrate this to eglot
 
 #+begin_src emacs-lisp
   (use-package web-mode
     :mode "(\\.\\(html?\\|ejs\\|tsx\\|jsx\\)\\'"
-    :hook (web-mode . lsp-deferred)
+    ;; :hook (web-mode . lsp-deferred)
     :config
     (setq-default web-mode-code-indent-offset 2)
     (setq-default web-mode-markup-indent-offset 2)
@@ -1823,22 +1728,25 @@ Used primarily for Flutter.
 #+end_src
 
 **** Tailwind CSS
+
 Check out Tailwind [[https://tailwindcss.com/][here]].
+
 #+begin_src emacs-lisp
-  (use-package lsp-tailwindcss
-    :straight '(:type git
-                :host github
-                :repo "merrickluo/lsp-tailwindcss"))
+  ;; (use-package lsp-tailwindcss
+  ;;   :straight '(:type git
+  ;;               :host github
+  ;;               :repo "merrickluo/lsp-tailwindcss"))
 #+end_src
 
-*** Shell scripting
+*** TODO Shell scripting
+Migrate this to flymake
 
 #+begin_src emacs-lisp
-  (defun lhgh/sh-mode-config()
-    (flycheck-select-checker 'sh-shellcheck))
+  ;; (defun lhgh/sh-mode-config()
+  ;;   (flycheck-select-checker 'sh-shellcheck))
 
-  (add-hook 'sh-mode-hook #'flycheck-mode)
-  (add-hook 'sh-mode-hook #'lhgh/sh-mode-config)
+  ;; (add-hook 'sh-mode-hook #'flycheck-mode)
+  ;; (add-hook 'sh-mode-hook #'lhgh/sh-mode-config)
 #+end_src
 
 *Guix Packages*
@@ -1848,21 +1756,6 @@ Check out Tailwind [[https://tailwindcss.com/][here]].
 #+end_src
 
 ** Productivity
-
-*** Syntax checking with Flycheck
-
-#+begin_src emacs-lisp
-  (use-package flycheck
-    :hook (lsp-mode . flycheck-mode))
-#+end_src
-
-*Guix Packages*
-
-#+begin_src scheme
-
-  "emacs-flycheck"
-
-#+end_src
 
 *** Rainbow Delimiters
 [[https://github.com/Fanael/rainbow-delimiters][rainbow-delimeters]] helps spotting matching delimiters, orienting yourself in the code and telling which statements are at a given depth.
@@ -1910,6 +1803,8 @@ Check out Tailwind [[https://tailwindcss.com/][here]].
 
 ** Tree-Sitter
 
+- Note taken on [2023-01-17 Tue 14:45] \\
+  Try switching to built-in tree-sitter integration when Emacs 29 lands.
 #+begin_src emacs-lisp
   (use-package tree-sitter
     :straight t
@@ -1926,7 +1821,7 @@ I have started to use =direnv= to automatically enable =guix shell= environments
 
 #+begin_src emacs-lisp
   (use-package envrc
-    :after projectile
+    :after project
     :config
     (envrc-global-mode))
 #+end_src
@@ -2506,12 +2401,21 @@ Dial the GC threshold back down so that garbage collection happens more frequent
 * Emacs Profile
 *.config/guix/manifests/emacs.scm*
 
+*OBS:* momentary hotfix for https://github.com/seagle0128/doom-modeline/issues/594
 #+begin_src scheme :tangle .config/guix/manifests/emacs.scm :noweb yes :noweb-ref nil :mkdirp yes
-  (specifications->manifest
-   '("emacs"
-     ;;"emacs-native-comp"
-     <<packages>>
-  ))
+  (use-modules (guix transformations))
+
+  (define transform
+    (options->transformation
+     '((with-commit . "emacs-doom-modeline=62b47fc8274c8cdff76f88fb6abcfe9d4aa602a3"))))
+
+  (concatenate-manifests
+   (list
+    (packages->manifest
+     (list (transform (specification->package "emacs-doom-modeline"))))
+    (specifications->manifest
+     '("emacs"
+       <<packages>>))))
 #+end_src
 
 * Local Variables

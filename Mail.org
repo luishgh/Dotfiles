@@ -14,6 +14,8 @@ If you wonder how you can expose Gmail categories - like =Updates= or =Promotion
   (use-package mu4e
     :straight nil ;; mu4e is installed through the package manager
     :defer 20 ; Wait until 20 seconds after startup
+    :custom
+    (mu4e-compose-context-policy 'pick-first)
     :config
 
     ;; Requiring org helpers
@@ -42,7 +44,7 @@ If you wonder how you can expose Gmail categories - like =Updates= or =Promotion
                 (string-prefix-p "/Gmail" (mu4e-message-field msg :maildir))))
             :vars '((smtpmail-smtp-server . "smtp.gmail.com")
                     (smtpmail-smtp-service . 465)
-                    (smtpmail-stream-type . 'ssl)
+                    (smtpmail-stream-type . ssl)
                     (user-mail-address . "luishenriquegh2701@gmail.com")
                     (user-full-name . "Luis Henrique Gomes Higino")
                     (mu4e-drafts-folder . "/Gmail/[Gmail]/Drafts")
@@ -60,7 +62,7 @@ If you wonder how you can expose Gmail categories - like =Updates= or =Promotion
                 (string-prefix-p "/DCC" (mu4e-message-field msg :maildir))))
             :vars '((smtpmail-smtp-server . "smtp.dcc.ufmg.br")
                     (smtpmail-smtp-service . 587)
-                    (smtpmail-stream-type . 'ssl)
+                    (smtpmail-stream-type . ssl)
                     (user-mail-address . "luis.higino@dcc.ufmg.br")
                     (user-full-name . "Luis Henrique Gomes Higino")
                     (mu4e-drafts-folder . "/DCC/Drafts")
@@ -105,8 +107,6 @@ If you wonder how you can expose Gmail categories - like =Updates= or =Promotion
     ;; Kill mail buffer when mail is sent
     (setq message-kill-buffer-on-exit t)
 
-    ;; Only ask for a context when composing if one hasn't been previously picked
-    (setq mu4e-compose-context-policy 'ask-if-none)
 
     (setq mu4e-headers-date-format "%d/%m/%y")
 
