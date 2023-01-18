@@ -99,7 +99,6 @@
       - [[#markdown-mode][markdown-mode]]
       - [[#markdown-toc][markdown-toc]]
     - [[#html][HTML]]
-      - [[#tailwind-css][Tailwind CSS]]
     - [[#shell-scripting][Shell scripting]]
   - [[#productivity][Productivity]]
     - [[#rainbow-delimiters][Rainbow Delimiters]]
@@ -273,6 +272,7 @@ I started using [[https://guix.gnu.org/][GNU Guix]] recently along with my Gento
   "emacs-f"
   "make"
   "cmake"
+  "gcc-toolchain"
 
 #+end_src
 
@@ -1508,35 +1508,28 @@ For snippets, I use yasnippets.
 
 #+end_src
 
-*** TODO Haskell
-Migrate this to flymake
+*** Haskell
 
 #+begin_src emacs-lisp
   (use-package haskell-mode
     :hook ((haskell-mode . interactive-haskell-mode)
            (haskell-mode . haskell-indent-mode)
            (haskell-mode . haskell-doc-mode)
-           ;; (haskell-mode . flycheck-mode)
-           )
-   :config
-   ;; (flycheck-add-next-checker 'haskell-ghc '(info . haskell-hlint))
-   )
+           (haskell-mode . flymake-mode)))
 
   (use-package hindent
     :after haskell-mode
     :hook (haskell-mode . hindent-mode))
 
+  ;; NOTE: apparently this mode uses company-mode, so I'm not enabling
+  ;; it right now. When I come back to haskell development I figure this
+  ;; out
   (use-package dante
     ;; :straight t
     :disabled t
     :after haskell-mode
-    :commands 'dante-mode
-    :hook (;; (haskell-mode . flycheck-mode)
-           (haskell-mode . dante-mode))
-    :config
-    ;; (flycheck-add-next-checker 'haskell-dante '(info . haskell-hlint))
-    )
-#+end_src
+    :hook (haskell-mode . dante-mode))
+    #+end_src
 
 *Guix Packages*
 
@@ -1550,13 +1543,11 @@ Migrate this to flymake
 
 #+end_src
 
-*** TODO TypeScript
-Migrate this to eglot
+*** TypeScript
 
 #+begin_src emacs-lisp
 (use-package typescript-mode
   :mode "\\.ts\\'"
-  ;; :hook (typescript-mode . lsp-deferred)
   :config
   (setq typescript-indent-level 2))
 #+end_src
@@ -1569,12 +1560,10 @@ Migrate this to eglot
 
 #+end_src
 
-*** TODO Python
-Migrate this to eglot
+*** Python
 
 #+begin_src emacs-lisp
   (use-package python-mode
-    ;; :hook (python-mode . lsp-deferred)
     :straight (:type built-in)
     :general
     (lhgh/leader-maps python-mode-map
@@ -1594,8 +1583,7 @@ Migrate this to eglot
                 :repo "glyph/python-docstring-mode"))
 #+end_src
 
-*** TODO Dart
-PS: Migrate this to eglot
+*** Dart
 
 Used primarily for Flutter.
 
@@ -1650,13 +1638,11 @@ Used primarily for Flutter.
       "rt" '(markdown-toc-generate-or-refresh-toc :which-key "generate or refresh markdown toc")))
 #+end_src
 
-*** TODO HTML
-Migrate this to eglot
+*** HTML
 
 #+begin_src emacs-lisp
   (use-package web-mode
     :mode "(\\.\\(html?\\|ejs\\|tsx\\|jsx\\)\\'"
-    ;; :hook (web-mode . lsp-deferred)
     :config
     (setq-default web-mode-code-indent-offset 2)
     (setq-default web-mode-markup-indent-offset 2)
@@ -1671,27 +1657,9 @@ Migrate this to eglot
 
 #+end_src
 
-**** Tailwind CSS
+*** Shell scripting
 
-Check out Tailwind [[https://tailwindcss.com/][here]].
-
-#+begin_src emacs-lisp
-  ;; (use-package lsp-tailwindcss
-  ;;   :straight '(:type git
-  ;;               :host github
-  ;;               :repo "merrickluo/lsp-tailwindcss"))
-#+end_src
-
-*** TODO Shell scripting
-Migrate this to flymake
-
-#+begin_src emacs-lisp
-  ;; (defun lhgh/sh-mode-config()
-  ;;   (flycheck-select-checker 'sh-shellcheck))
-
-  ;; (add-hook 'sh-mode-hook #'flycheck-mode)
-  ;; (add-hook 'sh-mode-hook #'lhgh/sh-mode-config)
-#+end_src
+As of Emacs 29 (which hasn't been released yet, but I haven't dealt with shell scripting recently either, so I don't mind this not working FTM), Flymake has built-in Shellcheck integration, so I only need to provide the external program.
 
 *Guix Packages*
 

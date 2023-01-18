@@ -645,35 +645,27 @@
   :hook ((haskell-mode . interactive-haskell-mode)
          (haskell-mode . haskell-indent-mode)
          (haskell-mode . haskell-doc-mode)
-         ;; (haskell-mode . flycheck-mode)
-         )
- :config
- ;; (flycheck-add-next-checker 'haskell-ghc '(info . haskell-hlint))
- )
+         (haskell-mode . flymake-mode)))
 
 (use-package hindent
   :after haskell-mode
   :hook (haskell-mode . hindent-mode))
 
+;; NOTE: apparently this mode uses company-mode, so I'm not enabling
+;; it right now. When I come back to haskell development I figure this
+;; out
 (use-package dante
   ;; :straight t
   :disabled t
   :after haskell-mode
-  :commands 'dante-mode
-  :hook (;; (haskell-mode . flycheck-mode)
-         (haskell-mode . dante-mode))
-  :config
-  ;; (flycheck-add-next-checker 'haskell-dante '(info . haskell-hlint))
-  )
+  :hook (haskell-mode . dante-mode))
 
 (use-package typescript-mode
   :mode "\\.ts\\'"
-  ;; :hook (typescript-mode . lsp-deferred)
   :config
   (setq typescript-indent-level 2))
 
 (use-package python-mode
-  ;; :hook (python-mode . lsp-deferred)
   :straight (:type built-in)
   :general
   (lhgh/leader-maps python-mode-map
@@ -715,22 +707,10 @@
 
 (use-package web-mode
   :mode "(\\.\\(html?\\|ejs\\|tsx\\|jsx\\)\\'"
-  ;; :hook (web-mode . lsp-deferred)
   :config
   (setq-default web-mode-code-indent-offset 2)
   (setq-default web-mode-markup-indent-offset 2)
   (setq-default web-mode-attribute-indent-offset 2))
-
-;; (use-package lsp-tailwindcss
-;;   :straight '(:type git
-;;               :host github
-;;               :repo "merrickluo/lsp-tailwindcss"))
-
-;; (defun lhgh/sh-mode-config()
-;;   (flycheck-select-checker 'sh-shellcheck))
-
-;; (add-hook 'sh-mode-hook #'flycheck-mode)
-;; (add-hook 'sh-mode-hook #'lhgh/sh-mode-config)
 
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
