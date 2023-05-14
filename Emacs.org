@@ -123,14 +123,16 @@
         - [[#other-common-operations][Other common operations]]
       - [[#configuration][Configuration]]
     - [[#opening-files-externally][Opening Files Externally]]
-  - [[#chat][Chat]]
+  - [[#social][Social]]
     - [[#telegram][Telegram]]
     - [[#erc][ERC]]
     - [[#discord][Discord]]
+    - [[#mastodon][Mastodon]]
   - [[#elpher][Elpher]]
   - [[#mail-management][Mail management]]
   - [[#pomodoro-timer][Pomodoro timer]]
   - [[#reference-browsing][Reference browsing]]
+  - [[#calendar--diary][Calendar / Diary]]
 - [[#credential-management][Credential Management]]
 - [[#utility-functions][Utility Functions]]
 - [[#runtime-performance][Runtime Performance]]
@@ -270,9 +272,6 @@ I started using [[https://guix.gnu.org/][GNU Guix]] recently along with my Gento
 
   "emacs-guix"
   "emacs-f"
-  "make"
-  "cmake"
-  "gcc-toolchain"
 
 #+end_src
 
@@ -405,6 +404,9 @@ This is the main section of configuration that makes Emacs usable for me. Before
     :init
     (setq evil-collection-company-use-tng nil)
     :config
+    ;; temporary fix for https://github.com/emacs-evil/evil-collection/pull/720 :/
+    (delete 'mu4e evil-collection-mode-list)
+    (delete 'mu4e-conversation evil-collection-mode-list)
     (evil-collection-init))
 #+end_src
 
@@ -517,8 +519,8 @@ A more minimal alternative to =Ivy=.  It uses the default completion system, whi
            :map minibuffer-local-map
            ("M-h" . backward-kill-word)
            ("<backspace>" . lhgh/minibuffer-backward-kill))
-    :custom-face
-    (vertico-current ((t (:background "#3a3f5a"))))
+    ;; :custom-face
+    ;; (vertico-current ((t (:background "#3a3f5a"))))
     :init
     (vertico-mode))
 #+end_src
@@ -773,10 +775,11 @@ I use [[https://github.com/hlissner/emacs-doom-themes#doom-emacs][doom-themes]] 
     ;; Global settings (defaults)
     (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
           doom-themes-enable-italic t) ; if nil, italics is universally disabled
-    (load-theme 'doom-palenight t) ; sets the proper theme
+    ;; (load-theme 'doom-palenight t) ; sets the proper theme
+    (load-theme 'modus-operandi)
 
     ;; Enable flashing mode-line on errors
-    (doom-themes-visual-bell-config)
+    ;; (doom-themes-visual-bell-config)
 
     ;; Enable custom neotree theme (all-the-icons must be installed!)
     ;;(doom-themes-neotree-config)
@@ -1099,10 +1102,7 @@ I make use of Org's built-in citation system through [[https://github.com/bdarcu
     :bind
     (:map org-mode-map :package org
           ;; optional: org-cite-insert is also bound to C-c C-x @
-          ("C-c b" . #'org-cite-insert))
-    :config
-    (with-eval-after-load 'citar
-      (define-key citar-map (kbd "d") (cons "download entry" #'citar-download-entry))))
+          ("C-c b" . #'org-cite-insert)))
 #+end_src
 
 *Guix Packages*
@@ -1516,19 +1516,6 @@ For snippets, I use yasnippets.
            (haskell-mode . haskell-indent-mode)
            (haskell-mode . haskell-doc-mode)
            (haskell-mode . flymake-mode)))
-
-  (use-package hindent
-    :after haskell-mode
-    :hook (haskell-mode . hindent-mode))
-
-  ;; NOTE: apparently this mode uses company-mode, so I'm not enabling
-  ;; it right now. When I come back to haskell development I figure this
-  ;; out
-  (use-package dante
-    ;; :straight t
-    :disabled t
-    :after haskell-mode
-    :hook (haskell-mode . dante-mode))
     #+end_src
 
 *Guix Packages*
@@ -1536,9 +1523,7 @@ For snippets, I use yasnippets.
 #+begin_src scheme
 
   "emacs-haskell-mode"
-  "emacs-dante"
   "ghc" ;; for haskell-interactive-mode
-  "ghc-hindent"
   "hlint"
 
 #+end_src
@@ -2061,7 +2046,7 @@ Just a cheatsheet with the commands I use most frequently. Disclaimer: this docu
 
 #+end_src
 
-** Chat
+** Social
 *** Telegram
 
 #+begin_src emacs-lisp
@@ -2071,6 +2056,8 @@ Just a cheatsheet with the commands I use most frequently. Disclaimer: this docu
     :commands telega
     :custom
     (telega-completing-read-function 'completing-read)
+    (telega-sticker-set-download 't)
+    (telega-emoji-use-images nil)
     :config
     (define-key global-map (kbd "C-c t") telega-prefix-map)
     (telega-appindicator-mode 1))
@@ -2131,6 +2118,21 @@ ERC is a builtin IRC client for Emacs.
     :defer t
     :custom
     (elcord-display-buffer-details nil))
+#+end_src
+
+*** Mastodon
+
+#+begin_src emacs-lisp
+  (use-package mastodon
+    :config
+    (setq mastodon-instance-url "https://emacs.ch"
+          mastodon-active-user "luishgh"))
+#+end_src
+
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-mastodon"
 #+end_src
 
 ** Elpher
@@ -2245,6 +2247,15 @@ I use [[https://github.com/cpitclaudel/biblio.el][biblio.el]] to download papers
 
 #+begin_src scheme
   "emacs-biblio"
+#+end_src
+
+** Calendar / Diary
+
+#+begin_src emacs-lisp
+  (use-package diary
+    :straight (:type built-in)
+    :custom
+    (diary-file "~/Documents/diary"))
 #+end_src
 
 * Credential Management

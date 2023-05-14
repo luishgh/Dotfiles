@@ -190,18 +190,20 @@ Unlike most distros, Guix pulls package definitions from Git repositories, so ad
    (append
     (list (specification->package "emacs")
           (specification->package "git")
+          (specification->package "make")
 
           ;; Xorg
-          (specification->package "setxkbmap")
-          (specification->package "xhost")
-          (specification->package "picom")
+          ;; (specification->package "setxkbmap")
+          ;; (specification->package "xhost")
+          ;; (specification->package "picom")
 
           ;; Wayland
           (specification->package "sway")
+          (specification->package "swaybg")
           (specification->package "bemenu")
           (specification->package "xdg-desktop-portal")
           (specification->package "xdg-desktop-portal-wlr")
-  
+
           (specification->package "feh")
           (specification->package "nss-certs"))
     %base-packages))
@@ -210,45 +212,50 @@ Unlike most distros, Guix pulls package definitions from Git repositories, so ad
 *** System Services
 
 #+begin_src scheme
-      (services
-       (append
-        (list
-         ;; (service slim-service-type
-         ;;               (slim-configuration
-         ;;                (default-user "luishgh")
-         ;; (xorg-configuration
-         ;;  (xorg-configuration
-         ;;   (extra-config (list %xorg-tear-free-config %xorg-libinput-config))
-         ;;   (keyboard-layout keyboard-layout)))))
-         (service sddm-service-type
-                  (sddm-configuration
-                   (auto-login-user "luishgh")
-                   (display-server "wayland")
-                   (xorg-configuration
-                    (xorg-configuration
-                     (extra-config (list %xorg-tear-free-config %xorg-libinput-config))
-                     (keyboard-layout keyboard-layout)))))
+  (services
+   (append
+    (list
+     ;; (service slim-service-type
+     ;;               (slim-configuration
+     ;;                (default-user "luishgh")
+     ;; (xorg-configuration
+     ;;  (xorg-configuration
+     ;;   (extra-config (list %xorg-tear-free-config %xorg-libinput-config))
+     ;;   (keyboard-layout keyboard-layout)))))
+     (service sddm-service-type
+              (sddm-configuration
+               (auto-login-user "luishgh")
+               (display-server "wayland")
+               (xorg-configuration
+                (xorg-configuration
+                 (extra-config (list %xorg-tear-free-config %xorg-libinput-config))
+                 (keyboard-layout keyboard-layout)))))
 
-         ;; VMs
-         (service virtlog-service-type)
-         (service libvirt-service-type
-                  (libvirt-configuration
-                   (unix-sock-group "libvirt")
-                   (tls-port "16555")))
+     ;; VMs
+     (service virtlog-service-type)
+     (service libvirt-service-type
+              (libvirt-configuration
+               (unix-sock-group "libvirt")
+               (tls-port "16555")))
 
-         ;; Guix dev
-         (service qemu-binfmt-service-type
-                  (qemu-binfmt-configuration
-                   (platforms (lookup-qemu-platforms "ppc64le"))))
+     ;; Guix dev
+     (service qemu-binfmt-service-type
+              (qemu-binfmt-configuration
+               (platforms (lookup-qemu-platforms "ppc64le"))))
 
-         (service syncthing-service-type
-                  (syncthing-configuration (user "luishgh")))
+     (service syncthing-service-type
+              (syncthing-configuration (user "luishgh")))
 
-         ;; Nix
-         (service nix-service-type
-                  (nix-configuration
-                   (extra-config '("experimental-features = nix-command flakes")))))
-        %my-desktop-services))
+     ;; Nix
+     (service nix-service-type
+              (nix-configuration
+               (extra-config
+                '("experimental-features = nix-command flakes\n"
+                  ;; Enable substitutes for haskell projects
+                  ;; "trusted-public-keys = hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=\n"
+                  ;; "substituters = https://cache.nixos.org https://cache.iog.io\n"
+                  )))))
+    %my-desktop-services))
 #+end_src
 
 *** File Systems and Bootloader

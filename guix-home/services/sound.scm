@@ -1,7 +1,7 @@
 (define-module (guix-home services sound)
   #:use-module (gnu services)
+  #:use-module (gnu home services desktop)
   #:use-module (guix-home services pipewire)
-  #:use-module (guix-home services dbus)
   #:export (home-sound-services))
 
 (define home-sound-services

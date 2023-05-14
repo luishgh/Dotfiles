@@ -1,20 +1,19 @@
 (define-module (guix-home services desktop)
-  #:use-module (gnu home)
   #:use-module (gnu services)
   #:use-module (guix gexp)
+  #:use-module (gnu home)
   #:use-module (gnu home services)
   #:use-module (gnu home services shepherd)
+  #:use-module (gnu home services xdg)
   #:use-module (gnu packages wm)
   #:use-module (gnu packages emacs-xyz)
   #:use-module (gnu packages lisp)
   #:use-module (gnu packages ncurses)
   #:use-module (gnu packages compression)
   #:use-module (gnu packages admin)
-  #:use-module (gnu packages xorg)
   #:use-module (gnu packages package-management)
   #:use-module (gnu packages freedesktop)
   #:use-module (gnu packages ssh)
-  #:use-module (gnu packages image)
   #:use-module (gnu packages terminals)
   #:use-module (gnu packages chromium)
   #:use-module (gnu packages gnuzilla)
@@ -25,46 +24,18 @@
   #:use-module (gnu packages video)
   #:use-module (gnu packages password-utils)
   #:use-module (gnu packages gnupg)
-  #:use-module (gnu packages compton)
-  #:use-module (gnu packages xdisorg)
-  #:use-module (gnu packages gnome-xyz)
-  #:use-module (gnu packages gnome)
   #:use-module (gnu packages fonts)
   #:use-module (gnu packages virtualization)
-
-  #:use-module (nongnu packages mozilla)
+  #:use-module (gnu packages bittorrent)
+  #:use-module (gnu packages curl)
+  #:use-module (gnu packages aspell)
 
   #:use-module (guix-home utils)
 
   #:export (home-desktop-service-type))
 
-(define (home-desktop-files-service config)
-  (list (list ".config/xsettingsd/xsettingsd.conf"
-              (plain-file "xsettingsd.conf" "
-Net/IconThemeName \"Adwaita\"
-Net/ThemeName \"Matcha-dark-azul\"
-Gtk/DecorationLayout \"menu:minimize,maximize,close\"
-Gtk/FontName \"Iosevka Aile 11\"
-Gtk/MonospaceFontName \"JetBrains Mono 10\"
-Gtk/CursorThemeName \"Adwaita\"
-Xft/Antialias 1
-Xft/Hinting 0
-Xft/HintStyle \"hintnone\" "))))
-
 (define (home-desktop-profile-service config)
-  (list ;; Xorg
-        setxkbmap
-        picom
-        xsettingsd
-        flameshot
-
-        ;; Wayland
-        grim
-        slurp
-        wl-clipboard
-        xsel
-
-        ;; Utilities
+  (list ;; Utilities
         xdg-utils
         ncurses ;; for prompt colors
         zip unzip
@@ -72,11 +43,12 @@ Xft/HintStyle \"hintnone\" "))))
         stow
         openssh
         alacritty
+        foot
         flatpak
+        transmission
+        curl
 
         ;; Browsers
-        ungoogled-chromium
-        firefox/wayland
         qutebrowser
         nyxt
 
@@ -86,24 +58,38 @@ Xft/HintStyle \"hintnone\" "))))
         zathura zathura-pdf-mupdf
         xournalpp
         mpv
+        aspell
+        aspell-dict-en
+        aspell-dict-pt-br
 
         ;; Credentials management
         password-store
         pinentry
         gnupg
 
-        ;; Appearance
-        matcha-theme
-        papirus-icon-theme
-        adwaita-icon-theme
-
         ;; Fonts
         font-google-noto
+        font-google-noto-emoji
         font-iosevka-aile
         font-jetbrains-mono
 
         ;; Virtualization
         virt-manager))
+
+(define (home-desktop-xdg-mime-applications-service config)
+  (home-xdg-mime-applications-configuration
+   (default '((application/x-bittorrent . transmission.desktop)
+              (application/x-pdf . org.pwmt.zathura.desktop)
+              (application/pdf . org.pwmt.zathura.desktop)
+              (video/mp4 . mpv.desktop)
+              (x-scheme-handler/magnet torrent.desktop)))
+   (desktop-entries
+    (list (xdg-desktop-entry
+           (file "transmission")
+           (name "Bittorent client")
+           (type 'application)
+           (config
+            '((exec . "transmission-remote -a %U"))))))))
 
 (define (home-desktop-shepherd-services config)
   (list
@@ -111,14 +97,7 @@ Xft/HintStyle \"hintnone\" "))))
     (provision '(gpg-agent))
     (documentation "Run and control gpg-agent.")
     (start #~(make-system-constructor "gpg-connect-agent /bye"))
-    (stop #~(make-system-destructor "gpgconf --kill gpg-agent")))
-   (shepherd-service
-    (provision '(xsettingsd))
-    (documentation "Run the xsettingsd daemon.")
-    (respawn? #t)
-    (start #~(make-forkexec-constructor
-              (list #$(file-append xsettingsd "/bin/xsettingsd"))))
-    (stop #~(make-kill-destructor)))))
+    (stop #~(make-system-destructor "gpgconf --kill gpg-agent")))))
 
 (define home-desktop-service-type
   (service-type (name 'home-desktop)
@@ -128,9 +107,9 @@ Xft/HintStyle \"hintnone\" "))))
                         home-profile-service-type
                         home-desktop-profile-service)
                        (service-extension
-                        home-shepherd-service-type
-                        home-desktop-shepherd-services)
+                        home-xdg-mime-applications-service-type
+                        home-desktop-xdg-mime-applications-service)
                        (service-extension
-                        home-files-service-type
-                        home-desktop-files-service)))
+                        home-shepherd-service-type
+                        home-desktop-shepherd-services)))
                 (default-value #f)))

@@ -78,6 +78,9 @@
   :init
   (setq evil-collection-company-use-tng nil)
   :config
+  ;; temporary fix for https://github.com/emacs-evil/evil-collection/pull/720 :/
+  (delete 'mu4e evil-collection-mode-list)
+  (delete 'mu4e-conversation evil-collection-mode-list)
   (evil-collection-init))
 
 (use-package evil-nerd-commenter
@@ -130,8 +133,8 @@
          :map minibuffer-local-map
          ("M-h" . backward-kill-word)
          ("<backspace>" . lhgh/minibuffer-backward-kill))
-  :custom-face
-  (vertico-current ((t (:background "#3a3f5a"))))
+  ;; :custom-face
+  ;; (vertico-current ((t (:background "#3a3f5a"))))
   :init
   (vertico-mode))
 
@@ -258,10 +261,11 @@
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  (load-theme 'doom-palenight t) ; sets the proper theme
+  ;; (load-theme 'doom-palenight t) ; sets the proper theme
+  (load-theme 'modus-operandi)
 
   ;; Enable flashing mode-line on errors
-  (doom-themes-visual-bell-config)
+  ;; (doom-themes-visual-bell-config)
 
   ;; Enable custom neotree theme (all-the-icons must be installed!)
   ;;(doom-themes-neotree-config)
@@ -457,10 +461,7 @@
   :bind
   (:map org-mode-map :package org
         ;; optional: org-cite-insert is also bound to C-c C-x @
-        ("C-c b" . #'org-cite-insert))
-  :config
-  (with-eval-after-load 'citar
-    (define-key citar-map (kbd "d") (cons "download entry" #'citar-download-entry))))
+        ("C-c b" . #'org-cite-insert)))
 
 (use-package org-roam
   :after org
@@ -646,19 +647,6 @@
          (haskell-mode . haskell-indent-mode)
          (haskell-mode . haskell-doc-mode)
          (haskell-mode . flymake-mode)))
-
-(use-package hindent
-  :after haskell-mode
-  :hook (haskell-mode . hindent-mode))
-
-;; NOTE: apparently this mode uses company-mode, so I'm not enabling
-;; it right now. When I come back to haskell development I figure this
-;; out
-(use-package dante
-  ;; :straight t
-  :disabled t
-  :after haskell-mode
-  :hook (haskell-mode . dante-mode))
 
 (use-package typescript-mode
   :mode "\\.ts\\'"
@@ -913,6 +901,8 @@
   :commands telega
   :custom
   (telega-completing-read-function 'completing-read)
+  (telega-sticker-set-download 't)
+  (telega-emoji-use-images nil)
   :config
   (define-key global-map (kbd "C-c t") telega-prefix-map)
   (telega-appindicator-mode 1))
@@ -954,6 +944,11 @@
   :defer t
   :custom
   (elcord-display-buffer-details nil))
+
+(use-package mastodon
+  :config
+  (setq mastodon-instance-url "https://emacs.ch"
+        mastodon-active-user "luishgh"))
 
 (use-package elpher
   :commands elpher)
@@ -1026,6 +1021,11 @@
                                           (setq key (lhgh/bibtex-get-key bibtex))))
       (setf (alist-get 'identifier record) key)
       (list record))))
+
+(use-package diary
+  :straight (:type built-in)
+  :custom
+  (diary-file "~/Documents/diary"))
 
 (use-package pinentry
   :straight (:source gnu-elpa-mirror)

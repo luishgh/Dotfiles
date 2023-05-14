@@ -3,14 +3,14 @@
 # Logo key. Use Mod1 for Alt.
 set $mod Mod4
 # Your preferred terminal emulator
-set $term alacritty
+set $term foot #alacritty is broken in sway ATM
 # Your preferred application launcher
 # Note: it's recommended that you pass the final command to sway
 set $uifont "Iosevka Aile 11"
 set $highlight #3daee9
 set $prompt #18b218
 set $menu bemenu-run --fn $uifont -b -p "▶" --tf "$prompt" --hf "$highlight" --sf "$highlight" --scf "$highlight" | xargs swaymsg exec
-set $wallpaper ~/Documents/Wallpapers/lord-of-the-rings-wallpapers.jpg
+set $wallpaper ~/Documents/Wallpapers/cowboy-bebop-red.png
 set $lock swaylock -f -i $wallpaper -s fill
 ### Needed for xdg-desktop-portal-kde
 exec dbus-update-activation-environment --systemd --all
@@ -238,31 +238,43 @@ bindsym $mod+r mode "resize"
 # Status Bar:
 #
 # Read `man 5 sway-bar` for more information about this section.
-bar {
-    # mode hide
-    # hidden_state hide
-    modifier $mod
-    font $uifont
 
-    # When the status_command prints a new line to stdout, swaybar updates.
-    # The default just shows the current date and time.
-    status_command while ~/.config/sway/swaybar-command.sh; do sleep 1; done
+#built-in bar:
+# bar {
+#     # mode hide
+#     # hidden_state hide
+#     modifier $mod
+#     font $uifont
 
-    colors {
-        # statusline #ffffff
-        # background #121212
-        # #background #00000000
-        # focused_workspace #121212 #18b218 #232627
-        # active_workspace #121212 $highlight #232627
-        # inactive_workspace #121212 #7f8c8d #232627
-    }
-}
+#     # When the status_command prints a new line to stdout, swaybar updates.
+#     # The default just shows the current date and time.
+#     status_command while ~/.config/sway/swaybar-command.sh; do sleep 1; done
+
+#     colors {
+#         # statusline #ffffff
+#         # background #121212
+#         # #background #00000000
+#         # focused_workspace #121212 #18b218 #232627
+#         # active_workspace #121212 $highlight #232627
+#         # inactive_workspace #121212 #7f8c8d #232627
+#     }
+# }
 #
+
+# waybar
+
+bar {
+    swaybar_command waybar
+
+    position bottom
+}
+
 # Titlebars
 #
 default_border pixel
 default_floating_border pixel
 hide_edge_borders smart
+# gaps inner 3
 #
 # Colors #93cee9
 #

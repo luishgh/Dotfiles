@@ -1,4 +1,4 @@
-(define-module (guix-home services desktop)
+(define-module (guix-home services stumpwm)
   #:use-module (gnu services)
   #:use-module (gnu packages emacs-xyz)
   #:use-module (gnu packages wm)

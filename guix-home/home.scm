@@ -10,12 +10,12 @@
   #:use-module (gnu services)
   #:use-module (guix-home services shells)
   #:use-module (guix-home services desktop)
+  #:use-module (guix-home services wayland)
   #:use-module (guix-home services sway)
   #:use-module (guix-home services sound)
   #:use-module (guix-home services flatpak)
   #:use-module (guix-home services emacs)
-  #:use-module (guix-home services direnv)
-  #:use-module (guix-home services xdg))
+  #:use-module (guix-home services direnv))
 
 (home-environment
  (services
@@ -23,7 +23,7 @@
 
                 ;; Set up desktop environment
                 (service home-desktop-service-type)
-                home-xdg-service
+                (service home-wayland-service-type)
                 (service home-sway-service-type)
                 (service home-emacs-service-type)
 
