@@ -55,7 +55,8 @@ Unlike most distros, Guix pulls package definitions from Git repositories, so ad
                        ssh xorg
                        sound sysctl
                        syncthing
-                       virtualization nix)
+                       virtualization nix
+                       pm)
   (use-package-modules package-management)
 
 #+end_src
@@ -230,6 +231,9 @@ Unlike most distros, Guix pulls package definitions from Git repositories, so ad
                 (xorg-configuration
                  (extra-config (list %xorg-tear-free-config %xorg-libinput-config))
                  (keyboard-layout keyboard-layout)))))
+
+     ;; Power management
+     (service tlp-service-type)
 
      ;; VMs
      (service virtlog-service-type)

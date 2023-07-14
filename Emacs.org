@@ -83,7 +83,6 @@
     - [[#forge][Forge]]
   - [[#language-server-protocol][Language Server Protocol]]
     - [[#add-localbin-to-exec-path-for-lsp-servers][Add .local/bin to exec path for lsp servers]]
-  - [[#debug-adapter-protocol][Debug Adapter Protocol]]
   - [[#snippets][Snippets]]
   - [[#languages][Languages]]
     - [[#meta-lisp][Meta Lisp]]
@@ -809,10 +808,9 @@ I use [[https://github.com/seagle0128/doom-modeline][doom-modeline]] because it 
 
 *Guix Packages*
 
-*OBS:* momentary hotfix for https://github.com/seagle0128/doom-modeline/issues/594
 #+begin_src scheme
 
-  ;; "emacs-doom-modeline"
+  "emacs-doom-modeline"
 
 #+end_src
 
@@ -1377,13 +1375,6 @@ I like to install my language servers to =.local/bin=. This is good because it m
 
 #+begin_src emacs-lisp
   (push "~/.local/bin" exec-path)
-#+end_src
-
-** TODO Debug Adapter Protocol
-The second best contribution from VSCode, debugger integration for any editor.
-OBS: Find an alternative for dap-mode that works without lsp-mode (I'll probably do it only when I come to need it again).
-
-#+begin_src emacs-lisp
 #+end_src
 
 ** Snippets
@@ -2314,21 +2305,10 @@ Dial the GC threshold back down so that garbage collection happens more frequent
 * Emacs Profile
 *.config/guix/manifests/emacs.scm*
 
-*OBS:* momentary hotfix for https://github.com/seagle0128/doom-modeline/issues/594
 #+begin_src scheme :tangle .config/guix/manifests/emacs.scm :noweb yes :noweb-ref nil :mkdirp yes
-  (use-modules (guix transformations))
-
-  (define transform
-    (options->transformation
-     '((with-commit . "emacs-doom-modeline=62b47fc8274c8cdff76f88fb6abcfe9d4aa602a3"))))
-
-  (concatenate-manifests
-   (list
-    (packages->manifest
-     (list (transform (specification->package "emacs-doom-modeline"))))
     (specifications->manifest
      '("emacs"
-       <<packages>>))))
+       <<packages>>))
 #+end_src
 
 * Local Variables

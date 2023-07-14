@@ -589,8 +589,6 @@
 
 (push "~/.local/bin" exec-path)
 
-
-
 (use-package yasnippet
   :hook ((prog-mode . yas-minor-mode)
          (org-mode . yas-minor-mode))
