@@ -574,7 +574,7 @@ Marginalia provides helpful annotations for various types of minibuffer completi
 #+end_src
 
 ** Corfu
-Corfu can be considered the minimalistic =completion-at-point= counterpart of =Vertico=. Similar to it. Because it uses the same plugggable backend format that the built in =completion-at-point= uses, it has full compatibility with a lot of Emacs packages, like =lsp-mode=.
+Corfu can be considered the minimalistic =completion-at-point= counterpart of =Vertico=. Similar to it. Because it uses the same plugggable backend format that the built in =completion-at-point= uses, it has full compatibility with a lot of Emacs packages, like =lsp-mode= and =eglot=.
 
 #+begin_src emacs-lisp
   (use-package corfu
@@ -1371,7 +1371,7 @@ LSP is IMO one of the most important contributions Microsoft has ever done to th
 #+end_src
 
 *** Add .local/bin to exec path for lsp servers
-I like to install my language servers to =.local/bin=. This is good because it mantains the installation at a user level. =lsp-mode= finds lsp server executables by executing =executable-find=, which searches in the folders listed in =exec-path=.
+I like to install my language servers to =.local/bin=. This is good because it mantains the installation at a user level. 
 
 #+begin_src emacs-lisp
   (push "~/.local/bin" exec-path)
