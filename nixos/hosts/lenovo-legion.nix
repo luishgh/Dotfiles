@@ -14,7 +14,7 @@
   boot.initrd.kernelModules = [ ];
   boot.kernelModules = [ "kvm-intel" ];
   boot.extraModulePackages = [ ];
-  boot.tmpOnTmpfs = true;
+  boot.tmp.useTmpfs = true;
 
   fileSystems."/" =
     { device = "/dev/disk/by-uuid/678538c5-d19d-45be-a230-fb4031fa9ad4";
@@ -43,5 +43,6 @@
   # networking.interfaces.wlp2s0.useDHCP = lib.mkDefault true;
 
   powerManagement.cpuFreqGovernor = lib.mkDefault "powersave";
+  hardware.enableRedistributableFirmware = true;
   hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 }

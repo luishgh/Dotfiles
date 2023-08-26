@@ -2,7 +2,7 @@
   description = "My gaming hub configuration.";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-22.11";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-23.05";
   };
 
   outputs = { self, nixpkgs }: {

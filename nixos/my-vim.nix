@@ -10,6 +10,10 @@
           vimrcConfig.customRC = ''
             syntax enable
             set number relativenumber
+            set autoindent smartindent
+            filetype plugin indent on
+
+            autocmd FileType cpp set shiftwidth=2
           '';
 
           vimrcConfig.packages.myVimPackage = with super.vimPlugins; {

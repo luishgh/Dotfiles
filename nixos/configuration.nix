@@ -26,6 +26,7 @@
 
   # Enable networking
   networking.networkmanager.enable = true;
+  services.resolved.enable = true;
 
   # Set your time zone.
   time.timeZone = "America/Sao_Paulo";
@@ -88,7 +89,7 @@
     gnumake
     pass
     my-vim
-    emacs
+    emacs-gtk
     gcc # for emacs
     firefox
     tdesktop # telegram
