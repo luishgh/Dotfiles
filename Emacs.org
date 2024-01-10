@@ -10,6 +10,9 @@
 :END:
 :CONTENTS:
 - [[#about-this-config][About This Config]]
+  - [[#list-of-todos][List of TODOS]]
+    - [[#exchange-define-key-and-global-set-key-with-the-new-keymap--functions][Exchange define-key and global-set-key with the new keymap- functions]]
+    - [[#remove-exwm-related-stuff-i-wont-be-using-it-again-anytime-soon-][Remove EXWM related stuff, I won't be using it again anytime soon :/]]
 - [[#setting-up-a-literate-config][Setting Up a Literate Config]]
 - [[#startup-performance][Startup Performance]]
 - [[#global-mappings][Global Mappings]]
@@ -53,6 +56,7 @@
   - [[#modeline-statusline-in-vimish][Modeline (statusline in vimish)]]
   - [[#startup-screen][Startup Screen]]
   - [[#workspaces][Workspaces]]
+  - [[#editing-features][Editing Features]]
 - [[#org-mode][Org Mode]]
   - [[#binding-prefix][Binding Prefix]]
   - [[#org-configuration][Org Configuration]]
@@ -143,6 +147,9 @@
 * About This Config
 This is my GNU Emacs config. I had been using [[https://github.com/hlissner/doom-emacs][Doom Emacs]] for a little while and really liked the experience of using Emacs. However, I wanted to try configuring Emacs myself, so that I could tune it to my personal workflow. So I stopped using Doom Emacs and came to good old GNU Emacs. This is my configuration.
 
+** List of TODOS
+*** TODO Exchange =define-key= and =global-set-key= with the new =keymap-= functions
+*** TODO Remove EXWM related stuff, I won't be using it again anytime soon :/
 * Setting Up a Literate Config
 Having this in your =init.el= permits using =config.org= to configure Emacs.
 
@@ -866,6 +873,12 @@ I use [[https://github.com/emacs-dashboard/emacs-dashboard][Emacs Dashboard]] as
 
 #+end_src
 
+** Editing Features
+
+#+begin_src emacs-lisp
+(setopt show-paren-context-when-offscreen 'overlay)
+#+end_src
+
 * Org Mode
 [[https://orgmode.org/][Org Mode]] is for keeping notes, maintaining to-do lists, planning projects, authoring documents, computational notebooks, literate programming and more — in a fast and effective plain text system.
 
@@ -1081,11 +1094,12 @@ ToC (Table of Contents) sections are nice in documentation and literate configs.
 
 ** Citations
 
-I make use of Org's built-in citation system through [[https://github.com/bdarcus/citar][citar]].
+I make use of Org's built-in citation system through [[https://github.com/emacs-citarj/citar][citar]].
 
 #+begin_src emacs-lisp
   (use-package citar
-    :no-require
+    :straight t
+    ;;:no-require
     :custom
     (org-cite-global-bibliography '("~/Documents/biblio.bib"))
     (citar-library-paths '("~/Documents/Library"))
@@ -1105,9 +1119,10 @@ I make use of Org's built-in citation system through [[https://github.com/bdarcu
 #+end_src
 
 *Guix Packages*
+NOTE: Currently, installing Citar through guix results in errors.
 
 #+begin_src scheme
-  "emacs-citar"
+  ;; "emacs-citar"
 #+end_src
 
 ** Org Roam
@@ -1304,7 +1319,7 @@ I started the built-in project.el instead of projectile.
     :straight (:type built-in)
     :after projectile
     :config
-    (customize-set-value 'xref-search-program 'ripgrep))
+    (setopt xref-search-program 'ripgrep))
 #+end_src
 
 *Guix Packages*
@@ -1360,7 +1375,9 @@ NOTE: Remember to configure GitHub and/or GitLab tokens before using this packag
 LSP is IMO one of the most important contributions Microsoft has ever done to the dev community and surely the best aspect of the creation of Visual Studio Code. It makes possible to have IDE level features in almost any text editor, from VSCode itself to (Neo)vim and Emacs. Right now I'm migrating from =lsp-mode= to =eglot= as the latter was recently included into the Emacs core.
 
 #+begin_src emacs-lisp
-  (use-package eglot)
+  (use-package eglot
+    ;; Enable outlining in Xref buffers, which are heavily used by Eglot
+    :hook (xref-after-update . outline-minor-mode))
 #+end_src
 
 *Guix Packages*
@@ -2260,10 +2277,7 @@ I use [[https://github.com/cpitclaudel/biblio.el][biblio.el]] to download papers
 ** Calendar / Diary
 
 #+begin_src emacs-lisp
-  (use-package diary
-    :straight (:type built-in)
-    :custom
-    (diary-file "~/Documents/diary"))
+  (setopt diary-file "~/Documents/diary")
 #+end_src
 
 * Credential Management

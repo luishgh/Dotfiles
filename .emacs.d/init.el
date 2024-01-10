@@ -305,6 +305,8 @@
   (unless (equal persp-mode t)
     (persp-mode)))
 
+(setopt show-paren-context-when-offscreen 'overlay)
+
 (lhgh/leader-maps
   "o" '(:ignore t :which-key "org"))
 
@@ -445,7 +447,8 @@
   :defer)
 
 (use-package citar
-  :no-require
+  :straight t
+  ;;:no-require
   :custom
   (org-cite-global-bibliography '("~/Documents/biblio.bib"))
   (citar-library-paths '("~/Documents/Library"))
@@ -570,7 +573,7 @@
   :straight (:type built-in)
   :after projectile
   :config
-  (customize-set-value 'xref-search-program 'ripgrep))
+  (setopt xref-search-program 'ripgrep))
 
 (use-package magit
   :commands (magit-status magit-get-current-branch)
@@ -585,7 +588,9 @@
 (use-package forge
   :after magit)
 
-(use-package eglot)
+(use-package eglot
+  ;; Enable outlining in Xref buffers, which are heavily used by Eglot
+  :hook (xref-after-update . outline-minor-mode))
 
 (push "~/.local/bin" exec-path)
 
@@ -1032,10 +1037,7 @@
       (setf (alist-get 'identifier record) key)
       (list record))))
 
-(use-package diary
-  :straight (:type built-in)
-  :custom
-  (diary-file "~/Documents/diary"))
+(setopt diary-file "~/Documents/diary")
 
 (use-package pinentry
   :straight (:source gnu-elpa-mirror)
