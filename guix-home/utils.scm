@@ -8,8 +8,8 @@
      (apply mixed-text-file file-name
                       (map (lambda (item)
 			     (if (string? item)
-				 (string-append item "\n")
-				 item))
+                     (string-append item "\n")
+                     item))
 			   (list exps exps* ...))))))
 
 (define home-extra-profiles-path

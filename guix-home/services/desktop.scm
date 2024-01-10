@@ -7,6 +7,7 @@
   #:use-module (gnu home services xdg)
   #:use-module (gnu packages wm)
   #:use-module (gnu packages emacs-xyz)
+  #:use-module (gnu packages gnome) ;; libnotify
   #:use-module (gnu packages lisp)
   #:use-module (gnu packages ncurses)
   #:use-module (gnu packages compression)
@@ -18,7 +19,6 @@
   #:use-module (gnu packages chromium)
   #:use-module (gnu packages gnuzilla)
   #:use-module (gnu packages web-browsers)
-  #:use-module (gnu packages libreoffice)
   #:use-module (gnu packages ebook)
   #:use-module (gnu packages pdf)
   #:use-module (gnu packages video)
@@ -29,6 +29,8 @@
   #:use-module (gnu packages bittorrent)
   #:use-module (gnu packages curl)
   #:use-module (gnu packages aspell)
+
+  #:use-module (nongnu packages mozilla)
 
   #:use-module (guix-home utils)
 
@@ -49,23 +51,27 @@
         curl
 
         ;; Browsers
+        firefox
         qutebrowser
         nyxt
 
         ;; DE Suite
-        libreoffice
         calibre
         zathura zathura-pdf-mupdf
-        xournalpp
         mpv
         aspell
         aspell-dict-en
         aspell-dict-pt-br
 
+        ;; Notifications
+        dunst
+        libnotify
+
         ;; Credentials management
         password-store
         pinentry
         gnupg
+        browserpass-native
 
         ;; Fonts
         font-google-noto
@@ -91,14 +97,6 @@
            (config
             '((exec . "transmission-remote -a %U"))))))))
 
-(define (home-desktop-shepherd-services config)
-  (list
-   (shepherd-service
-    (provision '(gpg-agent))
-    (documentation "Run and control gpg-agent.")
-    (start #~(make-system-constructor "gpg-connect-agent /bye"))
-    (stop #~(make-system-destructor "gpgconf --kill gpg-agent")))))
-
 (define home-desktop-service-type
   (service-type (name 'home-desktop)
                 (description "Install and configure Desktop Environment")
@@ -108,8 +106,5 @@
                         home-desktop-profile-service)
                        (service-extension
                         home-xdg-mime-applications-service-type
-                        home-desktop-xdg-mime-applications-service)
-                       (service-extension
-                        home-shepherd-service-type
-                        home-desktop-shepherd-services)))
+                        home-desktop-xdg-mime-applications-service)))
                 (default-value #f)))

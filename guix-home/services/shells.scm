@@ -30,6 +30,9 @@
 
     ;; Make Flatpak apps visible to launcher
     ("XDG_DATA_DIRS" . "$XDG_DATA_DIRS:$HOME/.local/share/flatpak/exports/share")
+
+    ;; Help Firefox with my timezone
+    ("TZ" . "America/Sao_Paulo")
     
     ;; We're in Emacs, yo
     ("VISUAL" . "emacsclient")

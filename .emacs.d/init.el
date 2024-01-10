@@ -698,6 +698,18 @@
   (setq-default web-mode-markup-indent-offset 2)
   (setq-default web-mode-attribute-indent-offset 2))
 
+(use-package tex
+  :straight (:type built-in)
+  :defer t
+  :config
+  ;; Use Zathura to open PDF files
+  (setq TeX-view-program-selection '((output-pdf "Zathura"))
+        TeX-source-correlate-start-server t)
+
+  ;; Update PDF buffers after successful LaTeX runs
+  (add-hook 'TeX-after-compilation-finished-functions
+            #'TeX-revert-document-buffer))
+
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
 

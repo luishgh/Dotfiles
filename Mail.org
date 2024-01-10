@@ -59,7 +59,7 @@ If you wonder how you can expose Gmail categories - like =Updates= or =Promotion
                 (string-prefix-p "/DCC" (mu4e-message-field msg :maildir))))
             :vars '((smtpmail-smtp-server . "smtp.dcc.ufmg.br")
                     (smtpmail-smtp-service . 587)
-                    (smtpmail-stream-type . ssl)
+                    (smtpmail-stream-type . starttls)
                     (user-mail-address . "luis.higino@dcc.ufmg.br")
                     (user-full-name . "Luis Henrique Gomes Higino")
                     (mu4e-drafts-folder . "/DCC/Drafts")

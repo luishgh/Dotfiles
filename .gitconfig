@@ -13,3 +13,5 @@
 	email = 51053603+luishgh@users.noreply.github.com
 	name = luishgh
 	signingkey = 29FA679F288F8C9E
+[http]
+	sslVerify = false

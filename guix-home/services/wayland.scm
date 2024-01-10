@@ -21,8 +21,7 @@
    wl-clipboard
    xsel
 
-   ;; Browsers (those that have different versions for Xorg and Wayland
-   firefox/wayland
+   ;; Browsers (those that have different versions for Xorg and Wayland)
    ungoogled-chromium/wayland))
 
 (define home-wayland-service-type

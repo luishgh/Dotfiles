@@ -99,6 +99,7 @@
       - [[#markdown-toc][markdown-toc]]
     - [[#html][HTML]]
     - [[#shell-scripting][Shell scripting]]
+    - [[#latex][LaTeX]]
   - [[#productivity][Productivity]]
     - [[#rainbow-delimiters][Rainbow Delimiters]]
     - [[#rainbow-mode][Rainbow Mode]]
@@ -1643,6 +1644,22 @@ As of Emacs 29 (which hasn't been released yet, but I haven't dealt with shell s
   "shellcheck"
 #+end_src
 
+*** LaTeX
+
+#+begin_src emacs-lisp
+  (use-package tex
+    :straight (:type built-in)
+    :defer t
+    :config
+    ;; Use Zathura to open PDF files
+    (setq TeX-view-program-selection '((output-pdf "Zathura"))
+          TeX-source-correlate-start-server t)
+
+    ;; Update PDF buffers after successful LaTeX runs
+    (add-hook 'TeX-after-compilation-finished-functions
+              #'TeX-revert-document-buffer))
+#+end_src
+
 ** Productivity
 
 *** Rainbow Delimiters
@@ -2277,7 +2294,7 @@ The [[https://github.com/zx2c4/password-store/tree/master/contrib/emacs][passwor
 #+begin_src scheme
 
   ;; "emacs-pinentry"
-  "pinentry-emacs"
+  ;; "pinentry-emacs" this is installed via guix home
   "emacs-password-store"
   "emacs-auth-source-pass"
 

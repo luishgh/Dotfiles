@@ -15,7 +15,9 @@
   #:use-module (guix-home services sound)
   #:use-module (guix-home services flatpak)
   #:use-module (guix-home services emacs)
-  #:use-module (guix-home services direnv))
+  #:use-module (guix-home services direnv)
+  #:use-module (guix-home services power)
+  #:use-module (guix-home services gnupg))
 
 (home-environment
  (services
@@ -26,6 +28,8 @@
                 (service home-wayland-service-type)
                 (service home-sway-service-type)
                 (service home-emacs-service-type)
+                home-power-service
+                home-gnupg-service
 
                 (service home-flatpak-service-type)
                 (service home-direnv-service-type))
