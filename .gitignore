@@ -5,3 +5,4 @@
 .emacs.d/lisp/lhgh-mail.el
 .emacs.d/straight/
 .emacs.d/auto-save-list/
+*.~undo-tree~
