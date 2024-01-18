@@ -289,7 +289,7 @@ I personally use [[https://github.com/jwiegley/use-package][use-package]] becaus
 
 #+begin_src emacs-lisp :tangle no
   (require 'use-package)
-  (setq use-package-always-ensure (not lhgh/is-guix-system)) ;; Install a package if it isn't installed already on non-Guix systems
+  (setq use-package-always-ensure (not (executable-find "guix"))) ;; Install a package if it isn't installed already on systems without Guix
   ;; (setq use-package-verbose t) ;; Uncomment to bench mark use-package
 #+end_src
 

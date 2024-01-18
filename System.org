@@ -13,7 +13,7 @@ Unlike most distros, Guix pulls package definitions from Git repositories, so ad
 
 *.config/guix/channels.scm*
 
-#+begin_src scheme :tangle .config/guix/channels.scm
+#+begin_src scheme :tangle .config/guix/channels.scm :mkdirp y
   ;; NOTE: This file is generated from System.org.  Please see commentary there.
 
   (list (channel

@@ -3,6 +3,7 @@
 
 \.git
 guix-home
+nixos
 ^/.*\.org
 LICENSE
 README.*
