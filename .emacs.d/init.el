@@ -249,12 +249,18 @@
 (setq-default indent-tabs-mode nil)
 
 (use-package all-the-icons
-  :if (display-graphic-p)
-  :commands all-the-icons-install-fonts
+    :disabled t
+    :if (display-graphic-p)
+    :commands all-the-icons-install-fonts
+    :init
+    (unless (or lhgh/is-guix-system
+                (find-font (font-spec :name "all-the-icons")))
+      (all-the-icons-install-fonts t)))
+
+(use-package nerd-icons
   :init
-  (unless (or lhgh/is-guix-system
-              (find-font (font-spec :name "all-the-icons")))
-    (all-the-icons-install-fonts t)))
+  (unless (find-font (font-spec :name "Symbols Nerd Font Mono"))
+    (nerd-icons-install-fonts)))
 
 (use-package doom-themes
   :config
@@ -448,7 +454,7 @@
 
 (use-package citar
   :straight t
-  ;;:no-require
+  :no-require t ;; Prevents compilation errors from org-cite variables
   :custom
   (org-cite-global-bibliography '("~/Documents/biblio.bib"))
   (citar-library-paths '("~/Documents/Library"))
