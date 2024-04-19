@@ -5,6 +5,7 @@
     [ 
       ./gaming.nix
       ./gnome.nix
+      ./hyprland.nix
       ./my-vim.nix
     ];
 
@@ -14,7 +15,6 @@
       experimental-features = nix-command flakes
     '';
   };
-
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
@@ -89,14 +89,13 @@
     gnumake
     pass
     my-vim
-    emacs-gtk
+    emacs29-gtk3
     gcc # for emacs
-    firefox
     tdesktop # telegram
     spotify
   ];
 
-  fonts.fonts = with pkgs; [
+  fonts.packages = with pkgs; [
     # Noto
     noto-fonts
     noto-fonts-cjk
@@ -112,7 +111,37 @@
     enable = true;
     enableSSHSupport = true;
   };
+
+  # Syncthing
+  services.syncthing = {
+    enable = true;
+    user = "luishgh";
+    dataDir = "/home/luishgh";
+    settings = {
+      devices = {
+        asusfedora.id = 
+        "TFZCN4K-JIRDVJC-P6Z2V2E-IVL3DDZ-GHHROFW-DXHCZQE-HF4KCEZ-YVX4HQN" ;
+      };
+      folders = {
+        "/home/luishgh/Documents" = {
+          id = "Documents";
+          devices = [ "asusfedora" ];
+        };
+      };
+    };
+  };
+
   programs.browserpass.enable = true;
+  programs.firefox.enable = true;
+
+  # OpenVPN
+  services.openvpn.servers = {
+      senseVPN = {
+        config  = "config /home/luishgh/Downloads/sense.ovpn";
+        autoStart = false;
+        updateResolvConf = true;
+      };
+  };
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions

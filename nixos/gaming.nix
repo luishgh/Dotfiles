@@ -25,7 +25,6 @@
   environment.systemPackages = with pkgs; [
     lutris
     discord
-    minecraft
     heroic
     protonup
     vulkan-tools
