@@ -268,9 +268,7 @@ I started using [[https://guix.gnu.org/][GNU Guix]] recently along with my Gento
 
 #+begin_src emacs-lisp
   (straight-use-package 'f)
-  (setq lhgh/is-guix-system (and (require 'f)
-                                 (string-equal (f-read "/etc/issue")
-                                               "\nThis is the GNU system.  Welcome.\n")))
+  (setq lhgh/is-guix-system (executable-find "guix"))
 #+end_src
 
 *Guix Packages*
@@ -1747,6 +1745,12 @@ As of Emacs 29 (which hasn't been released yet, but I haven't dealt with shell s
     :straight t)
 #+end_src
 
+*Guix Packages*
+
+#+begin_src scheme
+  "tree-sitter-cmake"
+#+end_src
+
 ** Direnv
 I have started to use =direnv= to automatically enable =guix shell= environments. [[https://github.com/purcell/envrc][envrc]] permits enabling those on a per-buffer basis.
 
@@ -2102,6 +2106,7 @@ Just a cheatsheet with the commands I use most frequently. Disclaimer: this docu
 #+begin_src scheme
 
   "emacs-telega"
+  "emacs-telega-server"
   "libwebp" ;; dwebp binary is required by telega
 
 #+end_src

@@ -19,9 +19,7 @@
 (require 'straight-x)
 
 (straight-use-package 'f)
-(setq lhgh/is-guix-system (and (require 'f)
-                               (string-equal (f-read "/etc/issue")
-                                             "\nThis is the GNU system.  Welcome.\n")))
+(setq lhgh/is-guix-system (executable-find "guix"))
 
 (straight-use-package 'use-package) ;; Use straight.el for use-package expressions
 (setq straight-use-package-by-default (not lhgh/is-guix-system)) ;; Install a package if it isn't installed already on non-Guix systems
