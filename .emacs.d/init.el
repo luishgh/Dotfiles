@@ -48,12 +48,6 @@
 
 (push "~/.emacs.d/lisp" load-path)
 
-(setq lhgh/exwm-enabled (and (eq window-system 'x)
-                          (seq-contains command-line-args "--use-exwm")))
-
-(when lhgh/exwm-enabled
-  (require 'lhgh-desktop))
-
 (use-package undo-tree
   :init
   (global-undo-tree-mode 1))
@@ -80,12 +74,6 @@
   (delete 'mu4e evil-collection-mode-list)
   (delete 'mu4e-conversation evil-collection-mode-list)
   (evil-collection-init))
-
-(use-package evil-nerd-commenter
-  :after evil
-  :config (evilnc-default-hotkeys t) ;; use default key bindings (M-;) in Emacs state
-  :bind (:map evil-normal-state-map
-         ("gc" . evilnc-comment-or-uncomment-lines)))
 
 (use-package general
   :after evil
@@ -131,8 +119,6 @@
          :map minibuffer-local-map
          ("M-h" . backward-kill-word)
          ("<backspace>" . lhgh/minibuffer-backward-kill))
-  ;; :custom-face
-  ;; (vertico-current ((t (:background "#3a3f5a"))))
   :init
   (vertico-mode))
 
@@ -282,32 +268,6 @@
   :custom
   (doom-modeline-buffer-file-name-style 'truncate-with-project)
   (doom-modeline-buffer-encoding nil))
-
-(use-package dashboard
-  :disabled t ; depends on page-break-lines, which is currently breaking Org-roam
-  :defer lhgh/exwm-enabled ;; defer if in EXWM because it doesn't make sense in that context
-  :init
-  (setq dashboard-set-heading-icons t)
-  (setq dashboard-set-file-icons t)
-  (setq dashboard-banner-logo-title "May I save your soul?")
-  (setq dashboard-startup-banner 'logo)
-  (setq dashboard-items '((recents . 10)
-                          (agenda . 5)
-                          (projects . 5)))
-  (unless lhgh/exwm-enabled
-    (dashboard-setup-startup-hook)))
-
-(use-package perspective
-  :demand t
-  :bind (("C-M-k" . persp-switch)
-         ("C-M-n" . persp-next)
-         ("C-x k" . persp-kill-buffer*))
-  :custom
-  (persp-initial-frame-name "Main")
-  :config
-  ;; Running `persp-mode' multiple times resets the perspective list...
-  (unless (equal persp-mode t)
-    (persp-mode)))
 
 (setopt show-paren-context-when-offscreen 'overlay)
 
@@ -983,63 +943,6 @@
 (use-package pomm
   :commands pomm
   )
-
-(defun lhgh/bibtex-get-key (bibtex-string)
-  "Get cite key from BIBTEX-STRING."
-  (when (stringp bibtex-string)
-    (with-temp-buffer
-      (bibtex-mode)
-      (insert bibtex-string)
-      (bibtex-generate-autokey))))
-
-(defun lhgh/biblio--selection-insert-at-org-cite-bibfile-callback (bibtex entry)
-  "Add BIBTEX (from ENTRY) to end of first file in `org-cite-global-bibliography'."
-  (with-current-buffer (find-file-noselect (car org-cite-global-bibliography))
-    (save-excursion
-      (bibtex-mode)
-      (goto-char (point-max))
-      (insert "\n")
-      (save-restriction
-        (narrow-to-region (point) (point-max))
-        (insert bibtex)
-        (bibtex-clean-entry)
-        (let ((current-key (bibtex-key-in-head))
-              (new-key (bibtex-generate-autokey)))
-          (when (not (string= current-key new-key))
-            (message (format "Inserting autokey %s to replace %s" new-key current-key))
-            (goto-char (point-min))
-            (search-forward current-key)
-            (replace-match new-key))))
-      (bibtex-sort-buffer)
-      (save-buffer)))
-  (message "Inserted bibtex entry for %S."
-           (biblio--prepare-title (biblio-alist-get 'title entry))))
-
-(defun lhgh/biblio-selection-insert-at-org-cite-bibfile ()
-  "Insert BibTeX of current entry in `org-cite-global-bibliography'."
-  (interactive)
-  (biblio--selection-forward-bibtex #'lhgh/biblio--selection-insert-at-org-cite-bibfile-callback))
-
-(defun lhgh/biblio-selection-add-to-collection ()
-  "Insert current entry at global-bibliography and download paper to library."
-  (interactive)
-  (lhgh/biblio-selection-insert-at-org-cite-bibfile)
-  (biblio--selection-extended-action #'biblio-download--action))
-
-(use-package biblio
-  :custom
-  (biblio-download-directory "~/Documents/Library/")
-  :general
-  (biblio-selection-mode-map
-   "a" #'lhgh/biblio-selection-add-to-collection)
-  :init
-  (define-advice biblio-download--action (:filter-args (args) replace-identifier-with-key)
-    (let* ((record (car args))
-           (key nil))
-      (biblio--selection-forward-bibtex (lambda (bibtex _)
-                                          (setq key (lhgh/bibtex-get-key bibtex))))
-      (setf (alist-get 'identifier record) key)
-      (list record))))
 
 (setopt diary-file "~/Documents/diary")
 

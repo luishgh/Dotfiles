@@ -12,27 +12,23 @@
 - [[#about-this-config][About This Config]]
   - [[#list-of-todos][List of TODOS]]
     - [[#exchange-define-key-and-global-set-key-with-the-new-keymap--functions][Exchange define-key and global-set-key with the new keymap- functions]]
-    - [[#remove-exwm-related-stuff-i-wont-be-using-it-again-anytime-soon-][Remove EXWM related stuff, I won't be using it again anytime soon :/]]
+    - [[#study-the-possiblity-of-switching-back-to-packageel-as-it-now-includes-vc-source-installations][Study the possiblity of switching back to package.el, as it now includes vc-source installations.]]
 - [[#setting-up-a-literate-config][Setting Up a Literate Config]]
 - [[#startup-performance][Startup Performance]]
 - [[#global-mappings][Global Mappings]]
   - [[#esc-cancels-commands][ESC cancels commands]]
 - [[#package-management][Package Management]]
-  - [[#general-package-setup-packageel][General package setup (package.el)]]
   - [[#straightel][straight.el]]
   - [[#guix][guix]]
   - [[#use-package-setup][use-package setup]]
-    - [[#packageel-setup][package.el setup]]
     - [[#straightel-setup][straight.el setup]]
 - [[#keep-emacsd-clean][Keep .emacs.d Clean]]
 - [[#update-load-path][Update Load Path]]
-- [[#desktop-environment][Desktop Environment]]
 - [[#key-bindings][Key Bindings]]
   - [[#dark-side-evil][Dark Side (Evil)]]
     - [[#evil][Evil]]
     - [[#enhancing-evil][Enhancing evil]]
       - [[#evil-collection][evil-collection]]
-      - [[#evil-nerd-commenter][evil-nerd-commenter]]
   - [[#generalel][general.el]]
   - [[#hydra][Hydra]]
   - [[#which-key][which-key]]
@@ -54,8 +50,6 @@
   - [[#icons][Icons]]
   - [[#colorscheme-theme][Colorscheme (theme)]]
   - [[#modeline-statusline-in-vimish][Modeline (statusline in vimish)]]
-  - [[#startup-screen][Startup Screen]]
-  - [[#workspaces][Workspaces]]
   - [[#editing-features][Editing Features]]
 - [[#org-mode][Org Mode]]
   - [[#binding-prefix][Binding Prefix]]
@@ -135,7 +129,6 @@
   - [[#elpher][Elpher]]
   - [[#mail-management][Mail management]]
   - [[#pomodoro-timer][Pomodoro timer]]
-  - [[#reference-browsing][Reference browsing]]
   - [[#calendar--diary][Calendar / Diary]]
 - [[#credential-management][Credential Management]]
 - [[#utility-functions][Utility Functions]]
@@ -149,7 +142,7 @@ This is my GNU Emacs config. I had been using [[https://github.com/hlissner/doom
 
 ** List of TODOS
 *** TODO Exchange =define-key= and =global-set-key= with the new =keymap-= functions
-*** TODO Remove EXWM related stuff, I won't be using it again anytime soon :/
+*** TODO Study the possiblity of switching back to =package.el=, as it now includes vc-source installations.
 * Setting Up a Literate Config
 Having this in your =init.el= permits using =config.org= to configure Emacs.
 
@@ -221,25 +214,6 @@ Some global keyboard mappings
 
 * Package Management
 
-** General package setup (package.el)
-Initializing package sources. (Not using this right now, trying straight.el)
-
-#+begin_src emacs-lisp :tangle no
-  (require 'package)
-  (setq package-archives '(("melpa"        . "https://melpa.org/packages/")
-                           ("melpa-stable" .  "https://stable.melpa.org/packages/")
-                           ("org"          . "https://orgmode.org/elpa/")
-                           ("elpa"         . "https://elpa.gnu.org/packages/")))
-#+end_src
-
-Initializing package system
-
-#+begin_src emacs-lisp :tangle no
-  (package-initialize)
-  (unless package-archive-contents
-    (package-refresh-contents))
-#+end_src
-
 ** straight.el
 [[https://github.com/raxod502/straight.el][straight.el]] is an alternative to =package.el=, which permits installing directly from git repos and other useful features.
 
@@ -264,7 +238,7 @@ Initializing package system
 #+end_src
 
 ** guix
-I started using [[https://guix.gnu.org/][GNU Guix]] recently along with my Gentoo system and managing the Emacs packages with the =guix= package manager there. This variable helps defining use-package to use straight by default only on non-Guix OSs.
+I mostly use [[https://guix.gnu.org/][GNU Guix]] for installing Emacs packages. This setup ensures straight.el is used for installing packages by default only if =guix= is not present.
 
 #+begin_src emacs-lisp
   (straight-use-package 'f)
@@ -282,14 +256,6 @@ I started using [[https://guix.gnu.org/][GNU Guix]] recently along with my Gento
 
 ** =use-package= setup
 I personally use [[https://github.com/jwiegley/use-package][use-package]] because I like how it helps fragmenting my configuration in sensible way.
-
-*** =package.el= setup
-
-#+begin_src emacs-lisp :tangle no
-  (require 'use-package)
-  (setq use-package-always-ensure (not (executable-find "guix"))) ;; Install a package if it isn't installed already on systems without Guix
-  ;; (setq use-package-verbose t) ;; Uncomment to bench mark use-package
-#+end_src
 
 *** =straight.el= setup
 
@@ -337,29 +303,6 @@ I have other org files, like [[file:Desktop.org][Desktop.org]], that provide .el
 
 #+begin_src emacs-lisp
   (push "~/.emacs.d/lisp" load-path)
-#+end_src
-
-* Desktop Environment
-Load up the desktop environment if the =--use-exwm= argument was passed to Emacs on startup. Desktop environment and window management code can be found in [[file:Desktop.org][Desktop.org]].
-
-#+begin_src emacs-lisp
-  (setq lhgh/exwm-enabled (and (eq window-system 'x)
-                            (seq-contains command-line-args "--use-exwm")))
-
-  (when lhgh/exwm-enabled
-    (require 'lhgh-desktop))
-#+end_src
-
-*Guix Packages*
-
-Despite the code being in Desktop.org, include the emacs packages for the desktop environment in this file so that they can be included in the Emacs profile.
-
-#+begin_src scheme
-
-  "emacs-exwm"
-  "emacs-desktop-environment"
-  ;; "emacs-app-launcher"
-
 #+end_src
 
 * Key Bindings
@@ -415,23 +358,11 @@ This is the main section of configuration that makes Emacs usable for me. Before
     (evil-collection-init))
 #+end_src
 
-**** evil-nerd-commenter
-[[https://github.com/redguardtoo/evil-nerd-commenter][evil-nerd-commenter]] is like [[http://www.vim.org/scripts/script.php?script_id=1218][Nerd Commenter]] in Vim.
-
-#+begin_src emacs-lisp
-  (use-package evil-nerd-commenter
-    :after evil
-    :config (evilnc-default-hotkeys t) ;; use default key bindings (M-;) in Emacs state
-    :bind (:map evil-normal-state-map
-           ("gc" . evilnc-comment-or-uncomment-lines)))
-#+end_src
-
 *Guix Packages*
 
 #+begin_src scheme
 
   "emacs-evil-collection"
-  "emacs-evil-nerd-commenter"
 
 #+end_src
 
@@ -524,8 +455,6 @@ A more minimal alternative to =Ivy=.  It uses the default completion system, whi
            :map minibuffer-local-map
            ("M-h" . backward-kill-word)
            ("<backspace>" . lhgh/minibuffer-backward-kill))
-    ;; :custom-face
-    ;; (vertico-current ((t (:background "#3a3f5a"))))
     :init
     (vertico-mode))
 #+end_src
@@ -826,57 +755,6 @@ I use [[https://github.com/seagle0128/doom-modeline][doom-modeline]] because it 
 #+begin_src scheme
 
   "emacs-doom-modeline"
-
-#+end_src
-
-** Startup Screen
-I use [[https://github.com/emacs-dashboard/emacs-dashboard][Emacs Dashboard]] as my startup screen.
-
-#+begin_src emacs-lisp
-  (use-package dashboard
-    :disabled t ; depends on page-break-lines, which is currently breaking Org-roam
-    :defer lhgh/exwm-enabled ;; defer if in EXWM because it doesn't make sense in that context
-    :init
-    (setq dashboard-set-heading-icons t)
-    (setq dashboard-set-file-icons t)
-    (setq dashboard-banner-logo-title "May I save your soul?")
-    (setq dashboard-startup-banner 'logo)
-    (setq dashboard-items '((recents . 10)
-                            (agenda . 5)
-                            (projects . 5)))
-    (unless lhgh/exwm-enabled
-      (dashboard-setup-startup-hook)))
-#+end_src
-
-*Guix Packages*
-
-#+begin_src scheme
-
- ; "emacs-dashboard"
-
-#+end_src
-
-** Workspaces
-
-#+begin_src emacs-lisp
-  (use-package perspective
-    :demand t
-    :bind (("C-M-k" . persp-switch)
-           ("C-M-n" . persp-next)
-           ("C-x k" . persp-kill-buffer*))
-    :custom
-    (persp-initial-frame-name "Main")
-    :config
-    ;; Running `persp-mode' multiple times resets the perspective list...
-    (unless (equal persp-mode t)
-      (persp-mode)))
-#+end_src
-
-*Guix Packages*
-
-#+begin_src scheme
-
-  "emacs-perspective"
 
 #+end_src
 
@@ -1660,7 +1538,7 @@ Used primarily for Flutter.
 
 *** Shell scripting
 
-As of Emacs 29 (which hasn't been released yet, but I haven't dealt with shell scripting recently either, so I don't mind this not working FTM), Flymake has built-in Shellcheck integration, so I only need to provide the external program.
+As of Emacs 29, Flymake has built-in Shellcheck integration, so I only need to provide the external program.
 
 *Guix Packages*
 
@@ -1769,6 +1647,8 @@ I have started to use =direnv= to automatically enable =guix shell= environments
 #+end_src
 
 ** Compilation Mode
+
+Some small enhancements to compilation buffers.
 
 #+begin_src emacs-lisp
   (use-package compile
@@ -2217,75 +2097,6 @@ Load up the configuration present in [[file:Mail.org][Mail.org]]
 
   "emacs-pomm"
 
-#+end_src
-
-** Reference browsing
-
-I use [[https://github.com/cpitclaudel/biblio.el][biblio.el]] to download papers and generate bibtex entries.
-
-#+begin_src emacs-lisp
-  (defun lhgh/bibtex-get-key (bibtex-string)
-    "Get cite key from BIBTEX-STRING."
-    (when (stringp bibtex-string)
-      (with-temp-buffer
-        (bibtex-mode)
-        (insert bibtex-string)
-        (bibtex-generate-autokey))))
-
-  (defun lhgh/biblio--selection-insert-at-org-cite-bibfile-callback (bibtex entry)
-    "Add BIBTEX (from ENTRY) to end of first file in `org-cite-global-bibliography'."
-    (with-current-buffer (find-file-noselect (car org-cite-global-bibliography))
-      (save-excursion
-        (bibtex-mode)
-        (goto-char (point-max))
-        (insert "\n")
-        (save-restriction
-          (narrow-to-region (point) (point-max))
-          (insert bibtex)
-          (bibtex-clean-entry)
-          (let ((current-key (bibtex-key-in-head))
-                (new-key (bibtex-generate-autokey)))
-            (when (not (string= current-key new-key))
-              (message (format "Inserting autokey %s to replace %s" new-key current-key))
-              (goto-char (point-min))
-              (search-forward current-key)
-              (replace-match new-key))))
-        (bibtex-sort-buffer)
-        (save-buffer)))
-    (message "Inserted bibtex entry for %S."
-             (biblio--prepare-title (biblio-alist-get 'title entry))))
-
-  (defun lhgh/biblio-selection-insert-at-org-cite-bibfile ()
-    "Insert BibTeX of current entry in `org-cite-global-bibliography'."
-    (interactive)
-    (biblio--selection-forward-bibtex #'lhgh/biblio--selection-insert-at-org-cite-bibfile-callback))
-
-  (defun lhgh/biblio-selection-add-to-collection ()
-    "Insert current entry at global-bibliography and download paper to library."
-    (interactive)
-    (lhgh/biblio-selection-insert-at-org-cite-bibfile)
-    (biblio--selection-extended-action #'biblio-download--action))
-
-  (use-package biblio
-    :custom
-    (biblio-download-directory "~/Documents/Library/")
-    :general
-    (biblio-selection-mode-map
-     "a" #'lhgh/biblio-selection-add-to-collection)
-    :init
-    (define-advice biblio-download--action (:filter-args (args) replace-identifier-with-key)
-      (let* ((record (car args))
-             (key nil))
-        (biblio--selection-forward-bibtex (lambda (bibtex _)
-                                            (setq key (lhgh/bibtex-get-key bibtex))))
-        (setf (alist-get 'identifier record) key)
-        (list record))))
-#+end_src
-
-*Guix Packages*
-
-#+begin_src scheme
-  "emacs-biblio"
 #+end_src
 
 ** Calendar / Diary
