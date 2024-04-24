@@ -241,7 +241,6 @@ Some global keyboard mappings
 I mostly use [[https://guix.gnu.org/][GNU Guix]] for installing Emacs packages. This setup ensures straight.el is used for installing packages by default only if =guix= is not present.
 
 #+begin_src emacs-lisp
-  (straight-use-package 'f)
   (setq lhgh/is-guix-system (executable-find "guix"))
 #+end_src
 
@@ -1262,7 +1261,10 @@ LSP is IMO one of the most important contributions Microsoft has ever done to th
 #+begin_src emacs-lisp
   (use-package eglot
     ;; Enable outlining in Xref buffers, which are heavily used by Eglot
-    :hook (xref-after-update . outline-minor-mode))
+    :hook (xref-after-update . outline-minor-mode)
+
+    ;; Disable auto-formatting
+    :custom (eglot-ignored-server-capabilities '(:documentFormattingProvider)))
 #+end_src
 
 *Guix Packages*

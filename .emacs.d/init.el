@@ -18,7 +18,6 @@
 ;; Load the helper package for commands like `straight-x-clean-unused-repos'
 (require 'straight-x)
 
-(straight-use-package 'f)
 (setq lhgh/is-guix-system (executable-find "guix"))
 
 (straight-use-package 'use-package) ;; Use straight.el for use-package expressions
@@ -554,7 +553,10 @@
 
 (use-package eglot
   ;; Enable outlining in Xref buffers, which are heavily used by Eglot
-  :hook (xref-after-update . outline-minor-mode))
+  :hook (xref-after-update . outline-minor-mode)
+
+  ;; Disable auto-formatting
+  :custom (eglot-ignored-server-capabilities '(:documentFormattingProvider)))
 
 (push "~/.local/bin" exec-path)
 
