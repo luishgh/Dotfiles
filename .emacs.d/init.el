@@ -341,7 +341,8 @@
 
 (setq org-agenda-files
   '("~/Documents/Org/Agenda/Tasks.org"
-    "~/Documents/Org/Agenda/Habits.org"))
+    "~/Documents/Org/Agenda/Habits.org"
+    "~/Documents/Org/org-roam/daily/"))
 (setq org-log-done 'time)
 
 (lhgh/leader-maps
@@ -420,9 +421,9 @@
   (org-cite-follow-processor 'citar)
   (org-cite-activate-processor 'citar)
   (citar-bibliography org-cite-global-bibliography)
-  (citar-symbols `((file ,(all-the-icons-faicon "file-o" :face 'all-the-icons-green :v-adjust -0.1) . " ")
-                   (note ,(all-the-icons-material "speaker_notes" :face 'all-the-icons-blue :v-adjust -0.3) . " ")
-                   (link ,(all-the-icons-octicon "link" :face 'all-the-icons-orange :v-adjust 0.01) . " ")))
+  ;; (citar-symbols `((file ,(all-the-icons-faicon "file-o" :face 'all-the-icons-green :v-adjust -0.1) . " ")
+  ;;                  (note ,(all-the-icons-material "speaker_notes" :face 'all-the-icons-blue :v-adjust -0.3) . " ")
+  ;;                  (link ,(all-the-icons-octicon "link" :face 'all-the-icons-orange :v-adjust 0.01) . " ")))
   (citar-symbol-separator "  ")
   :bind
   (:map org-mode-map :package org
