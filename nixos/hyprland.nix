@@ -6,4 +6,8 @@
     # Whether to enable XWayland
     xwayland.enable = true;
   };
+
+  environment.systemPackages = with pkgs; [
+    swaybg
+  ];
 }
