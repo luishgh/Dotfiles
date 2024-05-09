@@ -670,13 +670,21 @@
   (setq-default web-mode-markup-indent-offset 2)
   (setq-default web-mode-attribute-indent-offset 2))
 
+(use-package auctex)
+
 (use-package tex
-  :straight (:type built-in)
   :defer t
+  :requires auctex
   :config
   ;; Use Zathura to open PDF files
   (setq TeX-view-program-selection '((output-pdf "Zathura"))
+        TeX-source-correlate-mode t
         TeX-source-correlate-start-server t)
+  ;; (add-to-list 'TeX-view-program-list
+  ;;              '("Zathura"
+  ;;                ("zathura %o"
+  ;;                 (mode-io-correlate " --synctex-forward %n:0:\"%b\" -x \"emacsclient --socket-name=%sn +%{line} %{input}\""))
+  ;;                "zathura"))
 
   ;; Update PDF buffers after successful LaTeX runs
   (add-hook 'TeX-after-compilation-finished-functions
@@ -948,13 +956,6 @@
   )
 
 (setopt diary-file "~/Documents/diary")
-
-(use-package pinentry
-  :straight (:source gnu-elpa-mirror)
-  :demand
-  :config
-  (setq epg-pinentry-mode 'loopback)
-  (pinentry-start))
 
 (use-package password-store
   :config

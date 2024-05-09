@@ -50,3 +50,6 @@ map J zoom out
 map i recolor
 map p print
 map g goto top
+
+# LaTeX
+set synctex true

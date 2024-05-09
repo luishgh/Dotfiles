@@ -1552,17 +1552,31 @@ As of Emacs 29, Flymake has built-in Shellcheck integration, so I only need to p
 *** LaTeX
 
 #+begin_src emacs-lisp
+  (use-package auctex)
+
   (use-package tex
-    :straight (:type built-in)
     :defer t
+    :requires auctex
     :config
     ;; Use Zathura to open PDF files
     (setq TeX-view-program-selection '((output-pdf "Zathura"))
+          TeX-source-correlate-mode t
           TeX-source-correlate-start-server t)
+    ;; (add-to-list 'TeX-view-program-list
+    ;;              '("Zathura"
+    ;;                ("zathura %o"
+    ;;                 (mode-io-correlate " --synctex-forward %n:0:\"%b\" -x \"emacsclient --socket-name=%sn +%{line} %{input}\""))
+    ;;                "zathura"))
 
     ;; Update PDF buffers after successful LaTeX runs
     (add-hook 'TeX-after-compilation-finished-functions
               #'TeX-revert-document-buffer))
+#+end_src
+
+*Guix Packages*
+
+#+begin_src scheme
+  "emacs-auctex"
 #+end_src
 
 ** Productivity
@@ -2109,16 +2123,12 @@ Load up the configuration present in [[file:Mail.org][Mail.org]]
 #+end_src
 
 * Credential Management
-The [[https://github.com/zx2c4/password-store/tree/master/contrib/emacs][password-store]] package permits interacting with [[https://www.passwordstore.org/][pass]] inside Emacs. The [[https://elpa.gnu.org/packages/pinentry.html][pinentry]] package allows GnuPG passphrases to be prompted through the minibuffer. This only works if you change your gpg-agent config to use =pinentry-emacs= as its =pinentry-program=. It can be installed through package managers like guix or enabling the emacs USE flag for the pinentry package in portage.
+The [[https://github.com/zx2c4/password-store/tree/master/contrib/emacs][password-store]] package permits interacting with [[https://www.passwordstore.org/][pass]] inside Emacs.
+
+*Obs:* I do not use emacs-pinentry anymore, but will let the info below as it may be useful.
+The [[https://elpa.gnu.org/packages/pinentry.html][pinentry]] package allows GnuPG passphrases to be prompted through the minibuffer. This only works if you change your gpg-agent config to use =pinentry-emacs= as its =pinentry-program=. It can be installed through package managers like guix or enabling the emacs USE flag for the pinentry package in portage.
 
 #+begin_src emacs-lisp
-  (use-package pinentry
-    :straight (:source gnu-elpa-mirror)
-    :demand
-    :config
-    (setq epg-pinentry-mode 'loopback)
-    (pinentry-start))
-
   (use-package password-store
     :config
     (setq password-store-password-length 15)
@@ -2135,8 +2145,6 @@ The [[https://github.com/zx2c4/password-store/tree/master/contrib/emacs][passwor
 
 #+begin_src scheme
 
-  ;; "emacs-pinentry"
-  ;; "pinentry-emacs" this is installed via guix home
   "emacs-password-store"
   "emacs-auth-source-pass"
 
