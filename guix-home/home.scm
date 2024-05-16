@@ -8,6 +8,7 @@
   #:use-module (gnu home)
   #:use-module (gnu packages)
   #:use-module (gnu services)
+  #:use-module (gnu home services syncthing)
   #:use-module (guix-home services shells)
   #:use-module (guix-home services desktop)
   #:use-module (guix-home services wayland)
@@ -30,6 +31,7 @@
                 (service home-emacs-service-type)
                 home-power-service
                 ;;home-gnupg-service
+		(service home-syncthing-service-type)
 
                 (service home-flatpak-service-type)
                 (service home-direnv-service-type))

@@ -3,6 +3,7 @@
 
   #:use-module (gnu home services)
   #:use-module (gnu packages wm)
+  #:use-module (gnu packages xdisorg)
   #:export (home-sway-service-type))
 
 (define (home-sway-files-service config)
@@ -30,5 +31,5 @@
                         home-sway-environment-variables-service)
                        (service-extension
                         home-profile-service-type
-                        (const (list waybar)))))
+                        (const (list sway bemenu waybar)))))
                 (default-value #f)))
