@@ -38,6 +38,11 @@
     ("VISUAL" . "emacsclient")
     ("EDITOR" . "$VISUAL")
 
+    ;; SSL certificates
+    ("SSL_CERT_DIR" . "$HOME/guix-home/profile/etc/ssl/certs")
+    ("SSL_CERT_FILE" . "$HOME/guix-home/profile/etc/ssl/certs/ca-certificates.crt")
+    ("GIT_SSL_CAINFO" . "$SSL_CERT_FILE")
+
     ;; Augment PATH
     ,(augment-path!
       "$HOME/.local/bin"

@@ -200,6 +200,9 @@ Some operations for startup performance. This is tangled to =early-init.el= to b
   ;; may introduce down the road.
   (define-advice startup--load-user-init-file (:before (&rest _) remove-load-file-silence)
     (advice-remove #'load-file #'load-file@silence))
+
+  ;; fix bug with jsonrpc: https://issues.guix.gnu.org/70211
+  (setq load-no-native t)
 #+end_src
 
 * Global Mappings
@@ -218,23 +221,25 @@ Some global keyboard mappings
 [[https://github.com/raxod502/straight.el][straight.el]] is an alternative to =package.el=, which permits installing directly from git repos and other useful features.
 
 #+begin_src emacs-lisp
-;; Bootstrap straight.el
-(defvar bootstrap-version)
-(let ((bootstrap-file
-       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-      (bootstrap-version 5))
-  (unless (file-exists-p bootstrap-file)
-    (with-current-buffer
-        (url-retrieve-synchronously
-         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-         'silent 'inhibit-cookies)
-      (goto-char (point-max))
-      (eval-print-last-sexp)))
-  (load bootstrap-file nil 'nomessage))
+  ;; Bootstrap straight.el
+  (defvar bootstrap-version)
+  (let ((bootstrap-file
+         (expand-file-name
+          "straight/repos/straight.el/bootstrap.el"
+          (or (bound-and-true-p straight-base-dir)
+              user-emacs-directory)))
+        (bootstrap-version 7))
+    (unless (file-exists-p bootstrap-file)
+      (with-current-buffer
+          (url-retrieve-synchronously
+           "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+           'silent 'inhibit-cookies)
+        (goto-char (point-max))
+        (eval-print-last-sexp)))
+    (load bootstrap-file nil 'nomessage))
 
-
-;; Load the helper package for commands like `straight-x-clean-unused-repos'
-(require 'straight-x)
+  ;; Load the helper package for commands like `straight-x-clean-unused-repos'
+  (require 'straight-x)
 #+end_src
 
 ** guix
@@ -696,7 +701,7 @@ NOTE: Currently trying out =nerd-icons= instead.
   (use-package nerd-icons
     :init
     (unless (find-font (font-spec :name "Symbols Nerd Font Mono"))
-      (nerd-icons-install-fonts)))
+      (nerd-icons-install-fonts t)))
 #+end_src
 
 *Guix Packages*
@@ -1420,7 +1425,6 @@ For snippets, I use yasnippets.
 #+begin_src scheme
 
   "emacs-haskell-mode"
-  "ghc" ;; for haskell-interactive-mode
   "hlint"
 
 #+end_src

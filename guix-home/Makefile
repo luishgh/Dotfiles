@@ -12,3 +12,6 @@ test-no-subs:
 
 emacs-profile:
 	guix package -m ~/.config/guix/manifests/emacs.scm -p ~/.guix-extra-profiles/emacs/emacs
+
+mail-profile:
+	guix package -m ~/.config/guix/manifests/mail.scm -p ~/.guix-extra-profiles/mail/mail

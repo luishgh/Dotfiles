@@ -12,6 +12,7 @@
   #:use-module (gnu packages ncurses)
   #:use-module (gnu packages compression)
   #:use-module (gnu packages admin)
+  #:use-module (gnu packages certs)
   #:use-module (gnu packages package-management)
   #:use-module (gnu packages freedesktop)
   #:use-module (gnu packages ssh)
@@ -49,6 +50,7 @@
         flatpak
         transmission
         curl
+        nss-certs
 
         ;; Browsers
         firefox

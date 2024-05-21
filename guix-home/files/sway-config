@@ -15,6 +15,7 @@ set $lock swaylock -f -i $wallpaper -s fill
 ### Needed for xdg-desktop-portal-kde
 exec dbus-update-activation-environment --systemd --all
 exec emacs --daemon
+exec dunst
 # exec /usr/lib/xdg-desktop-portal --replace
 # exec mako
 
@@ -49,7 +50,7 @@ output * bg $wallpaper fill
 #
 # Example configuration:
 #
-  input "2:7:SynPS/2_Synaptics_TouchPad" {
+  input type:touchpad {
       dwt enabled
       tap enabled
       natural_scroll enabled
@@ -64,6 +65,11 @@ output * bg $wallpaper fill
     }
 
 input "1165:49408:ITE_Tech._Inc._ITE_Device(8910)_Keyboard" {
+        xkb_layout br
+        xkb_options ctrl:nocaps
+    }
+
+input "1:1:AT_Translated_Set_2_keyboard" {
         xkb_layout br
         xkb_options ctrl:nocaps
     }
@@ -114,9 +120,10 @@ input "1165:49408:ITE_Tech._Inc._ITE_Device(8910)_Keyboard" {
     #for_window [app_id="mpv"] layout tabbed
     for_window [class="Wine"] floating enable
     for_window [app_id="lutris"] floating enable
+    for_window [window_role="alert"] floating enable
     
     bindsym $mod+F12 exec shutdown now
-    # bindsym Mod4+L exec $lock
+    bindsym $mod+x exec $lock
     # bindsym Print exec grim -o $(swaymsg -t get_outputs | jq -r '.[] | select(.focused) | .name') "$HOME"/Pictures/Screenshot_$(date +'%Y-%m-%d-%H%M%S.png')
     bindsym Print exec grim "$HOME"/Pictures/Screenshot_$(date +'%Y-%m-%d-%H%M%S.png')
     bindsym Control+Print exec grim -g "$(slurp)" "$HOME"/Pictures/Screenshot_$(date +'%Y-%m-%d-%H%M%S.png')
