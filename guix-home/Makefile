@@ -1,6 +1,6 @@
-home:
+lenovo:
 	GUILE_LOAD_PATH=".." \
-	guix home reconfigure ./home.scm
+	guix home reconfigure ./lenovo.scm
 
 test:
 	GUILE_LOAD_PATH=".." \

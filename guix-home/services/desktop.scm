@@ -5,6 +5,7 @@
   #:use-module (gnu home services)
   #:use-module (gnu home services shepherd)
   #:use-module (gnu home services xdg)
+  #:use-module (gnu home services shells)
   #:use-module (gnu packages wm)
   #:use-module (gnu packages emacs-xyz)
   #:use-module (gnu packages gnome) ;; libnotify
@@ -99,14 +100,85 @@
            (config
             '((exec . "transmission-remote -a %U"))))))))
 
+(define (home-desktop-files-service config)
+  (list (home-config-file "profile"
+                          ;; Load the default Guix profile
+                          "GUIX_PROFILE=\"/home/luishgh/.guix-profile\""
+                          ". \"$GUIX_PROFILE/etc/profile\""
+
+                            ;; Load additional Guix profiles
+                            "GUIX_EXTRA_PROFILES=$HOME/.guix-extra-profiles"
+                            "for i in \"$GUIX_EXTRA_PROFILES\"/*; do"
+                            "  profile=$i/$(basename \"$i\")"
+                            "  if [ -f \"$profile\"/etc/profile ]; then"
+                            "    GUIX_PROFILE=\"$profile\""
+                            "    . \"$GUIX_PROFILE\"/etc/profile"
+                            "  fi"
+                            "  unset profile"
+                            "done"
+
+                            ;; Load Nix environment
+                            "if [ -f /run/current-system/profile/etc/profile.d/nix.sh ]; then"
+                            "    . /run/current-system/profile/etc/profile.d/nix.sh"
+                            "fi")))
+
+(define (augment-path-string . paths)
+  ;; Generate a valid string to augment PATH with
+  ;; all paths passed
+  (apply string-append (append
+                        (map
+                         (lambda (path)
+                           (string-append
+                            path
+                            ":"))
+                         paths)
+                        '("$PATH"))))
+
+(define-syntax-rule (augment-path! path ...)
+  (cons "PATH" (augment-path-string path ...)))
+
+
+(define (home-desktop-environment-variables-service _)
+  `(;; Many build scripts expect CC to contain the compiler command
+    ("CC" . "gcc")
+
+    ;; Make Flatpak apps visible to launcher
+    ("XDG_DATA_DIRS" . "$XDG_DATA_DIRS:$HOME/.local/share/flatpak/exports/share")
+
+    ;; Help Firefox with my timezone
+    ("TZ" . "America/Sao_Paulo")
+    
+    ;; We're in Emacs, yo
+    ("VISUAL" . "emacsclient")
+    ("EDITOR" . "$VISUAL")
+
+    ;; SSL certificates
+    ("SSL_CERT_DIR" . "$HOME/.guix-home/profile/etc/ssl/certs")
+    ("SSL_CERT_FILE" . "$HOME/.guix-home/profile/etc/ssl/certs/ca-certificates.crt")
+    ("GIT_SSL_CAINFO" . "$SSL_CERT_FILE")
+    ("CURL_CA_BUNDLE" . "$HOME/.guix-home/profile/etc/ssl/certs/ca-certificates.crt")
+
+    ;; Augment PATH
+    ,(augment-path!
+      "$HOME/.local/bin"
+      "$HOME/.yarn/bin"
+      "$HOME/.cargo/bin")))
+
+
 (define home-desktop-service-type
   (service-type (name 'home-desktop)
                 (description "Install and configure Desktop Environment")
                 (extensions
-                 (list (service-extension
-                        home-profile-service-type
-                        home-desktop-profile-service)
-                       (service-extension
-                        home-xdg-mime-applications-service-type
-                        home-desktop-xdg-mime-applications-service)))
+                  (list (service-extension
+                          home-profile-service-type
+                          home-desktop-profile-service)
+                        (service-extension
+                          home-shell-profile-service-type
+                          home-desktop-files-service)
+                        (service-extension
+                          home-environment-variables-service-type
+                          home-desktop-environment-variables-service)
+                        (service-extension
+                          home-xdg-mime-applications-service-type
+                          home-desktop-xdg-mime-applications-service)))
                 (default-value #f)))

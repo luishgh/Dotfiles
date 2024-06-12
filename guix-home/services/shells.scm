@@ -9,46 +9,6 @@
 
   #:export (home-bash-service))
 
-(define (augment-path-string . paths)
-  ;; Generate a valid string to augment PATH with
-  ;; all paths passed
-  (apply string-append (append
-                        (map
-                         (lambda (path)
-                           (string-append
-                            path
-                            ":"))
-                         paths)
-                        '("$PATH"))))
-
-(define-syntax-rule (augment-path! path ...)
-  (cons "PATH" (augment-path-string path ...)))
-
-(define home-environment-variables-alist
-  `(;; Many build scripts expect CC to contain the compiler command
-    ("CC" . "gcc")
-
-    ;; Make Flatpak apps visible to launcher
-    ("XDG_DATA_DIRS" . "$XDG_DATA_DIRS:$HOME/.local/share/flatpak/exports/share")
-
-    ;; Help Firefox with my timezone
-    ("TZ" . "America/Sao_Paulo")
-    
-    ;; We're in Emacs, yo
-    ("VISUAL" . "emacsclient")
-    ("EDITOR" . "$VISUAL")
-
-    ;; SSL certificates
-    ("SSL_CERT_DIR" . "$HOME/guix-home/profile/etc/ssl/certs")
-    ("SSL_CERT_FILE" . "$HOME/guix-home/profile/etc/ssl/certs/ca-certificates.crt")
-    ("GIT_SSL_CAINFO" . "$SSL_CERT_FILE")
-
-    ;; Augment PATH
-    ,(augment-path!
-      "$HOME/.local/bin"
-      "$HOME/.yarn/bin"
-      "$HOME/.cargo/bin")))
-
 (define bash-configuration
   (home-bash-configuration
    (guix-defaults? #f) ;; prefer to have full control
@@ -81,32 +41,7 @@
                             "    PS1=\"\\[$(tput bold)\\]\\[$(tput setaf 1)\\][\\[$(tput setaf 3)\\]\\u\\[$(tput setaf 2)\\]@\\[$(tput setaf 4)\\]\\h \\[$(tput setaf 5)\\]\\W\\[$(tput setaf 1)\\]]\\[$(tput setaf 7)\\]\\\\$ \\[$(tput sgr0)\\]\""
                             "fi"
 
-                            "export PS1")))
-   (bash-profile
-    (list (home-config-file "bash-profile"
-                            ;; Load the default Guix profile
-                            "GUIX_PROFILE=\"/home/luishgh/.guix-profile\""
-                            ". \"$GUIX_PROFILE/etc/profile\""
-
-                            ;; Load additional Guix profiles
-                            "GUIX_EXTRA_PROFILES=$HOME/.guix-extra-profiles"
-                            "for i in \"$GUIX_EXTRA_PROFILES\"/*; do"
-                            "  profile=$i/$(basename \"$i\")"
-                            "  if [ -f \"$profile\"/etc/profile ]; then"
-                            "    GUIX_PROFILE=\"$profile\""
-                            "    . \"$GUIX_PROFILE\"/etc/profile"
-                            "  fi"
-                            "  unset profile"
-                            "done"
-
-                            ;; Load Nix environment
-                            "if [ -f /run/current-system/profile/etc/profile.d/nix.sh ]; then"
-                            "    . /run/current-system/profile/etc/profile.d/nix.sh"
-                            "fi"
-
-                            "# environment variables:")))
-   (environment-variables
-    home-environment-variables-alist)))
+                            "export PS1")))))
 
 (define home-bash-service
   (service home-bash-service-type bash-configuration))
