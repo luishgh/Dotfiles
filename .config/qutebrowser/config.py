@@ -29,11 +29,16 @@ config.set("content.javascript.enabled", True, "qute://*/*")
 # Change start/default pages + search engine
 # config.set("url.start_pages", "https://start.duckduckgo.com/?kae=d")
 # config.set("url.default_page", "https://start.duckduckgo.com/?kae=d")
-config.set("url.start_pages", "https://cherrry9.github.io/startpage/")
-config.set("url.default_page", "https://cherrry9.github.io/startpage/")
+# config.set("url.start_pages", "https://cherrry9.github.io/startpage/")
+# config.set("url.default_page", "https://cherrry9.github.io/startpage/")
 config.set("url.searchengines", {"DEFAULT": "https://start.duckduckgo.com/?q={}&kae=d"})
 
-config.bind("pv", "spawn --userscript ~/.config/qutebrowser/script/view_in_mpv")
+# config.bind("pv", "spawn --userscript ~/.config/qutebrowser/script/view_in_mpv")
+qute_pass = 'qute-pass --username-target secret --username-pattern "login: (.+)"'
+config.bind('<z><l>', 'spawn --userscript ' + qute_pass)
+config.bind('<z><u><l>', 'spawn --userscript ' + qute_pass + ' --username-only')
+config.bind('<z><p><l>', 'spawn --userscript ' + qute_pass + ' --password-only')
+config.bind('<z><o><l>', 'spawn --userscript ' + qute_pass + ' --otp-only')
 
 # Tab settings
 config.set("tabs.padding", {"top": 1, "bottom": 2, "left": 5, "right": 5})
@@ -41,7 +46,7 @@ config.set("tabs.indicator.width", 0)
 config.set("tabs.favicons.scale", 1.2)
 
 # Open every tab as a new window
-c.tabs.tabs_are_windows = True
+# c.tabs.tabs_are_windows = True
 c.tabs.show = "multiple"
 c.tabs.last_close = "close"
 
