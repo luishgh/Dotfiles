@@ -29,6 +29,7 @@ If you wonder how you can expose Gmail categories - like =Updates= or =Promotion
 
     (setq mu4e-get-mail-command "mbsync -a")
     (setq mu4e-maildir "~/Mail")
+    (setq mu4e-attachment-dir "~/Downloads")
 
     (setq mu4e-contexts
           (list

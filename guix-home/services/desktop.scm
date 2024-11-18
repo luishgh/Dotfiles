@@ -30,6 +30,7 @@
   #:use-module (gnu packages bittorrent)
   #:use-module (gnu packages curl)
   #:use-module (gnu packages aspell)
+  #:use-module (gnu packages linux)
 
   #:use-module (nongnu packages mozilla)
 
@@ -51,6 +52,7 @@
         transmission
         curl
         nss-certs
+        light
 
         ;; Browsers
         firefox
