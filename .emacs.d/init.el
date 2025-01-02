@@ -50,10 +50,14 @@
 (push "~/.emacs.d/lisp" load-path)
 
 (use-package undo-tree
-  :init
-  (global-undo-tree-mode 1))
+  :config
+  (global-undo-tree-mode 1)
+  :custom
+  (undo-tree-history-directory-alist
+   `(("." . ,(no-littering-expand-var-file-name "undo-tree/")))))
 
 (use-package evil
+  :after undo-tree
   :init ;; tweak evil's configuration before loading it (as suggested in the package's documentation)
   (setq evil-want-integration t)
   (setq evil-want-keybinding nil) ;; required by evil-collection
@@ -62,6 +66,7 @@
   (setq evil-respect-visual-line-mode t) ;; move by visual lines
   (setq evil-vsplit-window-right t)
   (setq evil-split-window-below t)
+  (setq evil-undo-system 'undo-tree)
   :config
   (evil-mode 1)
   (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)) ;; C-g is trully equal to ESC
@@ -253,7 +258,6 @@
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
   ;; (load-theme 'doom-palenight t) ; sets the proper theme
-  (load-theme 'modus-operandi)
 
   ;; Enable flashing mode-line on errors
   ;; (doom-themes-visual-bell-config)
@@ -263,6 +267,31 @@
 
   ;; Corrects (and improves) org-mode's native fontification.
   (doom-themes-org-config))
+
+;; (use-package modus-themes
+;;   :straight (:type built-in)
+;;   :init
+;;   ;(modus-themes-load-themes)
+;;   :config
+;;   (modus-themes-load-operandi)
+;;   :custom
+;;   (modus-themes-org-blocks 'gray-background)
+
+;;   (modus-themes-headings
+;;    '((0 . (background variable-pitch overline 2.0))
+;;      (1 . (rainbow variable-pitch 1.5))
+;;      (2 . (semibold variable-pitch 1.3))
+;;      (3 . (1.1))
+;;      (t . t))))
+(setq modus-themes-org-blocks 'gray-background
+      modus-themes-headings
+      '((0 . (background overline variable-pitch 2.0))
+        (1 . (rainbow variable-pitch 1.5))
+        (2 . (semibold variable-pitch 1.3))
+        (3 . (semibold variable-pitch 1.1))
+        (t . (t))))
+
+(load-theme 'modus-operandi)
 
 (use-package doom-modeline
   :init (doom-modeline-mode 1)
@@ -277,9 +306,9 @@
 
 (defun lhgh/org-mode-setup ()
   (org-indent-mode)
-  (variable-pitch-mode)
-  (face-remap-add-relative 'tree-sitter-hl-face:punctuation nil  :inherit 'fixed-pitch)
-  (setq evil-auto-indent nil))
+  ;(variable-pitch-mode)
+  ;(face-remap-add-relative 'tree-sitter-hl-face:punctuation nil  :inherit 'fixed-pitch)
+  (setq-local evil-auto-indent nil))
 
 (when lhgh/is-guix-system
   ;; Use org provided by Guix
@@ -288,6 +317,8 @@
 (use-package org
   :hook (org-mode . lhgh/org-mode-setup)
   :commands (org-capture org-agenda) ;; Org is deferred, these commands are autoloaded so they can be used before opening an Org file
+  :custom
+  (org-fontify-whole-heading-line t)
   :general
   (org-mode-map
    :states 'normal
@@ -300,31 +331,6 @@
         org-hide-emphasis-markers t)
 
 ;; NOTE: Subsequent sections are still part of this use-package block!
-
-;; Increase the size of various headings
-(with-eval-after-load 'org-indent
-  (set-face-attribute 'org-document-title nil :weight 'bold :height 1.3 :inherit 'variable-pitch)
-
-  (dolist (face '((org-level-1 . 1.2)
-                  (org-level-2 . 1.1)
-                  (org-level-3 . 1.05)
-                  (org-level-4 . 1.0)
-                  (org-level-5 . 1.1)
-                  (org-level-6 . 1.1)
-                  (org-level-7 . 1.1)
-                  (org-level-8 . 1.1)))
-    (set-face-attribute (car face) nil :font "Iosevka Aile" :weight 'medium :height (cdr face)))
-
-  ;; Ensure that anything that should be fixed-pitch in Org files appears that way
-  (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
-  (set-face-attribute 'org-table nil  :inherit 'fixed-pitch)
-  (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
-  (set-face-attribute 'org-code nil   :inherit '(shadow fixed-pitch))
-  (set-face-attribute 'org-indent nil :inherit '(org-hide fixed-pitch))
-  (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
-  (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
-  (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
-  (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch))
 
 (setq org-tag-alist
   '(("@mandarim" . ?M)
@@ -959,6 +965,9 @@
   )
 
 (setopt diary-file "~/Documents/diary")
+
+(use-package competitive-companion
+  :straight (competitive-companion :type git :local-repo "~/Projects/Code/competitive-companion.el"))
 
 (use-package password-store
   :config

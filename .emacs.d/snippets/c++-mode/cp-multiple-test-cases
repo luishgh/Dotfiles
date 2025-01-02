@@ -1,0 +1,15 @@
+# -*- mode: snippet -*-
+# name: cp-multiple-test-cases
+# key: ttt
+# --
+void solve() {
+    $0
+}
+
+int main() {
+
+    int ttt; cin >> ttt;
+    while (ttt--) solve();
+
+    return 0;
+}

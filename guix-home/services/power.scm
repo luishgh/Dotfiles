@@ -6,6 +6,6 @@
 (define home-power-service
   (service home-batsignal-service-type
                  (home-batsignal-configuration
-                  (warning-level 50)
-                  (critical-level 40)
-                  (danger-level 30))))
+                  (warning-level 30)
+                  (critical-level 25)
+                  (danger-level 20))))

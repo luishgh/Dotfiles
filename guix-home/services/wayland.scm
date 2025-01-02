@@ -11,8 +11,9 @@
   #:export (home-wayland-service-type))
 
 (define (home-wayland-environment-variables-service _)
-  '(("xdg_session_type" . "wayland")
-    ("moz_enable_wayland" . "1")))
+  '(("XDG_SESSION_TYPE" . "wayland")
+    ("QT_QPA_PLATFORM" . "wayland-egl")
+    ("MOZ_ENABLE_WAYLAND" . "1")))
 
 (define (home-wayland-profile-service config)
   (list

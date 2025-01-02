@@ -35,4 +35,5 @@
 
                 (service home-flatpak-service-type)
                 (service home-direnv-service-type))
-          home-sound-services)))
+          ;;home-sound-services
+          )))

@@ -1,6 +1,7 @@
 {
     "modules-left": ["sway/workspaces", "sway/mode"],
-    "modules-center": ["clock", "custom/weather"],
+    "modules-center": ["clock" //, "custom/weather"
+    ],
     "modules-right": ["tray", "pulseaudio", "network", "battery", "custom/power"],
 
     "sway/mode": {

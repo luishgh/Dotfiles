@@ -17,7 +17,7 @@
                                                      "/files/swaybar-command.sh")))))))
 
 (define (home-sway-environment-variables-service _)
-  '(("xdg_current_desktop" . "sway")))
+  '(("XDG_CURRENT_DESKTOP" . "sway")))
 
 (define home-sway-service-type
   (service-type (name 'home-sway)

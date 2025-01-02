@@ -1,5 +1,5 @@
 #+TITLE: My own GNU Emacs Config
-#+AUTHOR: Luis Henrique
+#+AUTHOR: Luis Higino
 #+DESCRIPTION: My personal vanilla Emacs config.
 #+PROPERTY: header-args:emacs-lisp :tangle .emacs.d/init.el :mkdirp yes
 #+PROPERTY: header-args:scheme :noweb-ref packages :noweb-sep ""
@@ -49,12 +49,13 @@
   - [[#tabs-and-indentation][Tabs and indentation]]
   - [[#icons][Icons]]
   - [[#colorscheme-theme][Colorscheme (theme)]]
+    - [[#doom-themes][doom-themes]]
+    - [[#modus-themes][Modus themes]]
   - [[#modeline-statusline-in-vimish][Modeline (statusline in vimish)]]
   - [[#editing-features][Editing Features]]
 - [[#org-mode][Org Mode]]
   - [[#binding-prefix][Binding Prefix]]
   - [[#org-configuration][Org Configuration]]
-  - [[#faces][Faces]]
   - [[#tags][Tags]]
   - [[#capture-templates][Capture Templates]]
   - [[#agenda][Agenda]]
@@ -130,6 +131,7 @@
   - [[#mail-management][Mail management]]
   - [[#pomodoro-timer][Pomodoro timer]]
   - [[#calendar--diary][Calendar / Diary]]
+  - [[#competitive-companion][Competitive Companion]]
 - [[#credential-management][Credential Management]]
 - [[#utility-functions][Utility Functions]]
 - [[#runtime-performance][Runtime Performance]]
@@ -319,10 +321,14 @@ This is the main section of configuration that makes Emacs usable for me. Before
 
 #+begin_src emacs-lisp
   (use-package undo-tree
-    :init
-    (global-undo-tree-mode 1))
+    :config
+    (global-undo-tree-mode 1)
+    :custom
+    (undo-tree-history-directory-alist
+     `(("." . ,(no-littering-expand-var-file-name "undo-tree/")))))
 
   (use-package evil
+    :after undo-tree
     :init ;; tweak evil's configuration before loading it (as suggested in the package's documentation)
     (setq evil-want-integration t)
     (setq evil-want-keybinding nil) ;; required by evil-collection
@@ -331,6 +337,7 @@ This is the main section of configuration that makes Emacs usable for me. Before
     (setq evil-respect-visual-line-mode t) ;; move by visual lines
     (setq evil-vsplit-window-right t)
     (setq evil-split-window-below t)
+    (setq evil-undo-system 'undo-tree)
     :config
     (evil-mode 1)
     (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)) ;; C-g is trully equal to ESC
@@ -714,7 +721,10 @@ NOTE: Currently trying out =nerd-icons= instead.
 #+end_src
 
 ** Colorscheme (theme)
-I use [[https://github.com/hlissner/emacs-doom-themes#doom-emacs][doom-themes]] colorschemes.
+
+*** doom-themes
+
+The [[https://github.com/hlissner/emacs-doom-themes#doom-emacs][doom-themes]] allows for installing Doom Emacs' colorschemes.
 
 #+begin_src emacs-lisp
   (use-package doom-themes
@@ -723,7 +733,6 @@ I use [[https://github.com/hlissner/emacs-doom-themes#doom-emacs][doom-themes]] 
     (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
           doom-themes-enable-italic t) ; if nil, italics is universally disabled
     ;; (load-theme 'doom-palenight t) ; sets the proper theme
-    (load-theme 'modus-operandi)
 
     ;; Enable flashing mode-line on errors
     ;; (doom-themes-visual-bell-config)
@@ -741,6 +750,37 @@ I use [[https://github.com/hlissner/emacs-doom-themes#doom-emacs][doom-themes]] 
 
   "emacs-doom-themes"
 
+#+end_src
+
+*** Modus themes
+
+The [[https://protesilaos.com/emacs/modus-themes][modus-themes]] package provides two themes, one light and one dark, with granular user customization. They are already included in the most recent versions of Emacs! 🥳
+
+#+begin_src emacs-lisp
+  ;; (use-package modus-themes
+  ;;   :straight (:type built-in)
+  ;;   :init
+  ;;   ;(modus-themes-load-themes)
+  ;;   :config
+  ;;   (modus-themes-load-operandi)
+  ;;   :custom
+  ;;   (modus-themes-org-blocks 'gray-background)
+
+  ;;   (modus-themes-headings
+  ;;    '((0 . (background variable-pitch overline 2.0))
+  ;;      (1 . (rainbow variable-pitch 1.5))
+  ;;      (2 . (semibold variable-pitch 1.3))
+  ;;      (3 . (1.1))
+  ;;      (t . t))))
+  (setq modus-themes-org-blocks 'gray-background
+        modus-themes-headings
+        '((0 . (background overline variable-pitch 2.0))
+          (1 . (rainbow variable-pitch 1.5))
+          (2 . (semibold variable-pitch 1.3))
+          (3 . (semibold variable-pitch 1.1))
+          (t . (t))))
+
+  (load-theme 'modus-operandi)
 #+end_src
 
 ** Modeline (statusline in vimish)
@@ -783,9 +823,9 @@ I use [[https://github.com/seagle0128/doom-modeline][doom-modeline]] because it 
 #+begin_src emacs-lisp
   (defun lhgh/org-mode-setup ()
     (org-indent-mode)
-    (variable-pitch-mode)
-    (face-remap-add-relative 'tree-sitter-hl-face:punctuation nil  :inherit 'fixed-pitch)
-    (setq evil-auto-indent nil))
+    ;(variable-pitch-mode)
+    ;(face-remap-add-relative 'tree-sitter-hl-face:punctuation nil  :inherit 'fixed-pitch)
+    (setq-local evil-auto-indent nil))
 
   (when lhgh/is-guix-system
     ;; Use org provided by Guix
@@ -794,6 +834,8 @@ I use [[https://github.com/seagle0128/doom-modeline][doom-modeline]] because it 
   (use-package org
     :hook (org-mode . lhgh/org-mode-setup)
     :commands (org-capture org-agenda) ;; Org is deferred, these commands are autoloaded so they can be used before opening an Org file
+    :custom
+    (org-fontify-whole-heading-line t)
     :general
     (org-mode-map
      :states 'normal
@@ -816,10 +858,13 @@ I use [[https://github.com/seagle0128/doom-modeline][doom-modeline]] because it 
 
 #+end_src
 
-** Faces
+** COMMENT Faces
+
+*Disclaimer*: I switched from doing this manually to using [[*Modus themes][Modus themes]]' variables for this purpose.
+
 I try to make Org Mode buffers seem more like notebooks, using mostly a variable pitch font. However, I still use a fixed pitch font in places like code for practicality.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
   ;; Increase the size of various headings
   (with-eval-after-load 'org-indent
     (set-face-attribute 'org-document-title nil :weight 'bold :height 1.3 :inherit 'variable-pitch)
@@ -2125,6 +2170,15 @@ Load up the configuration present in [[file:Mail.org][Mail.org]]
 
 #+begin_src emacs-lisp
   (setopt diary-file "~/Documents/diary")
+#+end_src
+
+** Competitive Companion
+
+This is a package of my own 🤩. It provides an Emacs integration to the famous [[https://github.com/jmerle/competitive-companion][Competitive Companion Extension]].
+
+#+begin_src emacs-lisp
+  (use-package competitive-companion
+    :straight (competitive-companion :type git :local-repo "~/Projects/Code/competitive-companion.el"))
 #+end_src
 
 * Credential Management
