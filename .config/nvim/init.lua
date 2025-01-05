@@ -2,6 +2,7 @@ vim.opt.swapfile = false
 
 vim.opt.number = true
 vim.opt.relativenumber = true
+vim.opt.undofile  = true
 
 vim.cmd("filetype plugin indent on")
 
