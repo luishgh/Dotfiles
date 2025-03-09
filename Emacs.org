@@ -249,6 +249,10 @@ I mostly use [[https://guix.gnu.org/][GNU Guix]] for installing Emacs packages. 
 
 #+begin_src emacs-lisp
   (setq lhgh/is-guix-system (executable-find "guix"))
+
+  ;; NOTE: hack to fix Emacs Time Zone: (https://logs.guix.gnu.org/guix/2023-12-29.log#200705)
+  (when lhgh/is-guix-system
+    (set-time-zone-rule nil))
 #+end_src
 
 *Guix Packages*
@@ -387,7 +391,7 @@ This is the main section of configuration that makes Emacs usable for me. Before
     (general-create-definer lhgh/leader-maps
       :states '(normal insert emacs)
       :prefix "SPC" ;; The prefix in normal state
-      :global-prefix "C-SPC") ;; The prefix accessible in any state
+      :global-prefix "C-c") ;; The prefix accessible in any state
 
     (general-create-definer lhgh/ctrl-c-binds
       :states '(normal insert emacs)
@@ -1063,58 +1067,66 @@ NOTE: Currently, installing Citar through guix results in errors.
 ** Org Roam
 
 #+begin_src emacs-lisp
-    (use-package org-roam
-      :after org
-      :init
-      (setq org-roam-v2-ack t)
-      :custom
-      (org-roam-directory "~/Documents/Org/org-roam")
-      (org-roam-capture-templates
-       '(("m" "main" plain "%?"
-          :if-new (file+head "main/${slug}.org"
-                             "#+title: ${title}\n")
-          :unnarrowed t)
-         ("r" "reference" plain "%?"
-          :if-new (file+head "reference/${title}.org"
-                             "#+title: ${title}\n")
-          :unnarrowed t)
-         ("b" "bibliography reference" plain "%?"
-          :if-new (file+head "reference/${citekey}.org"
-                             "#+title: ${author} :: ${title}\n")
-          :unnarrowed t)))
-      (org-roam-node-display-template
-       (concat "${type:15} ${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
-      :general
-      (lhgh/ctrl-c-binds
-        "n" '(:ignore t :which-key "notes")
-        "nl" 'org-roam-buffer-toggle
-        "nf" 'org-roam-node-find
-        "ni" 'org-roam-node-insert)
-      :config
-      (org-roam-db-autosync-enable)
-      (cl-defmethod org-roam-node-type ((node org-roam-node))
-        "Return the TYPE of NODE."
-        (condition-case nil
-            (file-name-nondirectory
-             (directory-file-name
-              (file-name-directory
-               (file-relative-name (org-roam-node-file node) org-roam-directory))))
-          (error "")))
-      (add-to-list 'display-buffer-alist
-                   '("\\*org-roam\\*"
-                     (display-buffer-in-direction)
-                     (direction . right)
-                     (window-width . 0.33)
-                     (window-height . fit-window-to-buffer))))
+  (use-package org-roam
+    :after org
+    :init
+    (setq org-roam-v2-ack t)
+    :custom
+    (org-roam-directory "~/Documents/Org/org-roam")
+    (org-roam-capture-templates
+     '(("m" "main" plain "%?"
+        :if-new (file+head "main/${slug}.org"
+                           "#+title: ${title}\n")
+        :unnarrowed t)
+       ("r" "reference" plain "%?"
+        :if-new (file+head "reference/${title}.org"
+                           "#+title: ${title}\n")
+        :unnarrowed t)
+       ("b" "bibliography reference" plain "%?"
+        :if-new (file+head "reference/${citekey}.org"
+                           "#+title: ${author} :: ${title}\n")
+        :unnarrowed t)))
+    (org-roam-node-display-template
+     (concat "${type:15} ${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+    :general
+    (lhgh/leader-maps
+      "n" '(:ignore t :which-key "notes")
+      "nl" 'org-roam-buffer-toggle
+      "nf" 'org-roam-node-find
+      "ni" 'org-roam-node-insert
+      ;"nd" org-roam-dailies-map
+      )
+    :config
+    (org-roam-db-autosync-enable)
+    (cl-defmethod org-roam-node-type ((node org-roam-node))
+      "Return the TYPE of NODE."
+      (condition-case nil
+          (file-name-nondirectory
+           (directory-file-name
+            (file-name-directory
+             (file-relative-name (org-roam-node-file node) org-roam-directory))))
+        (error "")))
+    (add-to-list 'display-buffer-alist
+                 '("\\*org-roam\\*"
+                   (display-buffer-in-direction)
+                   (direction . right)
+                   (window-width . 0.33)
+                   (window-height . fit-window-to-buffer))))
 
-    (use-package org-roam-bibtex
-      :after org-roam
-      :hook (org-roam-mode . org-roam-bibtex-mode)
-      :custom
-      (orb-roam-ref-format 'org-cite)
-      (bibtex-completion-bibliography org-cite-global-bibliography)
-      (bibtex-completion-notes-path org-roam-directory)
-      (bibtex-completion-library-path "~/Documents/Library"))
+  (use-package org-roam-dailies
+    :general
+    (lhgh/leader-maps
+      "nd" '(:ignore t :which-key "dailies"))
+    :bind-keymap ("C-c nd" . org-roam-dailies-map))
+
+  (use-package org-roam-bibtex
+    :after org-roam
+    :hook (org-roam-mode . org-roam-bibtex-mode)
+    :custom
+    (orb-roam-ref-format 'org-cite)
+    (bibtex-completion-bibliography org-cite-global-bibliography)
+    (bibtex-completion-notes-path org-roam-directory)
+    (bibtex-completion-library-path "~/Documents/Library"))
 #+end_src
 
 *Guix Packages*
@@ -2177,8 +2189,21 @@ Load up the configuration present in [[file:Mail.org][Mail.org]]
 This is a package of my own 🤩. It provides an Emacs integration to the famous [[https://github.com/jmerle/competitive-companion][Competitive Companion Extension]].
 
 #+begin_src emacs-lisp
+  (defun lhgh/cc-compile-current ()
+    "Compile the current file using `make` with its base name sans extension."
+    (interactive)
+    (when buffer-file-name
+      (let* ((filename (file-name-nondirectory buffer-file-name))
+             (basename (file-name-sans-extension filename))
+             (compile-command (format "make -B %s" basename)))
+        (compile compile-command))))
+
   (use-package competitive-companion
-    :straight (competitive-companion :type git :local-repo "~/Projects/Code/competitive-companion.el"))
+    :straight (competitive-companion :type git :local-repo "~/Projects/Code/competitive-companion.el")
+    :bind
+    (:map competitive-companion-mode-map
+          ("C-c r" . competitive-companion-run-tests)
+          ("C-c m" . lhgh/cc-compile-current)))
 #+end_src
 
 * Credential Management

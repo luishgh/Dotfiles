@@ -22,6 +22,10 @@
 
 (setq lhgh/is-guix-system (executable-find "guix"))
 
+;; NOTE: hack to fix Emacs Time Zone: (https://logs.guix.gnu.org/guix/2023-12-29.log#200705)
+(when lhgh/is-guix-system
+  (set-time-zone-rule nil))
+
 (straight-use-package 'use-package) ;; Use straight.el for use-package expressions
 (setq straight-use-package-by-default (not lhgh/is-guix-system)) ;; Install a package if it isn't installed already on non-Guix systems
 ;; (setq use-package-verbose t) ;; Uncomment to bench mark use-package
@@ -87,7 +91,7 @@
   (general-create-definer lhgh/leader-maps
     :states '(normal insert emacs)
     :prefix "SPC" ;; The prefix in normal state
-    :global-prefix "C-SPC") ;; The prefix accessible in any state
+    :global-prefix "C-c") ;; The prefix accessible in any state
 
   (general-create-definer lhgh/ctrl-c-binds
     :states '(normal insert emacs)
@@ -460,11 +464,13 @@
   (org-roam-node-display-template
    (concat "${type:15} ${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
   :general
-  (lhgh/ctrl-c-binds
+  (lhgh/leader-maps
     "n" '(:ignore t :which-key "notes")
     "nl" 'org-roam-buffer-toggle
     "nf" 'org-roam-node-find
-    "ni" 'org-roam-node-insert)
+    "ni" 'org-roam-node-insert
+    ;"nd" org-roam-dailies-map
+    )
   :config
   (org-roam-db-autosync-enable)
   (cl-defmethod org-roam-node-type ((node org-roam-node))
@@ -481,6 +487,12 @@
                  (direction . right)
                  (window-width . 0.33)
                  (window-height . fit-window-to-buffer))))
+
+(use-package org-roam-dailies
+  :general
+  (lhgh/leader-maps
+    "nd" '(:ignore t :which-key "dailies"))
+  :bind-keymap ("C-c nd" . org-roam-dailies-map))
 
 (use-package org-roam-bibtex
   :after org-roam
@@ -966,8 +978,21 @@
 
 (setopt diary-file "~/Documents/diary")
 
+(defun lhgh/cc-compile-current ()
+  "Compile the current file using `make` with its base name sans extension."
+  (interactive)
+  (when buffer-file-name
+    (let* ((filename (file-name-nondirectory buffer-file-name))
+           (basename (file-name-sans-extension filename))
+           (compile-command (format "make -B %s" basename)))
+      (compile compile-command))))
+
 (use-package competitive-companion
-  :straight (competitive-companion :type git :local-repo "~/Projects/Code/competitive-companion.el"))
+  :straight (competitive-companion :type git :local-repo "~/Projects/Code/competitive-companion.el")
+  :bind
+  (:map competitive-companion-mode-map
+        ("C-c r" . competitive-companion-run-tests)
+        ("C-c m" . lhgh/cc-compile-current)))
 
 (use-package password-store
   :config

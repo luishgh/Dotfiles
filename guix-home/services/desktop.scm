@@ -5,6 +5,7 @@
   #:use-module (gnu home services)
   #:use-module (gnu home services shepherd)
   #:use-module (gnu home services xdg)
+  #:use-module (gnu packages bash)
   #:use-module (gnu packages wm)
   #:use-module (gnu packages emacs-xyz)
   #:use-module (gnu packages gnome) ;; libnotify
@@ -53,6 +54,7 @@
         curl
         nss-certs
         light
+        bash-completion
 
         ;; Browsers
         firefox

@@ -16,6 +16,11 @@ set $lock swaylock -f -i $wallpaper -s fill
 exec dbus-update-activation-environment --systemd --all
 exec emacs --daemon
 exec dunst
+
+# Org Agenda buffer in scratchpad
+exec sleep 10 && emacsclient -F "((title . \"Org Agenda [Scratchpad]\"))" -c -e '(progn (org-agenda nil "d") (delete-other-windows))'
+for_window [title=".*\[Scratchpad\]$"] move to scratchpad
+
 # exec /usr/lib/xdg-desktop-portal --replace
 # exec mako
 
