@@ -1616,6 +1616,7 @@ As of Emacs 29, Flymake has built-in Shellcheck integration, so I only need to p
   (use-package auctex)
 
   (use-package tex
+    :straight nil
     :defer t
     :requires auctex
     :config

@@ -693,6 +693,7 @@
 (use-package auctex)
 
 (use-package tex
+  :straight nil
   :defer t
   :requires auctex
   :config
