@@ -305,6 +305,8 @@
 
 (setopt show-paren-context-when-offscreen 'overlay)
 
+(setopt browse-url-browser-function 'browse-url-firefox)
+
 (lhgh/leader-maps
   "o" '(:ignore t :which-key "org"))
 
@@ -988,10 +990,29 @@
            (compile-command (format "make -B %s" basename)))
       (compile compile-command))))
 
+(defvar lhgh/contest-makefile-path "~/Documents/Maratona/Makefile"
+  "Path to the Makefile template to copy into new contest folders.")
+
 (use-package competitive-companion
   :straight (competitive-companion :type git :local-repo "~/Projects/Code/competitive-companion.el")
+  :init
+  (defun lhgh/create-contest-folder (name)
+    "Create contest folder under ~/Documents/Maratona/Contests/ with the given NAME.
+Copies a Makefile from `lhgh/contest-makefile-path'
+and opens the folder in Dired."
+    (interactive "sContest name: ")
+    (let* ((base-dir (expand-file-name "~/Documents/Maratona/Contests/"))
+           (contest-dir (expand-file-name name base-dir))
+           (makefile-path (expand-file-name lhgh/contest-makefile-path)))
+      (unless (file-directory-p base-dir)
+        (make-directory base-dir t))
+      (make-directory contest-dir t)
+      (copy-file makefile-path (expand-file-name "Makefile" contest-dir) t)
+      (dired contest-dir)
+      (competitive-companion-mode)))
   :bind
-  (:map competitive-companion-mode-map
+  (("C-c C" . lhgh/create-contest-folder)
+   :map competitive-companion-mode-map
         ("C-c r" . competitive-companion-run-tests)
         ("C-c m" . lhgh/cc-compile-current)))
 
