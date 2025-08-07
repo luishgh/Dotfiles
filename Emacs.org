@@ -83,6 +83,8 @@
     - [[#forge][Forge]]
   - [[#language-server-protocol][Language Server Protocol]]
     - [[#add-localbin-to-exec-path-for-lsp-servers][Add .local/bin to exec path for lsp servers]]
+  - [[#linter][Linter]]
+  - [[#debugger][Debugger]]
   - [[#snippets][Snippets]]
   - [[#languages][Languages]]
     - [[#meta-lisp][Meta Lisp]]
@@ -487,14 +489,9 @@ A more minimal alternative to =Ivy=.  It uses the default completion system, whi
 Consult provides a lot of useful completion commands similar to Ivy’s Counsel. It is compatible with any completion system based on the standard Emacs completing-read API, like =Vertico= or =Selectrum.=
 
 #+begin_src emacs-lisp
-  (defun lhgh/get-project-root ()
-    (when (fboundp 'projectile-project-root)
-      (projectile-project-root)))
-
   (use-package consult
     :bind (("C-s" . consult-line))
     :custom
-    (consult-project-root-function #'lhgh/get-project-root)
     (completion-in-region-function #'consult-completion-in-region))
 #+end_src
 
@@ -525,11 +522,14 @@ Marginalia provides helpful annotations for various types of minibuffer completi
 #+end_src
 
 ** Corfu
+
+*NOTE:* Currently trying out just using =Vertico=, along with the new (built-in) =completion-preview-mode=!
+
 Corfu can be considered the minimalistic =completion-at-point= counterpart of =Vertico=. Similar to it. Because it uses the same plugggable backend format that the built in =completion-at-point= uses, it has full compatibility with a lot of Emacs packages, like =lsp-mode= and =eglot=.
 
 #+begin_src emacs-lisp
   (use-package corfu
-    :demand t
+    :disabled t
     :bind (:map corfu-map
            ("M-j" . corfu-next)
            ("M-k" . corfu-previous)
@@ -539,6 +539,15 @@ Corfu can be considered the minimalistic =completion-at-point= counterpart of =V
     :config
     (setq tab-always-indent 'complete)
     (global-corfu-mode 1))
+
+  (use-package completion-preview
+    :straight (:type built-in)
+    :bind (:map completion-preview-active-mode-map
+                ("M-n" . completion-preview-next-candidate)
+                ("M-p" . completion-preview-prev-candidate))
+    :init
+    (global-completion-preview-mode 1))
+
 #+end_src
 
 *Guix Packages*
@@ -701,18 +710,19 @@ Enabling TAB key for completion and disabling its indentation functionality. I h
 NOTE: Currently trying out =nerd-icons= instead.
 
 #+begin_src emacs-lisp
-    (use-package all-the-icons
-      :disabled t
-      :if (display-graphic-p)
-      :commands all-the-icons-install-fonts
-      :init
-      (unless (or lhgh/is-guix-system
-                  (find-font (font-spec :name "all-the-icons")))
-        (all-the-icons-install-fonts t)))
+  (use-package all-the-icons
+    :disabled t
+    :if (display-graphic-p)
+    :commands all-the-icons-install-fonts
+    :init
+    (unless (or lhgh/is-guix-system
+                (find-font (font-spec :name "all-the-icons")))
+      (all-the-icons-install-fonts t)))
 
   (use-package nerd-icons
     :init
-    (unless (find-font (font-spec :name "Symbols Nerd Font Mono"))
+    (unless (or (daemonp)
+                (find-font (font-spec :name "Symbols Nerd Font Mono")))
       (nerd-icons-install-fonts t)))
 #+end_src
 
@@ -795,6 +805,7 @@ I use [[https://github.com/seagle0128/doom-modeline][doom-modeline]] because it 
   (use-package doom-modeline
     :init (doom-modeline-mode 1)
     :custom
+    (doom-modeline-project-name t)
     (doom-modeline-buffer-file-name-style 'truncate-with-project)
     (doom-modeline-buffer-encoding nil))
 #+end_src
@@ -1352,6 +1363,30 @@ I like to install my language servers to =.local/bin=. This is good because it m
   (push "~/.local/bin" exec-path)
 #+end_src
 
+** Linter
+
+I use the built-in package =flymake= for linting.
+
+#+begin_src emacs-lisp
+  (use-package flymake
+    :straight (:type built-in)
+    :custom
+    (flymake-indicator-type 'fringes)
+    (trusted-content '("~/Projects/Code/"))
+    (flymake-show-diagnostics-at-end-of-line t))
+#+end_src
+
+** Debugger
+
+For debugging, I'm currently using the built-in GUD interface.
+
+#+begin_src emacs-lisp
+  (use-package gud
+    :straight (:type built-in)
+    :custom
+    (gud-highlight-current-line t))
+#+end_src
+
 ** Snippets
 For snippets, I use yasnippets.
 
@@ -1416,7 +1451,7 @@ For snippets, I use yasnippets.
 
   "emacs-lispy"
   "emacs-lispyville"
-  "emacs-symex"
+  ;; "emacs-symex"
 
 #+end_src
 
@@ -1626,6 +1661,9 @@ As of Emacs 29, Flymake has built-in Shellcheck integration, so I only need to p
     :straight nil
     :defer t
     :requires auctex
+    :custom
+    (TeX-parse-self t)
+    (TeX-auto-save t)
     :config
     ;; NOTE: It seems Zathura dropped synctex support 😢
     ;; Use Zathura to open PDF files
@@ -1697,8 +1735,8 @@ As of Emacs 29, Flymake has built-in Shellcheck integration, so I only need to p
 
 ** Tree-Sitter
 
-- Note taken on [2023-01-17 Tue 14:45] \\
-  Try switching to built-in tree-sitter integration when Emacs 29 lands.
+I'm still using [[https://emacs-tree-sitter.github.io/][tree-sitter]], even though the built-in integration has already shipped to the latest official releases. I'll probably change to =treesit= whenever I have more free time available.
+
 #+begin_src emacs-lisp
   (use-package tree-sitter
     :straight t

@@ -132,14 +132,9 @@
   :init
   (vertico-mode))
 
-(defun lhgh/get-project-root ()
-  (when (fboundp 'projectile-project-root)
-    (projectile-project-root)))
-
 (use-package consult
   :bind (("C-s" . consult-line))
   :custom
-  (consult-project-root-function #'lhgh/get-project-root)
   (completion-in-region-function #'consult-completion-in-region))
 
 (use-package marginalia
@@ -148,7 +143,7 @@
   (marginalia-mode))
 
 (use-package corfu
-  :demand t
+  :disabled t
   :bind (:map corfu-map
          ("M-j" . corfu-next)
          ("M-k" . corfu-previous)
@@ -158,6 +153,14 @@
   :config
   (setq tab-always-indent 'complete)
   (global-corfu-mode 1))
+
+(use-package completion-preview
+  :straight (:type built-in)
+  :bind (:map completion-preview-active-mode-map
+              ("M-n" . completion-preview-next-candidate)
+              ("M-p" . completion-preview-prev-candidate))
+  :init
+  (global-completion-preview-mode 1))
 
 (use-package orderless
   :straight t
@@ -243,17 +246,18 @@
 (setq-default indent-tabs-mode nil)
 
 (use-package all-the-icons
-    :disabled t
-    :if (display-graphic-p)
-    :commands all-the-icons-install-fonts
-    :init
-    (unless (or lhgh/is-guix-system
-                (find-font (font-spec :name "all-the-icons")))
-      (all-the-icons-install-fonts t)))
+  :disabled t
+  :if (display-graphic-p)
+  :commands all-the-icons-install-fonts
+  :init
+  (unless (or lhgh/is-guix-system
+              (find-font (font-spec :name "all-the-icons")))
+    (all-the-icons-install-fonts t)))
 
 (use-package nerd-icons
   :init
-  (unless (find-font (font-spec :name "Symbols Nerd Font Mono"))
+  (unless (or (daemonp)
+              (find-font (font-spec :name "Symbols Nerd Font Mono")))
     (nerd-icons-install-fonts t)))
 
 (use-package doom-themes
@@ -300,6 +304,7 @@
 (use-package doom-modeline
   :init (doom-modeline-mode 1)
   :custom
+  (doom-modeline-project-name t)
   (doom-modeline-buffer-file-name-style 'truncate-with-project)
   (doom-modeline-buffer-encoding nil))
 
@@ -583,6 +588,18 @@
 
 (push "~/.local/bin" exec-path)
 
+(use-package flymake
+  :straight (:type built-in)
+  :custom
+  (flymake-indicator-type 'fringes)
+  (trusted-content '("~/Projects/Code/"))
+  (flymake-show-diagnostics-at-end-of-line t))
+
+(use-package gud
+  :straight (:type built-in)
+  :custom
+  (gud-highlight-current-line t))
+
 (use-package yasnippet
   :hook ((prog-mode . yas-minor-mode)
          (org-mode . yas-minor-mode))
@@ -698,6 +715,9 @@
   :straight nil
   :defer t
   :requires auctex
+  :custom
+  (TeX-parse-self t)
+  (TeX-auto-save t)
   :config
   ;; NOTE: It seems Zathura dropped synctex support 😢
   ;; Use Zathura to open PDF files
