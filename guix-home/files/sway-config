@@ -10,7 +10,7 @@ set $uifont "Iosevka Aile 11"
 set $highlight #3daee9
 set $prompt #18b218
 set $menu bemenu-run --fn $uifont -b -p "▶" --tf "$prompt" --hf "$highlight" --sf "$highlight" --scf "$highlight" | xargs swaymsg exec
-set $wallpaper ~/Documents/Wallpapers/cowboy-bebop-red.png
+set $wallpaper ~/Downloads/wp10740842-babylons-fall-wallpapers.jpg
 set $lock swaylock -f -i $wallpaper -s fill
 ### Needed for xdg-desktop-portal-kde
 exec dbus-update-activation-environment --systemd --all
@@ -21,7 +21,7 @@ exec dunst
 exec sleep 10 && emacsclient -F "((title . \"Org Agenda [Scratchpad]\"))" -c -e '(progn (org-agenda nil "d") (delete-other-windows))'
 for_window [title=".*\[Scratchpad\]$"] move to scratchpad
 
-# exec /usr/lib/xdg-desktop-portal --replace
+# exec /usr/libexec/xdg-desktop-portal --replace
 # exec mako
 
 ### Output configuration

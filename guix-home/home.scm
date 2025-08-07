@@ -36,5 +36,5 @@
                 (service home-flatpak-service-type)
                 (service home-direnv-service-type))
           ;;home-sound-services
-          ;%base-home-services
+          %base-home-services
           )))
