@@ -496,6 +496,7 @@
                  (window-height . fit-window-to-buffer))))
 
 (use-package org-roam-dailies
+  :straight nil
   :general
   (lhgh/leader-maps
     "nd" '(:ignore t :which-key "dailies"))
@@ -598,6 +599,7 @@
 (use-package gud
   :straight (:type built-in)
   :custom
+  (gdb-show-main t)
   (gud-highlight-current-line t))
 
 (use-package yasnippet
