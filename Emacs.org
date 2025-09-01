@@ -2265,7 +2265,7 @@ This is a package of my own 🤩. It provides an Emacs integration to the famous
         (make-directory contest-dir t)
         (copy-file makefile-path (expand-file-name "Makefile" contest-dir) t)
         (dired contest-dir)
-        (competitive-companion-mode)))
+        (competitive-companion-mode 1)))
     :bind
     (("C-c C" . lhgh/create-contest-folder)
      :map competitive-companion-mode-map

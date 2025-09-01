@@ -1031,7 +1031,7 @@ and opens the folder in Dired."
       (make-directory contest-dir t)
       (copy-file makefile-path (expand-file-name "Makefile" contest-dir) t)
       (dired contest-dir)
-      (competitive-companion-mode)))
+      (competitive-companion-mode 1)))
   :bind
   (("C-c C" . lhgh/create-contest-folder)
    :map competitive-companion-mode-map
