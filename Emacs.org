@@ -2059,8 +2059,11 @@ Just a cheatsheet with the commands I use most frequently. Disclaimer: this docu
 
 *** Opening Files Externally
 
+Obs: currently using built-in solution: ~dired-do-open~
+
 #+begin_src emacs-lisp
   (use-package openwith
+    :disabled t
     :after dired
     :hook (dired-mode . openwith-mode)
     :config

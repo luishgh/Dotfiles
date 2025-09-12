@@ -910,6 +910,7 @@
     "p" 'dired-ranger-paste))
 
 (use-package openwith
+  :disabled t
   :after dired
   :hook (dired-mode . openwith-mode)
   :config
