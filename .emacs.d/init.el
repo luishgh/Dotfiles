@@ -848,6 +848,11 @@
   (eshell-git-prompt-use-theme 'powerline))
 
 (use-package all-the-icons-dired
+  :disabled t
+  :defer t)
+
+(use-package nerd-icons-dired
+  :straight t
   :defer t)
 
 (use-package dired
@@ -899,7 +904,7 @@
             (lambda ()
               ;; (interactive)
               (dired-collapse-mode 1)
-              (all-the-icons-dired-mode 1)))
+              (nerd-icons-dired-mode 1)))
 
   (evil-collection-define-key 'normal 'dired-mode-map
     "h" 'dired-up-directory

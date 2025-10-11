@@ -1986,6 +1986,11 @@ Just a cheatsheet with the commands I use most frequently. Disclaimer: this docu
 
 #+begin_src emacs-lisp
   (use-package all-the-icons-dired
+    :disabled t
+    :defer t)
+
+  (use-package nerd-icons-dired
+    :straight t
     :defer t)
 
   (use-package dired
@@ -2037,7 +2042,7 @@ Just a cheatsheet with the commands I use most frequently. Disclaimer: this docu
               (lambda ()
                 ;; (interactive)
                 (dired-collapse-mode 1)
-                (all-the-icons-dired-mode 1)))
+                (nerd-icons-dired-mode 1)))
 
     (evil-collection-define-key 'normal 'dired-mode-map
       "h" 'dired-up-directory
@@ -2052,7 +2057,7 @@ Just a cheatsheet with the commands I use most frequently. Disclaimer: this docu
 
 #+begin_src scheme
 
-  "emacs-all-the-icons-dired"
+  ;"emacs-all-the-icons-dired"
   "emacs-dired-hacks"
 
 #+end_src
