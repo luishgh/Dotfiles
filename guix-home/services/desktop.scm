@@ -16,6 +16,7 @@
   #:use-module (gnu packages certs)
   #:use-module (gnu packages package-management)
   #:use-module (gnu packages freedesktop)
+  #:use-module (gnu packages nss)
   #:use-module (gnu packages ssh)
   #:use-module (gnu packages terminals)
   #:use-module (gnu packages chromium)

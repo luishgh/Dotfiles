@@ -13,7 +13,9 @@ set $menu bemenu-run --fn $uifont -b -p "▶" --tf "$prompt" --hf "$highlight" -
 set $wallpaper ~/Downloads/wp10740842-babylons-fall-wallpapers.jpg
 set $lock swaylock -f -i $wallpaper -s fill
 ### Needed for xdg-desktop-portal-kde
-exec dbus-update-activation-environment --systemd --all
+exec systemctl --user import-environment DISPLAY WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
+exec dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
+# exec dbus-update-activation-environment --systemd --all
 exec emacs --daemon
 exec dunst
 
@@ -93,6 +95,7 @@ input "1:1:AT_Translated_Set_2_keyboard" {
 
     # start your launcher
     bindsym $mod+p exec $menu
+    bindsym $mod+Shift+p exec "$HOME/.bin/zotero_menu.sh"
     #bindcode 133 exec $menu
 
     # Emacs

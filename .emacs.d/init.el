@@ -946,6 +946,8 @@
   (telega-sticker-set-download 't)
   (telega-emoji-use-images nil)
   :config
+  ;; TODO: check who sets this stupid bindings, I suspect evil-collection:
+  (defalias 'telega-msg-delete-marked-or-at-point 'telega-msg-delete-dwim)
   (define-key global-map (kbd "C-c t") telega-prefix-map)
   (telega-appindicator-mode 1))
 
