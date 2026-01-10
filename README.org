@@ -1,0 +1,35 @@
+#+TITLE: Dotfiles
+
+These are my configuration files, feel free to take a peek!
+
+* Current Suite
+
+Some configurations here haven't been used in years and I am not in the mood of pruning this repo right now. I list below the programs I (heavily) use nowadays, these are the configurations that (should) work:
+
+- Text editor :: I mainly use [[file:Emacs.org][Emacs]] as my text editor, sometimes I use [[file:.config/nvim/init.lua][Neovim]]. 
+- Window Manager :: [[file:guix-home/files/sway-config][Sway]]
+- Terminal :: [[file:.config/alacritty/alacritty.toml][Alacritty]]
+- Status bar :: [[file:.config/waybar/config][Waybar]]
+- Distribution :: [[https://www.debian.org/][Debian]]
+
+* How do I use this?
+
+I setup my dotfiles in new machines mainly through two tools:
+
+1. [[https://www.gnu.org/software/stow/][GNU Stow]] syncs my plain files inside =.config= with symlinks.
+2. [[https://guix.gnu.org/][GNU Guix]] reproduces the software suite and some configuration files through the ~guix home~ subcommand. The files for this are in the =guix-home= folder
+
+To apply the configuration files on a new machine, I do the following after cloning the repo to =~/.dotfiles= and installing =stow=:
+
+#+begin_src shell
+  cd ~/.dotfiles
+  stow .
+#+end_src
+
+If I have =guix= installed, I reproduce my environments with the following commands:
+#+begin_src shell
+  cd ~/.dotfiles/guix-home
+  make home
+  make emacs-profile
+  make mail-profile
+#+end_src
