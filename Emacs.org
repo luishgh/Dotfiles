@@ -3,6 +3,7 @@
 #+DESCRIPTION: My personal vanilla Emacs config.
 #+PROPERTY: header-args:emacs-lisp :tangle .emacs.d/init.el :mkdirp yes
 #+PROPERTY: header-args:scheme :noweb-ref packages :noweb-sep ""
+#+STARTUP: content
 
 * Table of Contents
 :PROPERTIES:
@@ -147,7 +148,11 @@ This is my GNU Emacs config. I had been using [[https://github.com/hlissner/doom
 
 ** List of TODOS
 *** TODO Exchange =define-key= and =global-set-key= with the new =keymap-= functions
+
+See [[info:emacs#Init Rebinding][emacs#Init Rebinding]]
+
 *** TODO Study the possiblity of switching back to =package.el=, as it now includes vc-source installations.
+
 * Setting Up a Literate Config
 Having this in your =init.el= permits using =config.org= to configure Emacs.
 
@@ -205,9 +210,6 @@ Some operations for startup performance. This is tangled to =early-init.el= to b
   ;; may introduce down the road.
   (define-advice startup--load-user-init-file (:before (&rest _) remove-load-file-silence)
     (advice-remove #'load-file #'load-file@silence))
-
-  ;; fix bug with jsonrpc: https://issues.guix.gnu.org/70211
-  (setq load-no-native t)
 #+end_src
 
 * Global Mappings
@@ -622,7 +624,6 @@ Context action for completion minibuffers.
 
 #+begin_src emacs-lisp
   (lhgh/leader-maps
-    "."  '(find-file :which-key "find file")
     "b" '(:ignore t :which-key "buffers")
     "bb" '(consult-buffer :which-key "switch buffer"))
 #+end_src
@@ -1251,7 +1252,7 @@ With [[https://github.com/awth13/org-appear][org-appear]], hidden element parts 
 #+end_src
 
 ** Auto-tangle Configuration Files
-This snippet adds a hook to =org-mode= buffers so that any Org file in the =.dotfiles= folder when saved gets auto tangled on save.
+This snippet adds a hook to =org-mode= buffers so that any Org file in the =.dotfiles= folder gets auto tangled on save.
 
 #+begin_src emacs-lisp
   ;; Automatically tangle our Emacs.org config file when we save it
@@ -1750,10 +1751,16 @@ I'm still using [[https://emacs-tree-sitter.github.io/][tree-sitter]], even thou
     :straight t)
 #+end_src
 
+This snippet ensures =treesit= looks for grammars installed through the default Guix profile:
+#+begin_src emacs-lisp
+  (push (substitute-in-file-name "$HOME/.guix-profile/lib/tree-sitter") treesit-extra-load-path)
+#+end_src
+
 *Guix Packages*
 
 #+begin_src scheme
   "tree-sitter-cmake"
+  "tree-sitter-yaml"
 #+end_src
 
 ** Direnv
@@ -1775,7 +1782,7 @@ I have started to use =direnv= to automatically enable =guix shell= environments
 
 ** Compilation Mode
 
-Some small enhancements to compilation buffers.
+Some small enhancements to compilation (=M-x compile=) buffers.
 
 #+begin_src emacs-lisp
   (use-package compile
@@ -2244,7 +2251,7 @@ Load up the configuration present in [[file:Mail.org][Mail.org]]
 
 ** Competitive Companion
 
-This is a package of my own 🤩. It provides an Emacs integration to the famous [[https://github.com/jmerle/competitive-companion][Competitive Companion Extension]].
+This is a package of my own 🤩. It provides an Emacs integration to the famous [[https://github.com/jmerle/competitive-companion][Competitive Companion browser extension]].
 
 #+begin_src emacs-lisp
   (defun lhgh/cc-compile-current ()
@@ -2260,7 +2267,8 @@ This is a package of my own 🤩. It provides an Emacs integration to the famous
     "Path to the Makefile template to copy into new contest folders.")
 
   (use-package competitive-companion
-    :straight (competitive-companion :type git :local-repo "~/Projects/Code/competitive-companion.el")
+    :load-path "~/Projects/Code/competitive-companion.el"
+    :commands competitive-companion-mode
     :init
     (defun lhgh/create-contest-folder (name)
       "Create contest folder under ~/Documents/Maratona/Contests/ with the given NAME.
@@ -2280,10 +2288,10 @@ This is a package of my own 🤩. It provides an Emacs integration to the famous
     (("C-c C" . lhgh/create-contest-folder)
      :map competitive-companion-mode-map
           ("C-c r" . competitive-companion-run-tests)
-          ("C-c m" . lhgh/cc-compile-current)))
-
-
-
+          ("C-c l" . competitive-companion-toggle-output-buffer)
+          ("C-c m" . lhgh/cc-compile-current))
+    :config
+    (competitive-companion-setup-evil))
 #+end_src
 
 * Credential Management

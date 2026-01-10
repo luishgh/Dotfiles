@@ -201,7 +201,6 @@
   ([remap describe-key] . helpful-key))
 
 (lhgh/leader-maps
-  "."  '(find-file :which-key "find file")
   "b" '(:ignore t :which-key "buffers")
   "bb" '(consult-buffer :which-key "switch buffer"))
 
@@ -754,6 +753,8 @@
   :after tree-sitter
   :straight t)
 
+(push (substitute-in-file-name "$HOME/.guix-profile/lib/tree-sitter") treesit-extra-load-path)
+
 (use-package envrc
   :after project
   :config
@@ -1024,7 +1025,8 @@
   "Path to the Makefile template to copy into new contest folders.")
 
 (use-package competitive-companion
-  :straight (competitive-companion :type git :local-repo "~/Projects/Code/competitive-companion.el")
+  :load-path "~/Projects/Code/competitive-companion.el"
+  :commands competitive-companion-mode
   :init
   (defun lhgh/create-contest-folder (name)
     "Create contest folder under ~/Documents/Maratona/Contests/ with the given NAME.
@@ -1044,7 +1046,10 @@ and opens the folder in Dired."
   (("C-c C" . lhgh/create-contest-folder)
    :map competitive-companion-mode-map
         ("C-c r" . competitive-companion-run-tests)
-        ("C-c m" . lhgh/cc-compile-current)))
+        ("C-c l" . competitive-companion-toggle-output-buffer)
+        ("C-c m" . lhgh/cc-compile-current))
+  :config
+  (competitive-companion-setup-evil))
 
 (use-package password-store
   :config
