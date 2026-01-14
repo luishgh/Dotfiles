@@ -14,22 +14,38 @@ Some configurations here haven't been used in years and I am not in the mood of 
 
 * How do I use this?
 
-I setup my dotfiles in new machines mainly through two tools:
+I setup my dotfiles in new machines mainly through a collection of tools. I use them in the following order:
 
-1. [[https://www.gnu.org/software/stow/][GNU Stow]] syncs my plain files inside =.config= with symlinks.
-2. [[https://guix.gnu.org/][GNU Guix]] reproduces the software suite and some configuration files through the ~guix home~ subcommand. The files for this are in the =guix-home= folder
+1. Emacs' [[https://orgmode.org/worg/org-contrib/babel/intro.html][Org Babel]] tangles content from [[file:Emacs.org]] and [[file:Mail.org]] to a collection of generated files. This sets up my Emacs config, my Mail configuration, my guix profiles, etc.
+2. [[https://www.gnu.org/software/stow/][GNU Stow]] syncs my plain files inside =.config= with symlinks.
+3. [[https://guix.gnu.org/][GNU Guix]] reproduces the software suite and some configuration files through the ~guix home~ subcommand. The files for this are in the =guix-home= folder
 
-To apply the configuration files on a new machine, I do the following after cloning the repo to =~/.dotfiles= and installing =stow=:
+To apply the configuration files on a new machine, I do the following after cloning the repo to =~/.dotfiles= and installing =stow= and =emacs=:
 
-#+begin_src shell
+#+begin_src shell :results silent
   cd ~/.dotfiles
+  emacs -Q --batch --eval "(require 'org)" Emacs.org -f org-babel-tangle Mail.org -f org-babel-tangle
   stow .
 #+end_src
 
 If I have =guix= installed, I reproduce my environments with the following commands:
-#+begin_src shell
+
+*home environment*:
+#+begin_src shell :results silent
   cd ~/.dotfiles/guix-home
   make home
+#+end_src
+
+*Emacs environment*:
+#+begin_src shell :results silent
+  cd ~/.dotfiles/guix-home
   make emacs-profile
+#+end_src
+
+*Mail environment*:
+#+begin_src shell :results silent
+  cd ~/.dotfiles/guix-home
   make mail-profile
 #+end_src
+
+Cool tip: instead of opening this in Emacs and copy paste this in my terminal, I just use ~C-c C-c~ on each of the above code blocks!

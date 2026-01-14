@@ -60,7 +60,7 @@
         ;; Browsers
         firefox
         qutebrowser
-        nyxt
+        ;; nyxt
 
         ;; DE Suite
         calibre
