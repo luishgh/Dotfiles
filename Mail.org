@@ -126,7 +126,7 @@ If you wonder how you can expose Gmail categories - like =Updates= or =Promotion
 #+begin_src conf :tangle .mbsyncrc :mkdirp yes
   IMAPAccount gmail
   Host imap.gmail.com
-  SSLType IMAPS
+  TLSType IMAPS
   AuthMechs LOGIN
   User luishenriquegh2701@gmail.com
   PassCmd "pass email/mbsync-gmail"
@@ -151,7 +151,7 @@ If you wonder how you can expose Gmail categories - like =Updates= or =Promotion
 
   IMAPAccount dcc
   Host imap.dcc.ufmg.br 
-  SSLType IMAPS
+  TLSType IMAPS
   AuthMechs LOGIN
   User luis.higino
   PassCmd "pass academic/dcc.ufmg.br"
