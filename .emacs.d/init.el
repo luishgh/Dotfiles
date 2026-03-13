@@ -1025,6 +1025,7 @@
   "Path to the Makefile template to copy into new contest folders.")
 
 (use-package competitive-companion
+  :straight nil
   :load-path "~/Projects/Code/competitive-companion.el"
   :commands competitive-companion-mode
   :init
