@@ -588,6 +588,10 @@
 
 (push "~/.local/bin" exec-path)
 
+(use-package agent-shell
+  :straight t
+    :ensure t)
+
 (use-package flymake
   :straight (:type built-in)
   :custom

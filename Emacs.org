@@ -84,6 +84,7 @@
     - [[#forge][Forge]]
   - [[#language-server-protocol][Language Server Protocol]]
     - [[#add-localbin-to-exec-path-for-lsp-servers][Add .local/bin to exec path for lsp servers]]
+  - [[#agentic-integration][Agentic integration]]
   - [[#linter][Linter]]
   - [[#debugger][Debugger]]
   - [[#snippets][Snippets]]
@@ -1363,6 +1364,14 @@ I like to install my language servers to =.local/bin=. This is good because it m
 
 #+begin_src emacs-lisp
   (push "~/.local/bin" exec-path)
+#+end_src
+
+** Agentic integration
+Currently experimenting with it.
+#+begin_src emacs-lisp
+  (use-package agent-shell
+    :straight t
+      :ensure t)
 #+end_src
 
 ** Linter
