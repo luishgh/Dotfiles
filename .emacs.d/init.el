@@ -80,9 +80,6 @@
   :init
   (setq evil-collection-company-use-tng nil)
   :config
-  ;; temporary fix for https://github.com/emacs-evil/evil-collection/pull/720 :/
-  (delete 'mu4e evil-collection-mode-list)
-  (delete 'mu4e-conversation evil-collection-mode-list)
   (evil-collection-init))
 
 (use-package general
@@ -384,6 +381,7 @@
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((emacs-lisp . t)
+     (shell . t)
      (python . t)
      (scheme . t)
      (latex . t))))
@@ -954,7 +952,9 @@
   ;; TODO: check who sets this stupid bindings, I suspect evil-collection:
   (defalias 'telega-msg-delete-marked-or-at-point 'telega-msg-delete-dwim)
   (define-key global-map (kbd "C-c t") telega-prefix-map)
-  (telega-appindicator-mode 1))
+  (telega-appindicator-mode 1)
+  ;; Telega only really works with Company, sorry capf :/
+  :hook (telega-chat-mode-hook . company-mode))
 
 (use-package erc
     :commands erc
@@ -1054,6 +1054,12 @@ and opens the folder in Dired."
         ("C-c r" . competitive-companion-run-tests)
         ("C-c l" . competitive-companion-toggle-output-buffer)
         ("C-c m" . lhgh/cc-compile-current))
+  :custom
+  (competitive-companion-languages
+   '((c++-mode . ".cpp")
+     (kotlin-mode . ".kt")))
+  (competitive-companion-task-major-mode 'c++-mode)
+  (competitive-companion-task-template-file "~/Documents/Maratona/templ.cpp")
   :config
   (competitive-companion-setup-evil))
 
