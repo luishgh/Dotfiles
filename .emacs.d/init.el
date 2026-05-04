@@ -588,7 +588,19 @@
 
 (use-package agent-shell
   :straight t
-    :ensure t)
+  :ensure t
+  :bind (:map project-prefix-map
+              ("a" . agent-shell-project)) ;; "a" de agent
+  :config
+  (defun agent-shell-project ()
+    "Abre o agent-shell na raiz do projeto atual."
+    (interactive)
+    (let ((default-directory (project-root (project-current t))))
+      (agent-shell)))
+
+  ;; Opcional: faz o comando aparecer no menu de 'project-switch-project'
+  (with-eval-after-load 'project
+    (add-to-list 'project-switch-commands '(agent-shell-project "Agent Shell" ?a) t)))
 
 (use-package flymake
   :straight (:type built-in)
