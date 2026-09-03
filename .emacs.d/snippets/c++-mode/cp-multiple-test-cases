@@ -6,7 +6,7 @@ void solve() {
     $0
 }
 
-int main() {
+int main() {_;
 
     int ttt; cin >> ttt;
     while (ttt--) solve();
