@@ -159,6 +159,7 @@
   :init
   (global-completion-preview-mode 1))
 
+
 (use-package orderless
   :straight t
   :init
@@ -396,7 +397,7 @@
   (add-to-list 'org-structure-template-alist '("sc" . "src scheme"))
   (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp")))
 
-(with-eval-after-load 'ox-latex
+  (with-eval-after-load 'ox-latex
     (add-to-list 'org-latex-classes
                  '("homework"
                    "\\documentclass[11pt]{article}
@@ -788,6 +789,9 @@
     "at" '(vterm :which-key "vterm"))
   :config
   (setq vterm-max-scrollback 10000))
+
+(use-package xterm-color
+  :straight t)
 
 (defun lhgh/configure-eshell ()
   (require 'evil-collection-eshell)

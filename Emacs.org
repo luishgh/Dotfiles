@@ -1842,6 +1842,9 @@ A native code alternative to =term= and =ansi-term=.
 ** Eshell
 
 #+begin_src emacs-lisp
+  (use-package xterm-color
+    :straight t)
+
   (defun lhgh/configure-eshell ()
     (require 'evil-collection-eshell)
     (evil-collection-eshell-setup)
