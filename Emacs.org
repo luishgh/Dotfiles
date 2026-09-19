@@ -137,6 +137,7 @@
   - [[#pomodoro-timer][Pomodoro timer]]
   - [[#calendar--diary][Calendar / Diary]]
   - [[#competitive-companion][Competitive Companion]]
+  - [[#rbx][RBX]]
 - [[#credential-management][Credential Management]]
 - [[#utility-functions][Utility Functions]]
 - [[#runtime-performance][Runtime Performance]]
@@ -372,6 +373,9 @@ This is the main section of configuration that makes Emacs usable for me. Before
     :after evil
     :init
     (setq evil-collection-company-use-tng nil)
+    ;; RET should submit the prompt while typing (insert state), like it
+    ;; always has, instead of only doing so from normal state.
+    (setq evil-collection-repl-submit-state 'insert)
     :config
     (evil-collection-init))
 #+end_src
@@ -2275,7 +2279,7 @@ Load up the configuration present in [[file:Mail.org][Mail.org]]
 
 ** Competitive Companion
 
-This is a package of my own 🤩. It provides an Emacs integration to the famous [[https://github.com/jmerle/competitive-companion][Competitive Companion browser extension]].
+[[https://github.com/luishgh/competitive-companion.el][competitive-companion.el]] is a package of my own 🤩. It provides an Emacs integration to the famous [[https://github.com/jmerle/competitive-companion][Competitive Companion browser extension]].
 
 #+begin_src emacs-lisp
   (defun lhgh/cc-compile-current ()
@@ -2324,6 +2328,22 @@ This is a package of my own 🤩. It provides an Emacs integration to the famous
     (competitive-companion-task-template-file "~/Documents/Maratona/templ.cpp")
     :config
     (competitive-companion-setup-evil))
+#+end_src
+
+** RBX
+
+[[https://github.com/luishgh/rbx.el][rbx.el]] is another package of my own, which provides Emacs integration for [[https://rbx.rsalesc.dev/]].
+
+#+begin_src emacs-lisp
+  (use-package rbx
+    :straight nil
+    :load-path "~/Projects/Code/rbx.el"
+    ;:commands competitive-companion-mode
+    :bind (("C-c r" . rbx-dispatch))
+    ;:hook ((c-mode c++-mode python-base-mode latex-mode LaTeX-mode) . rbx-mode)
+    :custom
+    (rbx-testcase-layout 'below)
+    (rbx-solution-label 'trimmed))
 #+end_src
 
 * Credential Management

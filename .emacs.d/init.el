@@ -79,6 +79,9 @@
   :after evil
   :init
   (setq evil-collection-company-use-tng nil)
+  ;; RET should submit the prompt while typing (insert state), like it
+  ;; always has, instead of only doing so from normal state.
+  (setq evil-collection-repl-submit-state 'insert)
   :config
   (evil-collection-init))
 
@@ -1078,6 +1081,16 @@ and opens the folder in Dired."
   (competitive-companion-task-template-file "~/Documents/Maratona/templ.cpp")
   :config
   (competitive-companion-setup-evil))
+
+(use-package rbx
+  :straight nil
+  :load-path "~/Projects/Code/rbx.el"
+  ;:commands competitive-companion-mode
+  :bind (("C-c r" . rbx-dispatch))
+  ;:hook ((c-mode c++-mode python-base-mode latex-mode LaTeX-mode) . rbx-mode)
+  :custom
+  (rbx-testcase-layout 'below)
+  (rbx-solution-label 'trimmed))
 
 (use-package password-store
   :config
