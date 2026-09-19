@@ -1085,12 +1085,15 @@ and opens the folder in Dired."
 (use-package rbx
   :straight nil
   :load-path "~/Projects/Code/rbx.el"
-  ;:commands competitive-companion-mode
+  :commands rbx-mode
   :bind (("C-c r" . rbx-dispatch))
-  ;:hook ((c-mode c++-mode python-base-mode latex-mode LaTeX-mode) . rbx-mode)
+  ;; :hook ((c-mode c++-mode python-base-mode latex-mode LaTeX-mode) . rbx-mode)
   :custom
   (rbx-testcase-layout 'below)
-  (rbx-solution-label 'trimmed))
+  (rbx-solution-label 'trimmed)
+  :config
+  (with-eval-after-load 'evil
+    (require 'rbx-evil)))
 
 (use-package password-store
   :config
